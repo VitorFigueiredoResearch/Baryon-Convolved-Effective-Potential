@@ -1,16 +1,30 @@
 cff-version: 1.2.0
+message: "If you use this repository or the H1 draft, please cite this software release."
 title: Baryon-Convolved Effective Potential (H1)
-message: "If you use this repo or the H1 draft, please cite this software and release."
 type: software
 authors:
   - family-names: "Figueiredo"
-    given-names: "Vitor M. F."
+    given-names: "Vítor M. F."
     orcid: "https://orcid.org/0009-0004-7358-4622"
     affiliation: "The Ananta Project, Portugal"
 repository-code: "https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential"
 license: MIT
 version: 0.1.0-rc
-date-released: 2025-08-27
+date-released: "2025-08-27"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.16967259
+
+preferred-citation:
+  type: software
+  title: "Baryon-Convolved Effective Potential (H1) v0.1.0-rc"
+  authors:
+    - family-names: "Figueiredo"
+      given-names: "Vítor M. F."
+      orcid: "https://orcid.org/0009-0004-7358-4622"
+      affiliation: "The Ananta Project, Portugal"
+  year: 2025
+  version: "0.1.0-rc"
+  doi: 10.5281/zenodo.16967259
+  repository-code: "https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential"
+  license: MIT
