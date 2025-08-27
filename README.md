@@ -38,3 +38,4 @@ latexmk -pdf main.tex
 - **BTFR:** slope 3.8–4.2 with σ_int ≤ 0.12 dex  
 - **RAR:** scatter ≤ 0.13 dex with no trend (α=0.01)  
 - **Lensing (prediction):** ≥10% residual‑variance reduction at 2σ vs baseline (baryons‑only + NFW with Dutton–Macciò)
+
