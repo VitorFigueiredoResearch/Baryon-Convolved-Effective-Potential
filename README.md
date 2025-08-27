@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16967259.svg)](https://doi.org/10.5281/zenodo.16967259)
 [![CI](https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential/actions/workflows/ci.yml/badge.svg)](https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential/actions/workflows/ci.yml)
 
 [![CI](https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential/actions/workflows/ci.yml/badge.svg)](https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential/actions)
