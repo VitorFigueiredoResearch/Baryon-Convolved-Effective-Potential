@@ -1,55 +1,32 @@
+# src/kernels.py
+# Acceleration kernels + their integrated potential kernels U(r; L).
 import numpy as np
 
-def set_k0_to_zero(phi_k):
+# ---- acceleration kernels (what’s in the paper) ----
+def plummer_kernel(r, L):
+    return 1.0 / (4.0 * np.pi * (r**2 + L**2))
+
+def exp_core_kernel(r, L):
+    return np.exp(-r / L) / (4.0 * np.pi * (r**2 + L**2))
+
+K_plummer  = plummer_kernel
+K_exp_core = exp_core_kernel
+
+# ---- potential kernels U (so we can convolve then take ∇) ----
+def U_plummer(r, L):
+    """U(r;L) = (1/(4πL)) * arctan(r/L), with U(0)=0."""
+    L = np.clip(L, 1e-9, None)
+    return (1.0 / (4.0 * np.pi * L)) * np.arctan(r / L)
+
+def U_exp_core(r, L, rmax=None, n=4096):
     """
-    Zero the DC (k=0) mode to remove any box-constant offset in the potential.
-    Safe because ∇phi is unchanged by adding a constant.
+    Build U by integrating K_exp_core from 0..r (fast, vectorized).
     """
-    phi_k = phi_k.copy()
-    phi_k.flat[0] = 0.0
-    return phi_k
-
-def conv_fft(rho, U, zero_mode=True):
-    """
-    Convolve density 'rho' with scalar kernel 'U' using FFTs.
-    Both arrays must be the same shape (n x n x n). Returns phi = rho * U.
-
-    Tip: rho is your 3D baryon map, U is built from L (the kernel length).
-    """
-    rho_k = np.fft.fftn(rho, norm=None)
-    U_k   = np.fft.fftn(U,   norm=None)
-    phi_k = rho_k * U_k
-    if zero_mode:
-        phi_k = set_k0_to_zero(phi_k)
-    phi = np.fft.ifftn(phi_k).real
-    return phi
-
-def gradient_from_phi(phi, Lbox):
-    """
-    Compute ∇phi using Fourier derivatives.
-
-    Args:
-      phi  : 3D array (n x n x n) potential
-      Lbox : half-size of the box in kpc; grid spans [-Lbox, +Lbox]
-
-    Returns:
-      gx, gy, gz : 3D arrays, components of the gradient (same shape as phi)
-    """
-    n = phi.shape[0]
-    # Physical grid spacing (kpc)
-    dx = (2.0 * Lbox) / n
-    # Wave numbers in physical units (1/kpc)
-    k1d = 2.0 * np.pi * np.fft.fftfreq(n, d=dx)
-    kx, ky, kz = np.meshgrid(k1d, k1d, k1d, indexing='ij')
-
-    phi_k = np.fft.fftn(phi, norm=None)
-    # Gradient in Fourier space: ∇phi  ->  i * k * phi_k
-    i = 1j
-    gx_k = i * kx * phi_k
-    gy_k = i * ky * phi_k
-    gz_k = i * kz * phi_k
-
-    gx = np.fft.ifftn(gx_k).real
-    gy = np.fft.ifftn(gy_k).real
-    gz = np.fft.ifftn(gz_k).real
-    return gx, gy, gz
+    r = np.asarray(r)
+    if rmax is None:
+        rmax = float(np.max(r))
+    rt = np.linspace(0.0, rmax, n)
+    K = exp_core_kernel(rt, L)
+    Utab = np.zeros_like(rt)
+    Utab[1:] = np.cumsum(0.5 * (K[1:] + K[:-1]) * (rt[1:] - rt[:-1]))
+    return np.interp(r, rt, Utab)
