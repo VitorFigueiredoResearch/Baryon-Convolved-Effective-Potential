@@ -1,6 +1,3 @@
-# src/fft_pipeline.py
-# Convolution by FFT and gradient via k-space. Simple, fast, and matches H1.
-
 import numpy as np
 
 def set_k0_to_zero(phi_k):
