@@ -11,3 +11,6 @@ repository-code: "https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Ef
 license: MIT
 version: 0.1.0-rc
 date-released: 2025-08-27
+identifiers:
+  - type: doi
+    value:https://doi.org/10.5281/zenodo.16967259
