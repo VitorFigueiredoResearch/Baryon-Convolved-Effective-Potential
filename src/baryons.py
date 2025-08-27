@@ -1,0 +1,1 @@
+# Build 3D rho_b grids from SPARC-like inputs (placeholder)

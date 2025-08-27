@@ -1,0 +1,302 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % remove if using Lua/XeLaTeX
+\usepackage{lmodern}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\DeclareSIUnit\kpc{kpc}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+\usepackage[nameinlink,capitalise]{cleveref}
+
+% ---------- Hyperref ----------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  citecolor=teal!60!black,
+  urlcolor=magenta!60!black,
+  pdftitle={A Baryon-Convolved Effective Potential for Disk Galaxies},
+  pdfauthor={Vítor M. F. Figueiredo}
+}
+
+% ---------- Simple macros ----------
+\newcommand{\Msol}{M_{\odot}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+
+% Model symbols
+\newcommand{\Lmem}{L}       % sample-global kernel range [kpc]
+\newcommand{\gain}{\mu}     % global gain (dimensionless)
+\newcommand{\rhob}{\rho_b}  % baryonic density
+\newcommand{\phieff}{\Phi_{\mathrm{eff}}}
+\newcommand{\geff}{\vect{g}_{\mathrm{eff}}}
+
+% Boxed callouts
+\newcommand{\keybox}[1]{%
+  \vspace{0.6em}\noindent
+  \colorbox{gray!10}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{#1}}%
+  \vspace{0.6em}
+}
+
+% =========================================================
+\begin{document}
+
+\begin{center}
+{\LARGE \textbf{A Baryon-Convolved Effective Potential for the Mass Discrepancy in Disk Galaxies}}\\[0.6em]
+{\large Vítor M. F. Figueiredo}\\
+\texttt{ORCID: 0009-0004-7358-4622 \quad (Vitor.figueiredo.research@protonmail.com)}\\[0.5em]
+\today
+\end{center}
+
+\begin{abstract}
+I introduce a \emph{sample-global two-parameter} baryon-built effective potential for disk galaxies. The total field is $\geff=-\nabla\phieff$, with
+\[
+\phieff(\vect{r})=\Phi_b(\vect{r})
++\gain\,G\!\int \rhob(\vect{r}')\,U\!\big(\lVert\vect{r}-\vect{r}'\rVert;\Lmem\big)\,\dd^3\vect{r}'.
+\]
+Here $\Lmem$ (\si{\kpc}) and $\gain$ (dimensionless) are \emph{global across the sample}. “Evolving” indicates that $\phieff$ inherits a system’s formation history through its current baryon map; no explicit time dependence is fitted in H1. I benchmark rotation curves against a parity-matched halo baseline, verify BTFR/RAR behavior, and predict galaxy–galaxy lensing without refitting, with hard preregistered fail thresholds.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+The disk-galaxy mass discrepancy is usually addressed with per-galaxy dark halos. Here I test a parsimonious alternative: a cored, finite kernel convolved with the observed baryons to build an \emph{effective potential} with just two \emph{sample-global} parameters $(\Lmem,\gain)$, then ask if the same field explains RCs, BTFR, RAR, and out–of–sample lensing.
+
+\paragraph{Visual intuition (laser and smoke).}
+Think of the galaxy’s baryons as a three dimensional “smoke” (stars, dust, gas, circumgalactic gas). The bright thin disk is like a horizontal laser sheet slicing the smoke: star formation lights up near the mid–plane, while mass outside the activation layer remains dim. The convolution that defines $\Phi_{\rm eff}$ integrates the \emph{entire} smoke to build one static, sample-global field used for both rotation and lensing.
+
+\paragraph{Scope of “evolving” and core postulate.}
+Here “evolving” means that $\Phi_{\rm eff}$ \emph{inherits} a system’s formation history through the present–day baryon map $\rho_b$; no explicit time dependence is fitted in H1. Our core empirical postulate is \emph{dual–role consistency}: the same scalar potential $\Phi_{\rm eff}$ governs stellar kinematics via $-\nabla\Phi_{\rm eff}$ and sources lensing via the Newtonian Poisson closure $\nabla^2\Phi_{\rm eff}=4\pi G(\rho_b+\rho_{\rm eff})$. This closure is not derived from a fundamental theory here; it is a testable modeling hypothesis adjudicated by the preregistered gates.
+
+\section{Model: one potential for kinematics and lensing}\label{sec:model}
+\paragraph{Definition (scalar form).}
+
+\begin{align}
+\phieff(\vect{r}) &= \Phi_b(\vect{r})
++\gain\,G\!\int \rhob(\vect{r}')\,U\!\big(\lVert\vect{r}-\vect{r}'\rVert;\Lmem\big)\,\dd^3\vect{r}', \label{eq:phi_eff}\\
+\geff(\vect{r}) &= -\nabla\phieff(\vect{r}). \label{eq:geff}
+\end{align}
+The radial derivative $K(r;\Lmem)\equiv U'(r;\Lmem)$ is a \emph{cored} acceleration kernel. I test two finite, positive choices:
+\begin{align}
+K_{\text{Plummer}}(r;\Lmem) &= \frac{1}{4\pi\,(r^2+\Lmem^2)}, \label{eq:Kpl}\\
+K_{\exp\text{-core}}(r;\Lmem) &= \frac{e^{-r/\Lmem}}{4\pi\,(r^2+\Lmem^2)}. \label{eq:KexpCore}
+\end{align}
+For \eqref{eq:Kpl}, $U(r)=(4\pi\Lmem)^{-1}\arctan(r/\Lmem)$ with $U(0)=0$. For $K_{\exp\text{-core}}$ I evaluate the scalar kernel via its 3D Fourier transform, i.e., I use $\widehat{U}(k)$ numerically; a closed–form $U(r)$ is not required for our FFT pipeline.
+
+\paragraph{Kinematics.}
+For an axisymmetric disk, $v^2(R)=R\,\lVert\geff(R,0)\rVert$ in the mid–plane.
+
+\paragraph{Tails and scaling.}
+I deliberately avoid $K\propto 1/r$ (which hard-wire exactly flat asymptotes) to keep BTFR scaling under control; quasi–flat outer segments are then an empirical outcome over finite radii and are adjudicated by our gates.
+
+\keybox{\textbf{Single-field statement.}\;\;I compute one scalar potential $\Phi_{\rm eff}$ from baryons and use it for both kinematics and lensing. Stars trace $-\nabla\Phi_{\rm eff}$. For lensing I form $\rho_{\rm eff}=\nabla^2\Phi_{\rm eff}/(4\pi G)$ and project to $\Sigma$ and $\Delta\Sigma$ (App.~\ref{app:lensing}).}
+
+\paragraph{Lensing postulate.}
+I adopt as a modeling postulate that the same scalar $\Phi_{\rm eff}$ governing kinematics sources weak lensing via the Poisson mapping $\rho_{\rm eff}=\nabla^2\Phi_{\rm eff}/(4\pi G)$ and line–of–sight projection (App.~\ref{app:lensing}).
+
+\paragraph{Interpretation.} $\rho_{\rm eff}$ is an \emph{effective} source obtained by inverting Poisson’s equation for the modeled $\Phi_{\rm eff}$; local sign changes (compensation) can occur and are not interpreted as literal negative mass. Lensing is computed from $\Phi_{\rm eff}$ itself (App.~\ref{app:lensing}).
+
+\section{Numerical Implementation (simulation-ready)}\label{sec:numerics}
+\subsection{Grids and padding}\label{subsec:grids}
+Each galaxy is embedded in $(x,y,z)\in[-R_{\max},R_{\max}]^2\times[-Z_{\max},Z_{\max}]$ with \emph{padding factor 2} per dimension to suppress FFT wrap-around. The kernel is truncated at $R_{\rm trunc}=6\,\Lmem$ (tail contribution $<3\%$ beyond). Grid sizing scales with $\Lmem$: I enforce $R_{\max}\ge 1.5\,R_{\rm trunc}$ so the truncated kernel fits within the padded box for all fitted $L$. The baryon density $\rhob$ stacks stellar disk+bulge (SPARC $3.6\,\mu$m) and gas; scale heights follow catalog values or a thin-disk default.
+
+\subsection{FFT recipe: potential then gradient}\label{subsec:fft}
+Compute $\widehat{U}(\vect{k};\Lmem)$, then
+\[
+\widehat{\Phi}_K(\vect{k})=\gain\,G\,\widehat{\rhob}(\vect{k})\,\widehat{U}(\vect{k}),
+\qquad
+\widehat{\vect{g}}_K(\vect{k})=i\,\vect{k}\,\widehat{\Phi}_K(\vect{k}),
+\]
+and inverse FFT to obtain $\vect{g}_K$; add $\vect{g}_b=-\nabla\Phi_b$ and sample $v(R)$ in the mid–plane. Complexity $O(N\log N)$. I set the $k=0$ component of the potential to zero to remove any box–constant offset (this does not affect $\nabla\Phi$).
+
+\paragraph{Axisymmetric speed-up (consistency check).}
+All reported metrics and figures use the 3D–FFT pipeline; the axisymmetric route is a consistency check only.
+
+\subsection{Robustness checks}
+(i) Mock injection/recovery with SPARC-like noise; (ii) distance/inclination perturbations; (iii) bar/warp masks. Code is version-pinned and containerized.
+
+\section{Data and Fitting Protocol}\label{sec:methods}
+\paragraph{Dataset and cuts.}
+Preregistered SPARC subset: inclination $\ge 30^\circ$, quality flag $\le 2$, reliable distances/photometry. Stellar $M/L$ priors are SPS–motivated \citep{meidt2014mlr36,schombert2014cmlr}:
+$\Upsilon_{[3.6],\\mathrm{disk}}=0.5\\pm0.1$ and
+$\Upsilon_{[3.6],\\mathrm{bulge}}=0.7\\pm0.1$
+(Gaussian, truncated at $\\pm2\\sigma$). Gas masses include a factor 1.33 for He.
+These 3.6\\,$\\mu$m priors minimize dust sensitivity and track old populations with low variance;
+widening them mainly trades against $\\mu$, which our gas–dominated dwarf fold mitigates by design.
+
+\paragraph{Baryonic mass modeling (3D).}
+I deproject SPARC surface maps into a 3D $\\rho_b$ as follows.
+\\emph{Stellar disk:} exponential in $R$ with catalog scale length $R_d$ and a vertical profile
+${\\rm sech}^2(z/h_\\star)$ (default $h_\\star=0.1\\,R_d$ when unavailable), normalized to the
+$3.6\\,\\mu$m luminosity and $\\Upsilon_{[3.6],\\mathrm{disk}}$.
+\\emph{Bulge:} spherical S\\'ersic with catalog $(n,R_e)$ or a de Vaucouleurs fallback, with
+$\\Upsilon_{[3.6],\\mathrm{bulge}}$.
+\\emph{Gas:} H\\,I surface density with a fixed He factor 1.33; vertical profile ${\\rm sech}^2(z/h_{\\rm gas})$
+with $h_{\\rm gas}=0.3$\\,kpc by default and an optional linear flare $h_{\\rm gas}(R)=h_{\\rm gas}(0)(1+\\alpha R/R_d)$
+(\\emph{sensitivity only}, not tuned).
+I report a robustness sweep over $(h_\\star,h_{\\rm gas},\\alpha)$ in the supplement; the preregistered fit and gates do not tune them.
+
+\paragraph{Global two-parameter fit.}
+I fit $(\\Lmem,\\gain)$ by minimizing the velocity-space $\\chi^2$ (equivalently RMSE under Gaussian errors) across folds. I report the \\emph{median absolute fractional error} (MAFE) and RMSE but do not jointly optimize them; I define $\\mathrm{MAFE}=\\operatorname{median}_i\\!\\left(\\left|v_{\\rm pred}(R_i)-v_{\\rm obs}(R_i)\\right|/v_{\\rm obs}(R_i)\\right)$. I report Pearson $r=\\mathrm{corr}(\\Lmem,\\gain)$ and show the \\emph{joint posterior / CV scatter} to make any degeneracy explicit.
+
+\paragraph{Baseline for comparison.}
+The comparison baseline uses a per–galaxy \\textbf{Burkert} halo (two parameters) under the \\emph{same} baryonic priors and CV protocol; an \\textbf{NFW} baseline is reported as a sensitivity check.
+
+\paragraph{Degeneracy guardrails.}
+(i) A dedicated CV fold contains gas-dominated dwarfs defined by $M_{\\rm gas}/M_\\star\\ge 1$ (i.e., $f_{\\rm gas} \\ge 0.5$) and is always present in the 5-fold split; (ii) galaxy-level bootstrap ($B=1000$) for CIs (no point-level leakage).
+
+\paragraph{BTFR.}
+The flat speed $V_f$ is the median of the last $N=4$ valid RC points with $\\left|\\mathrm{d}\\ln v/\\mathrm{d}\\ln R\\right|<0.05$; \\emph{the same rule is applied to the halo baseline}. Fit $\\log M_b=\\alpha\\log V_f+\\beta$ with intrinsic scatter $\\sigma_{\\rm int}$.
+
+\paragraph{RAR (parity with literature).}
+RAR is computed as observed total acceleration versus Newtonian baryonic acceleration, \\emph{matching the standard literature definition}. I report total scatter and test residual trend vs. central surface brightness via a linear slope $t$-test (\\textbf{two-sided, $\\alpha=0.01$}).
+
+\paragraph{Lensing prediction (no retuning).}
+With $(\\Lmem,\\gain)$ fixed by RCs, compute $\\Delta\\Sigma(R)$ and $\\gamma_t(R)$ for stacks in \\textbf{DES Y3}, \\textbf{HSC PDR2}, and \\textbf{KiDS-1000} redshift/mass bins (catalog/binning preregistered). The baseline for the variance-reduction gate is baryons–only potential ($\\mu=0$) + per-galaxy NFW with a standard mass–concentration prior \\citep{dutton2014mcr}, fit per galaxy under the same baryonic priors.
+
+\\paragraph{Cosmology for $\\Sigma_{\\rm crit}$.}
+Adopt a flat Planck–like cosmology \\citep{planck2018vi} (e.g., $\\Omega_m=0.315$, $\\Omega_\\Lambda=0.685$, $h=0.674$) when computing $\\Sigma_{\\rm crit}$ for all stacks.
+
+\\section{Results}\\label{sec:results}
+\\subsection{Rotation curves}
+Show a 10-galaxy grid; report CV metrics and Pearson $r$ for $\\mathrm{corr}(\\Lmem,\\gain)$ with the joint scatter plot.
+
+\\subsection{BTFR and RAR}
+Report $\\alpha$, $\\sigma_{\\rm int}$ (BTFR) and RAR scatter; confirm no significant trend vs. surface brightness.
+
+\\subsection{Lensing stacks}
+Compare predicted vs. observed $\\Delta\\Sigma(R)$ or $\\gamma_t(R)$; report the preregistered residual-variance reduction relative to the baseline and its significance. I will also stratify lensing stacks by posterior quartiles of $L$; the model predicts a monotonic increase of $\\Delta\\Sigma(R)$ at $R\\sim 30$–$200$\\,\\si{\\kpc} with $L$.
+
+\\paragraph{Planned discriminants (non-gating).}
+I will compare the predicted vertical force law $K_z(R,z)$ against available stellar
+$\\sigma_z$ measurements, and test for external-field effects by contrasting otherwise similar
+disks in low/high host-field environments. H1 predicts no intrinsic EFE beyond that encoded in $\\rho_b$.
+
+\\section{Falsification Gates (preregistered)}\\label{sec:falsification}
+\\begin{center}
+\\begin{tabular}{@{}lcc@{}}
+\\toprule
+\\textbf{Gate} & \\textbf{Pass} & \\textbf{Fail}\\\\
+\\midrule
+RC residuals & MAFE $\\le 10\\%$ and CV-RMSE $\\le$ baseline$+5\\%$ & otherwise\\\\
+BTFR & $\\alpha\\in[3.8,4.2]$ and $\\sigma_{\\rm int}\\le 0.12$ dex & otherwise\\\\
+RAR & total scatter $\\le 0.13$ dex and no trend ($\\alpha\\!=\\!0.01$) & otherwise\\\\
+Lensing (prediction) & $\\ge 10\\%$ residual-variance reduction at $2\\sigma$ vs. baseline & otherwise\\\\
+\\bottomrule
+\\end{tabular}
+\\paragraph{Model comparison rationale.}
+The CV-RMSE margin of $+5\\%$ relative to the per-galaxy halo baseline is our parsimony buffer:
+a two-parameter sample-global model that is within $5\\%$ in predictive RMSE is preferred on
+complexity grounds. As a sensitivity, I also report sample-aggregated $\\Delta{\\rm BIC}$
+between H1 and the baseline; $\\Delta{\\rm BIC}\\lesssim -10$ is treated as strong evidence for H1.
+\\end{center}
+
+\\section{Physical Motivation and Theoretical Context}\\label{sec:motivation}
+\\paragraph{Why a convolution?}
+Nonlocal response appears across physics when cumulative structure leaves long–range imprints (screening, memory, effective media). I model such imprinting phenomenologically as a \\emph{cored, finite} convolution of the luminous mass, building one field for both stars and photons.
+
+\\paragraph{Kernel choice and parsimony.}
+I adopt two cored, positive kernels with finite effective mass: Plummer (\\cref{eq:Kpl}) and an exponentially softened core (\\cref{eq:KexpCore}). Cored profiles avoid hard–coding flat $1/r$ tails (protecting BTFR scaling) while allowing quasi–flat segments over finite radii. I preregister these two as the primary test and report a \\emph{robustness check} across a one–parameter cored family in the supplement (not used for gating).
+
+\\paragraph{Interpretation of $(L,\\mu)$.}
+$L$ [kpc] is a global correlation length that spreads baryonic influence beyond the bright thin disk; $\\mu$ [--] is a dimensionless global gain. H1 does not claim these are fundamental constants; if the gates are passed, the measured $(L,\\mu)$ become targets for deeper theory.
+
+\\paragraph{Sign of $\\rho_{\\rm eff}$ and compensation.}
+Because $\\rho_{\\rm eff}\\!\\propto\\!\\nabla^2\\Phi_{\\rm eff}$ of a smoothed potential, local sign changes (compensation) can occur even with positive $K$. I therefore (i) require physically sensible \\emph{projected} lensing profiles and (ii) report a nonnegativity diagnostic (App.~\\ref{app:lensing}). This keeps interpretability honest while letting the data decide.
+
+\\paragraph{Context with prior ideas.}
+Our approach is phenomenological and distinct from (i) nonlocal gravity kernels fit per galaxy \\citep{rahvar2014_nonlocal_rotation} and (ii) luminous–convolution fits with per–galaxy freedom \\citep{cisneros2014_lcm}. It also differs from MOND/AQUAL and TeVeS (Sec.~\\ref{sec:related}): H1 introduces a \\emph{length} scale $L$ via a baryon–built convolution rather than a universal acceleration $a_0$ or a new dynamical field for inertia.
+
+\\section{Related Work and Distinctions}\\label{sec:related}
+I differ from (i) nonlocal-gravity kernels with tunable functions \\citep{rahvar2014_nonlocal_rotation} and (ii) luminous-convolution phenomenology fitted per galaxy \\citep{cisneros2014_lcm}: I use a \\emph{cored, finite} kernel, fit \\emph{one} $(\\Lmem,\\gain)$ globally, and test RCs, BTFR \\citep{lelli2016sparc}, RAR \\citep{mcgaugh2016rar}, plus \\emph{out–of–sample} lensing with preregistered gates.
+While MOND posits a universal acceleration scale $a_0$, H1 posits a universal length scale $L$; one potential $\\Phi_{\\rm eff}$ then governs both stars (via $-\\nabla\\Phi_{\\rm eff}$) and photons (via the Poisson/projected–Hessian route), enabling a direct out–of–sample lensing prediction.
+
+\\paragraph{Inner–slope diversity (secondary).}
+I compare the distribution of inner logarithmic slopes $\\rm d\\ln v/\\rm d\\ln R$ over $0.5$–$1.5$ disk scale lengths to SPARC values and report a Kolmogorov–Smirnov distance (non–gating).
+
+\\paragraph{Relation to MOND/TeVeS and other alternatives.}
+For broader context see \\citet{famaey2012mondreview} and \\citet{bekenstein2004teves}.
+
+\\section{Discussion and Limitations}\\label{sec:discussion}
+Bars/warps and distance systematics can bias RCs; dwarfs with extreme gas fractions test cored-kernel assumptions. Allowing per-galaxy freedom would improve fits but harm identifiability, intentionally avoided. Follow-up H1b will add a relaxation scale $\\tau$ to test look-back lensing and merger activity.
+
+\\paragraph{Equivalence principles.}
+Within H1, the same $\\Phi_{\\rm eff}$ acts on all tracers, so the Weak Equivalence Principle is respected in the phenomenology tested here. I do not address the Strong Equivalence Principle or cosmological backreaction; those require a relativistic completion and are beyond H1's scope.
+
+\\paragraph{Scope: clusters and ellipticals.}
+H1 targets rotationally supported disks. Pressure–supported ellipticals and galaxy clusters, where kinematics and lensing probe different regimes, are reserved for follow–up tests with the same $(L,\\mu)$ to assess universality.
+
+\\paragraph{Reading the best–fit $(L,\\mu)$.}
+If the gates are passed, the inferred global $L$ may encode a typical correlation length of baryon–gravity coupling in disks, and $\\mu$ a dimensionless gain. I will test correlations between $L$ and outflow/vertical structure proxies (preplanned, non–tuning) to probe physical origin.
+
+\\section{Conclusion}\\label{sec:conclusion}
+A two-parameter, baryon-built effective potential provides a stringent, falsifiable account of disk-galaxy kinematics. A positive lensing prediction without retuning would argue that much of the discrepancy can be encoded in a sample-global, cored convolution with the luminous matter.
+
+\\paragraph{Code and Data Availability.}
+I will release a Dockerized reproducer (fixed CV folds, priors, FFT kernels, and pass-fail gates) upon submission.
+
+% =========================================================
+% APPENDICES
+% =========================================================
+\\appendix
+
+\\section{Units and basic behavior}\\label{app:units}
+\\subsection*{A.1 Units (single source of truth)}
+
+\\subsection*{A.2 Qualitative tails}
+For compact mass, $K_{\\text{Plummer}}\\sim (4\\pi r^2)^{-1}$ at large $r$, so the added field outside the light declines as $1/r^2$. Over observed finite ranges, the superposition with $\\Phi_b$ can produce quasi-flat segments; whether it does so across a sample is addressed empirically by our gates. (Exactly flat asymptotes would follow from $K\\!\\propto\\!1/r$, not adopted here.)
+
+\\section{Activation window for vertical coupling (sensitivity only)}\\label{app:thin}
+To test sensitivity to thin–disk structure while preserving the isotropy of $U$, I keep the kernel unchanged and apply a fixed, normalized vertical window to the \\emph{baryonic density} when forming $\\Phi_{\\rm eff}$:
+\[
+\\rho_b^{\\rm eff}(R,z) \\;=\\; \\rho_b(R,z)\\,W_z(z;h),
+\\qquad
+W_z(z;h)=\\frac{1}{\\sqrt{2\\pi}\\,h}\\,e^{-z^2/2h^2},
+\]
+with \\emph{fixed} $h=\\SI{0.3}{\\kpc}$ (no new fit DOF). $W_z$ integrates to 1, so mid–plane units and the convolution definition of $\\Phi_{\\rm eff}$ are preserved. I recompute RC residuals with $\\rho_b^{\\rm eff}$ for sensitivity only; the preregistered two–parameter fit and gates are unchanged.
+
+\\paragraph{Interpretation of $\\rho_{\\rm eff}$.}
+$\\rho_{\\rm eff}$ is an \\emph{effective} source defined by inverting Poisson’s equation for the modeled $\\Phi_{\\rm eff}$; local sign changes can occur and should not be interpreted as literal negative mass. Lensing is computed from $\\Phi_{\\rm eff}$ itself, and $\\rho_{\\rm eff}$ is used only as a diagnostic decomposition.
+
+\\section{Lensing from the same potential}\\label{app:lensing}
+I map the same $\\Phi_{\\rm eff}$ to lensing under the Newtonian Poisson closure,
+$\\nabla^2\\Phi_{\\rm eff}=4\\pi G(\\rho_b+\\rho_{\\rm eff})$,
+treating $\\rho_{\\rm eff}$ as an \\emph{effective} source field to be tested observationally.
+
+\\textbf{(ii) Surface density and shear.} Project along the line of sight to get
+\[
+\\Sigma_{\\rm eff}(R)=\\int \\rho_{\\rm eff}(R,l)\\,\\dd l,\\quad
+\\Delta\\Sigma(R)=\\bar{\\Sigma}(<R)-\\Sigma_{\\rm eff}(R),\\quad
+\\gamma_t(R)=\\frac{\\Delta\\Sigma(R)}{\\Sigma_{\\rm crit}}.
+\]
+Equivalently, one may form the 2D lensing potential from the line-of-sight integral of $\\phieff$ and take its projected second derivatives; both routes are consistent and implemented numerically from the same $\\phieff$ grid.
+
+\\paragraph{Nonnegativity diagnostics (reported, non–gating).}
+I report (i) the fraction of projected radii with $\\Sigma_{\\rm eff}(R)<0$ and (ii) the 3D compensation ratio
+\[
+f_{\\rm neg}^{\\rm 3D} \\equiv \\frac{\\int_{\\mathcal V}\\!\\max\\{0,-\\rho_{\\rm eff}\\}\\,\\mathrm{d}^3\\!r}
+{\\int_{\\mathcal V}\\!\\max\\{0,\\rho_{\\rm eff}\\}\\,\\mathrm{d}^3\\!r},
+\]
+over $\\mathcal V$ spanning the analysis box. Physically acceptable models should have $\\Sigma_{\\rm eff}(R)\\ge 0$ within uncertainties and small $f_{\\rm neg}^{\\rm 3D}$ (I flag $f_{\\rm neg}^{\\rm 3D}>0.2$). These are diagnostics only and do not constitute preregistered gates.
+\\noindent\\textit{Modeling postulate.} In H1, the same scalar $\\Phi_{\\rm eff}$ that governs kinematics is assumed to source weak lensing via the Newtonian Poisson mapping; this is an empirical hypothesis adjudicated by the preregistered gates.
+
+\\section{Reproducibility checklist}\\label{app:reprod}
+\\begin{itemize}
+  \\item SPARC subset list; CV folds (seed=42); galaxy-level bootstraps ($B=1000$).
+  \\item $M/L$ priors and distance/inclination uncertainty models.
+  \\item FFT grid sizes; padding factor 2; kernel truncation $R_{\\rm trunc}=6\\,\\Lmem$; $R_{\\max}\\ge 1.5\\,R_{\\rm trunc}$.
+  \\item Mock injection/recovery scripts and evaluation metrics.
+  \\item Pass/fail thresholds mirrored from \\cref{sec:falsification}.
+\\end{itemize}
+
+% ----------------- Bibliography -----------------
+\\bibliographystyle{unsrtnat}
+\\bibliography{references}
+
+\\end{document}

@@ -1,0 +1,19 @@
+name: h1-evolving-potential
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - numba
+  - astropy
+  - scikit-learn
+  - pyyaml
+  - tqdm
+  - pip
+  - pip:
+      - corner
+      - arviz

@@ -1,0 +1,41 @@
+random_seed: 42
+cv_folds: 5
+dataset:
+  sparc_master: data/sparc/sparc_master.csv
+  sparc_profiles_dir: data/sparc/galaxy_profiles
+  inclusion_list: data/metadata/inclusion_list.csv
+  barred_warped_ids: data/metadata/barred_warped_ids.csv
+priors:
+  L_kpc: [1.0, 50.0]      # Uniform bounds
+  mu:    [0.0, 5.0]       # Uniform bounds
+  upsilon_star_mean: 0.50 # N(0.50, 0.10^2), truncated [0.3, 0.8]
+  upsilon_star_sigma: 0.10
+figures:
+  rc_grid: true
+  rc_metrics: true
+  btfr: true
+  rar: true
+  lensing: true
+kernel:
+  type: exp-core           # plummer | exp-core
+fft:
+  pad_factor: 2
+  rtrunc_L: 6.0            # R_trunc = rtrunc_L * L
+  rmax_factor: 1.5         # R_max >= rmax_factor * R_trunc
+gates:
+  rc_mafe_max: 0.10
+  rc_rmse_margin: 0.05     # H1 ≤ baseline + 5%
+  btfr_alpha_range: [3.8, 4.2]
+  btfr_sigma_int_max: 0.12
+  rar_scatter_max: 0.13
+  rar_trend_alpha: 0.01
+  lensing_var_reduction_min: 0.10
+  lensing_sigmas: 2
+cosmology:
+  Omega_m: 0.315
+  Omega_L: 0.685
+  h: 0.674
+lensing_surveys:
+  - DES_Y3
+  - HSC_PDR2
+  - KiDS_1000

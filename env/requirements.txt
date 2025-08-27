@@ -1,0 +1,11 @@
+numpy>=1.26
+scipy>=1.11
+pandas>=2.0
+matplotlib>=3.8
+numba>=0.58
+astropy>=6.0
+scikit-learn>=1.4
+PyYAML>=6.0
+tqdm>=4.66
+corner>=2.2
+arviz>=0.17
