@@ -1,54 +1,101 @@
-# run_local.py — first pictures from either kernel
+# run_local.py — RC proxy + Σ(R) + ΔΣ(R) for both kernels
 
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 
 from src.baryons import make_exponential_disk
-from src.fft_pipeline import conv_fft, gradient_from_phi
+from src.fft_pipeline import conv_fft, gradient_from_phi, laplacian_from_phi
 from src.kernels import U_plummer, U_exp_core
 
-# choose: "plummer" or "exp-core"
-KERNEL = "plummer"   # change to "exp-core" to compare
-L = 6.0              # kpc
-
-# 1) mass map
+# global knobs
 n = 64
-Lbox = 20.0
-rho, dx = make_exponential_disk(n=n, Lbox=Lbox, Rd=3.0, Md=5e10, hz=0.3)
+Lbox = 20.0  # kpc
+L = 6.0      # kpc (kernel length)
 
-# 2) build U(r;L) on the same grid
-axis = np.linspace(-Lbox, Lbox, n, endpoint=False)
-x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
-r = np.sqrt(x*x + y*y + z*z)
+def build_U(r, kernel):
+    if kernel == "plummer":
+        return U_plummer(r, L)
+    elif kernel == "exp-core":
+        return U_exp_core(r, L)
+    else:
+        raise ValueError("kernel must be 'plummer' or 'exp-core'")
 
-if KERNEL == "plummer":
-    U = U_plummer(r, L)
-elif KERNEL == "exp-core":
-    U = U_exp_core(r, L)
-else:
-    raise ValueError("KERNEL must be 'plummer' or 'exp-core'")
-U.flat[0] = 0.0  # safe at the origin
+def radial_profile(arr2d, dx, nbins=30):
+    """Azimuthal mean vs radius for a 2D array sampled on square pixels of size dx."""
+    n = arr2d.shape[0]
+    cx = cy = n // 2
+    yy, xx = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
+    R = np.sqrt((xx - cx + 0.5)**2 + (yy - cy + 0.5)**2) * dx
+    rbins = np.linspace(0, (n//2 - 1)*dx, nbins+1)
+    centers = 0.5 * (rbins[1:] + rbins[:-1])
+    prof = []
+    for r0, r1 in zip(rbins[:-1], rbins[1:]):
+        m = (R >= r0) & (R < r1)
+        prof.append(float(np.mean(arr2d[m])) if np.any(m) else np.nan)
+    return centers, np.array(prof), rbins, R
 
-# 3) convolution and gradient
-phiK = conv_fft(rho, U, zero_mode=True)
-gx, gy, gz = gradient_from_phi(phiK, Lbox)
+def run_for_kernel(kernel):
+    # 1) mass map
+    rho, dx = make_exponential_disk(n=n, Lbox=Lbox, Rd=3.0, Md=5e10, hz=0.3)
 
-# 4) sample a toy “rotation curve” on y=z=0
-ix0 = iy0 = iz0 = n // 2
-indices = np.arange(ix0 + 1, n - 2)
-R = (indices - ix0) * dx
-gR = np.sqrt(gx[indices, iy0, iz0]**2 + gy[indices, iy0, iz0]**2)
-v_proxy = np.sqrt(np.maximum(R * gR, 0.0))
+    # 2) kernel grid
+    axis = np.linspace(-Lbox, Lbox, n, endpoint=False)
+    x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
+    r = np.sqrt(x*x + y*y + z*z)
+    U = build_U(r, kernel)
+    U.flat[0] = 0.0
 
-# 5) save figure
-os.makedirs("figs", exist_ok=True)
-out = f"figs/rc_toy_{KERNEL}.png"
-plt.figure(figsize=(5, 4))
-plt.plot(R, v_proxy, "-o", ms=3)
-plt.xlabel("R [kpc]"); plt.ylabel("toy speed (arb. units)")
-plt.title(f"Toy curve from {KERNEL} kernel (L = {L:.1f} kpc)")
-plt.tight_layout()
-plt.savefig(out, dpi=150)
-plt.close()
-print(f"Done. Figure saved to {out}")
+    # 3) φ_K and ∇φ_K
+    phiK = conv_fft(rho, U, zero_mode=True)
+    gx, gy, gz = gradient_from_phi(phiK, Lbox)
+
+    # --- RC proxy (mid-plane) ---
+    ix0 = iy0 = iz0 = n // 2
+    idx = np.arange(ix0 + 1, n - 2)
+    R = (idx - ix0) * dx
+    gR = np.sqrt(gx[idx, iy0, iz0]**2 + gy[idx, iy0, iz0]**2)
+    v_proxy = np.sqrt(np.maximum(R * gR, 0.0))
+
+    os.makedirs("figs", exist_ok=True)
+    out_rc = f"figs/rc_toy_{kernel}.png"
+    plt.figure(figsize=(5,4))
+    plt.plot(R, v_proxy, "-o", ms=3)
+    plt.xlabel("R [kpc]"); plt.ylabel("toy speed (arb. units)")
+    plt.title(f"Toy curve from {kernel} kernel (L = {L:.1f} kpc)")
+    plt.tight_layout(); plt.savefig(out_rc, dpi=150); plt.close()
+
+    # --- Σ(R) from the same field (toy) ---
+    rho_eff = laplacian_from_phi(phiK, Lbox)      # ∝ ∇²φ (arb. units)
+    Sigma = np.sum(rho_eff, axis=2) * dx          # project along z
+    centers, Smean, rbins, R2D = radial_profile(Sigma, dx, nbins=30)
+
+    out_sig = f"figs/sigma_toy_{kernel}.png"
+    plt.figure(figsize=(5,4))
+    plt.plot(centers, Smean, "-o", ms=3)
+    plt.xlabel("R [kpc]"); plt.ylabel("toy Σ (arb. units)")
+    plt.title(f"Projected Σ from {kernel} kernel")
+    plt.tight_layout(); plt.savefig(out_sig, dpi=150); plt.close()
+
+    # --- ΔΣ(R) = mean(<R) - Σ(R) ---
+    # mean inside R: for each bin edge r1, average all pixels with radius < r1
+    cum_mean = []
+    for r1 in rbins[1:]:
+        m = (R2D < r1)
+        cum_mean.append(float(np.mean(Sigma[m])) if np.any(m) else np.nan)
+    cum_mean = np.array(cum_mean)
+    DeltaSigma = cum_mean - Smean
+
+    out_dsig = f"figs/delta_sigma_toy_{kernel}.png"
+    plt.figure(figsize=(5,4))
+    plt.plot(centers, DeltaSigma, "-o", ms=3)
+    plt.xlabel("R [kpc]"); plt.ylabel("toy ΔΣ (arb. units)")
+    plt.title(f"ΔΣ from {kernel} kernel")
+    plt.tight_layout(); plt.savefig(out_dsig, dpi=150); plt.close()
+
+    print(f"Saved: {out_rc}, {out_sig}, {out_dsig}")
+
+if __name__ == "__main__":
+    for k in ("plummer", "exp-core"):
+        run_for_kernel(k)
+    print("All done.")
