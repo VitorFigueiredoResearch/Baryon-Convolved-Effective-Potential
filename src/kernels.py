@@ -1,22 +1,28 @@
+# src/kernels.py
+# Two cored, positive acceleration kernels used by H1.
+# Units: r and L in kpc; output has units of 1/kpc^2 (up to the G·ρ factors elsewhere).
+
 import numpy as np
 
-def K_plummer(r, L):
+# --- Primary names (simple) ---
+def plummer_kernel(r, L):
+    """
+    Plummer acceleration kernel:
+        K_Plummer(r; L) = 1 / [4π (r^2 + L^2)]
+    r : float or np.ndarray (kpc)
+    L : float (kpc), a positive global length scale
+    """
     return 1.0 / (4.0 * np.pi * (r**2 + L**2))
 
-def K_exp_core(r, L):
-    # Cored exponential: e^{-r/L} / [4π (r^2 + L^2)]
+def exp_core_kernel(r, L):
+    """
+    Exponentially softened core kernel:
+        K_exp-core(r; L) = exp(-r/L) / [4π (r^2 + L^2)]
+    r : float or np.ndarray (kpc)
+    L : float (kpc)
+    """
     return np.exp(-r / L) / (4.0 * np.pi * (r**2 + L**2))
 
-def U_hat_isotropic(k, L, kernel_type="plummer"):
-    """Return \hat{U}(k) for isotropic kernel; numerical forms acceptable.
-    For Plummer: U(r) = (4πL)^{-1} arctan(r/L) ⇒ \hat{U}(k) ~ f(kL).
-    Implemented as a placeholder (user to supply calibrated FFT form).
-    """
-    # Placeholder smooth low-pass form; replace with calibrated transform.
-    x = k * L
-    if kernel_type == "plummer":
-        return 1.0 / (1.0 + x**2)
-    elif kernel_type == "exp-core":
-        return np.exp(-x) / (1.0 + x**2)
-    else:
-        raise ValueError("Unknown kernel_type")
+# --- Alias names (match the paper/skeleton later) ---
+K_plummer   = plummer_kernel
+K_exp_core  = exp_core_kernel
