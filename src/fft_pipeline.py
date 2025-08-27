@@ -1,32 +1,53 @@
-# src/kernels.py
-# Acceleration kernels + their integrated potential kernels U(r; L).
+# src/fft_pipeline.py
+# Convolution by FFT and gradient/Laplacian via k-space.
+
 import numpy as np
 
-# ---- acceleration kernels (what’s in the paper) ----
-def plummer_kernel(r, L):
-    return 1.0 / (4.0 * np.pi * (r**2 + L**2))
+def set_k0_to_zero(phi_k):
+    """Zero the DC (k=0) mode; safe for ∇phi."""
+    phi_k = phi_k.copy()
+    phi_k.flat[0] = 0.0
+    return phi_k
 
-def exp_core_kernel(r, L):
-    return np.exp(-r / L) / (4.0 * np.pi * (r**2 + L**2))
-
-K_plummer  = plummer_kernel
-K_exp_core = exp_core_kernel
-
-# ---- potential kernels U (so we can convolve then take ∇) ----
-def U_plummer(r, L):
-    """U(r;L) = (1/(4πL)) * arctan(r/L), with U(0)=0."""
-    L = np.clip(L, 1e-9, None)
-    return (1.0 / (4.0 * np.pi * L)) * np.arctan(r / L)
-
-def U_exp_core(r, L, rmax=None, n=4096):
+def conv_fft(rho, U, zero_mode=True):
     """
-    Build U by integrating K_exp_core from 0..r (fast, vectorized).
+    Convolve density 'rho' with scalar kernel 'U' using FFTs.
+    Both arrays must have the same shape (n x n x n). Returns phi = rho * U.
     """
-    r = np.asarray(r)
-    if rmax is None:
-        rmax = float(np.max(r))
-    rt = np.linspace(0.0, rmax, n)
-    K = exp_core_kernel(rt, L)
-    Utab = np.zeros_like(rt)
-    Utab[1:] = np.cumsum(0.5 * (K[1:] + K[:-1]) * (rt[1:] - rt[:-1]))
-    return np.interp(r, rt, Utab)
+    rho_k = np.fft.fftn(rho, norm=None)
+    U_k   = np.fft.fftn(U,   norm=None)
+    phi_k = rho_k * U_k
+    if zero_mode:
+        phi_k = set_k0_to_zero(phi_k)
+    phi = np.fft.ifftn(phi_k).real
+    return phi
+
+def gradient_from_phi(phi, Lbox):
+    """
+    Compute ∇phi via Fourier derivatives.
+    phi : 3D array; Lbox : half-size of box in kpc (grid spans [-Lbox, +Lbox]).
+    """
+    n = phi.shape[0]
+    dx = (2.0 * Lbox) / n
+    k1d = 2.0 * np.pi * np.fft.fftfreq(n, d=dx)
+    kx, ky, kz = np.meshgrid(k1d, k1d, k1d, indexing='ij')
+
+    phi_k = np.fft.fftn(phi, norm=None)
+    i = 1j
+    gx = np.fft.ifftn(i * kx * phi_k).real
+    gy = np.fft.ifftn(i * ky * phi_k).real
+    gz = np.fft.ifftn(i * kz * phi_k).real
+    return gx, gy, gz
+
+def laplacian_from_phi(phi, Lbox):
+    """Return ∇²phi via Fourier: (∇²)↔(-k^2)."""
+    n = phi.shape[0]
+    dx = (2.0 * Lbox) / n
+    k1d = 2.0 * np.pi * np.fft.fftfreq(n, d=dx)
+    kx, ky, kz = np.meshgrid(k1d, k1d, k1d, indexing='ij')
+    k2 = kx*kx + ky*ky + kz*kz
+    phi_k = np.fft.fftn(phi, norm=None)
+    lap_k = -k2 * phi_k
+    lap_k.flat[0] = 0.0
+    lap = np.fft.ifftn(lap_k).real
+    return lap
