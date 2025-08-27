@@ -1,7 +1,3 @@
-# src/kernels.py
-# Two cored, positive acceleration kernels used by H1.
-# Units: r and L in kpc; output has units of 1/kpc^2 (up to the G·ρ factors elsewhere).
-
 import numpy as np
 
 # --- Primary names (simple) ---
