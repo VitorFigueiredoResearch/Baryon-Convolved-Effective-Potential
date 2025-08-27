@@ -1,6 +1,3 @@
-# src/baryons.py
-# One super-simple mass map for testing.
-
 import numpy as np
 
 def make_exponential_disk(n=64, Lbox=20.0, Rd=3.0, Md=5e10, hz=0.3):
