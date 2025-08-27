@@ -51,3 +51,16 @@ def laplacian_from_phi(phi, Lbox):
     lap_k.flat[0] = 0.0
     lap = np.fft.ifftn(lap_k).real
     return lap
+def laplacian_from_phi(phi, Lbox):
+    """Return ∇²phi via Fourier: (∇²) ↔ (−k^2)."""
+    import numpy as np
+    n = phi.shape[0]
+    dx = (2.0 * Lbox) / n
+    k1d = 2.0 * np.pi * np.fft.fftfreq(n, d=dx)
+    kx, ky, kz = np.meshgrid(k1d, k1d, k1d, indexing='ij')
+    k2 = kx*kx + ky*ky + kz*kz
+    phi_k = np.fft.fftn(phi, norm=None)
+    lap_k = -k2 * phi_k
+    lap_k.flat[0] = 0.0  # safe DC handling
+    lap = np.fft.ifftn(lap_k).real
+    return lap
