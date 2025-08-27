@@ -50,20 +50,20 @@ def run_for_kernel(kernel):
     phiK = conv_fft(rho, U, zero_mode=True)
     gx, gy, gz = gradient_from_phi(phiK, Lbox)
 
-    # --- RC proxy (mid-plane) ---
-    ix0 = iy0 = iz0 = n // 2
-    idx = np.arange(ix0 + 1, n - 2)
-    R = (idx - ix0) * dx
-    gR = np.sqrt(gx[idx, iy0, iz0]**2 + gy[idx, iy0, iz0]**2)
-    v_proxy = np.sqrt(np.maximum(R * gR, 0.0))
+   # --- RC proxy (mid-plane, ring-averaged) ---
+    iz0 = n // 2
+    gR2d = np.sqrt(gx[:, :, iz0]**2 + gy[:, :, iz0]**2)  # force magnitude in plane
+    centers_RC, gmean, _, _ = radial_profile(gR2d, dx, nbins=30)  # azimuthal mean per ring
+    v_proxy = np.sqrt(np.maximum(centers_RC * gmean, 0.0))
 
     os.makedirs("figs", exist_ok=True)
     out_rc = f"figs/rc_toy_{kernel}.png"
-    plt.figure(figsize=(5,4))
-    plt.plot(R, v_proxy, "-o", ms=3)
+    plt.figure(figsize=(5, 4))
+    plt.plot(centers_RC, v_proxy, "-o", ms=3)
     plt.xlabel("R [kpc]"); plt.ylabel("toy speed (arb. units)")
     plt.title(f"Toy curve from {kernel} kernel (L = {L:.1f} kpc)")
     plt.tight_layout(); plt.savefig(out_rc, dpi=150); plt.close()
+
 
     # --- Σ(R) from the same field (toy) ---
     rho_eff = laplacian_from_phi(phiK, Lbox)      # ∝ ∇²φ (arb. units)
