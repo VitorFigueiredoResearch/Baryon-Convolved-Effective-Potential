@@ -24,7 +24,7 @@ jobs:
           python run_local.py
       - name: Run SPARC-lite loop
         run: |
-        python run_sparc_lite.py
+          python run_sparc_lite.py
       - name: Run experiment
         run: |
           bash ./run_experiment.sh || true
