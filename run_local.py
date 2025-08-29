@@ -77,25 +77,23 @@ def run_for_kernel(kernel):
     plt.title(f"Projected Σ from {kernel} kernel")
     plt.tight_layout(); plt.savefig(out_sig, dpi=150); plt.close()
 
-    # --- ΔΣ(R) = mean(<R) - Σ(R) ---
-    # mean inside R: for each bin edge r1, average all pixels with radius < r1
-    cum_mean = []
-    for r1 in rbins[1:]:
-        m = (R2D < r1)
-        cum_mean.append(float(np.mean(Sigma[m])) if np.any(m) else np.nan)
-    cum_mean = np.array(cum_mean)
-    DeltaSigma = cum_mean - Smean
+    # --- Σ(R) and ΔΣ(R) from the same total field ---
+   from src.newtonian import phi_newtonian_from_rho, G
+   from src.fft_pipeline import laplacian_from_phi
 
-    out_dsig = f"figs/delta_sigma_toy_{kernel}.png"
-    plt.figure(figsize=(5,4))
-    plt.plot(centers, DeltaSigma, "-o", ms=3)
-    plt.xlabel("R [kpc]"); plt.ylabel("toy ΔΣ (arb. units)")
-    plt.title(f"ΔΣ from {kernel} kernel")
-    plt.tight_layout(); plt.savefig(out_dsig, dpi=150); plt.close()
+   phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G)
+   phi_tot = phi_b + phiK  # IMPORTANT: use total field
 
-    print(f"Saved: {out_rc}, {out_sig}, {out_dsig}")
+   lap_tot = laplacian_from_phi(phi_tot, Lbox)
+   rho_tot = lap_tot / (4.0 * np.pi * G)
 
-if __name__ == "__main__":
-    for k in ("plummer", "exp-core"):
-        run_for_kernel(k)
-    print("All done.")
+   Sigma = np.sum(rho_tot, axis=2) * dx
+   centers, Smean, rbins, R2D = radial_profile(Sigma, dx, nbins=30)
+
+   # ΔΣ
+  cum_mean = []
+  for r1 in rbins[1:]:
+  m = (R2D < r1)
+  cum_mean.append(float(np.mean(Sigma[m])) if np.any(m) else np.nan)
+  cum_mean = np.array(cum_mean)
+  DeltaSigma = cum_mean - Smean
