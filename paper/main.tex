@@ -9,15 +9,13 @@
 		pages   = {157},
 		doi     = {10.3847/0004-6256/152/6/157}
 	}
-	@article{mcgaugh2016rar,
-		author  = {McGaugh, Stacy S. and Lelli, Federico and Schombert, James M.},
-		title   = {Radial Acceleration Relation in Rotationally Supported Galaxies},
-		journal = {Physical Review Letters},
-		year    = {2016},
-		volume  = {117},
-		pages   = {201101},
-		doi     = {10.1103/PhysRevLett.117.201101}
-	}
+	@article{famaey_mcgaugh_2012_lrr,
+  author={Famaey, Benoit and McGaugh, Stacy S.},
+  title={Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions},
+  journal={Living Reviews in Relativity},
+  year={2012}, volume={15}, pages={10},
+  doi={10.12942/lrr-2012-10}
+}
 	@article{meidt2014mlr36,
 		author  = {Meidt, S. E. and Schinnerer, E. and van de Ven, G. and others},
 		title   = {Reconstructing the Stellar Mass Distributions of Galaxies from S$^4$G IRAC 3.6 $\mu$m Images: Implications for the Stellar Mass-to-Light Ratio},
@@ -74,24 +72,20 @@
 		eprint  = {1407.7583},
 		archivePrefix = {arXiv}
 	}
-	@article{milgrom1983mond,
-		author = {Milgrom, Mordehai},
-		title = {A modification of the Newtonian dynamics as a possible alternative to the hidden mass hypothesis},
-		journal = {Astrophysical Journal},
-		year = {1983},
-		volume = {270},
-		pages = {365--370},
-		doi = {10.1086/161130}
-	}
-	@article{bekenstein2004teves,
-		author = {Bekenstein, Jacob D.},
-		title = {Relativistic gravitation theory for the MOND paradigm},
-		journal = {Physical Review D},
-		year = {2004},
-		volume = {70},
-		pages = {083509},
-		doi = {10.1103/PhysRevD.70.083509}
-	}
+@article{milgrom1983_mond,
+  author={Milgrom, Mordehai},
+  title={A modification of the Newtonian dynamics as a possible alternative to the hidden mass hypothesis},
+  journal={Astrophysical Journal},
+  year={1983}, volume={270}, pages={365--370},
+  doi={10.1086/161130}
+}
+	@article{bekenstein2004_teves,
+  author={Bekenstein, Jacob D.},
+  title={Relativistic gravitation theory for the MOND paradigm},
+  journal={Physical Review D},
+  year={2004}, volume={70}, pages={083509},
+  doi={10.1103/PhysRevD.70.083509}
+}
 	@article{famaey2012mondreview,
 		author = {Famaey, Benoit and McGaugh, Stacy S.},
 		title  = {Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions},
@@ -165,6 +159,8 @@
 \newcommand{\dd}{\mathrm{d}}
 \newcommand{\vect}[1]{\bm{#1}}
 \newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+% typographic
+\newcommand{\TF}{Tully--Fisher} % will render as Tully–Fisher under modern engines
 
 % Model symbols
 \newcommand{\Lmem}{L}       % sample-global kernel range [kpc]
@@ -227,7 +223,8 @@
 		\paragraph{Tails and scaling.}
 		I deliberately avoid $K\propto 1/r$ (which hard-wire exactly flat asymptotes) to keep BTFR scaling under control; quasi--flat outer segments are then an empirical outcome over finite radii and are adjudicated by our gates.
 		
-\keybox{\textbf{Single-field statement.}\;\;I compute one scalar potential $\Phi_{\rm eff}$ from baryons and use it for both kinematics and lensing. Stars trace $-\nabla\Phi_{\rm eff}$. For lensing I form $\rho_{\rm eff}=\nabla^2\Phi_{\rm eff}/(4\pi G)$ and project to $\Sigma$ and $\Delta\Sigma$ (App.~\ref{app:lensing}).}
+\keybox{\textbf{Single-field statement.}\; I compute one scalar potential $\Phi_{\rm eff}$ from baryons and use it for both kinematics and lensing. Stars trace $-\nabla\Phi_{\rm eff}$. For lensing I form the \emph{total} density $\rho_{\rm tot} \equiv \nabla^2\Phi_{\rm eff}/(4\pi G)$ and project it to $\Sigma$ and $\Delta\Sigma$ (App.~\ref{app:lensing}); the diagnostic decomposition $\rho_{\rm eff}\equiv \rho_{\rm tot}-\rho_b$ is reported but not used for the prediction.}
+
 
 		
 		\paragraph{Lensing postulate.}
@@ -392,7 +389,8 @@ For broader context see \citep{famaey2012mondreview} and \citet{bekenstein2004te
 		
 		\section{Units and basic behavior}\label{app:units}
 		\subsection*{A.1 Units (single source of truth)}
-		
+		By construction $\,[U]=L^{-1}$ and $[K]=L^{-2}$ so that $\mu\,G\,\rho_b*U$ has units of potential (km$^2$\,s$^{-2}$). 
+
 		\subsection*{A.2 Qualitative tails}
 		For compact mass, $K_{\text{Plummer}}\sim (4\pi r^2)^{-1}$ at large $r$, so the added field outside the light declines as $1/r^2$. Over observed finite ranges, the superposition with $\Phi_b$ can produce quasi-flat segments; whether it does so across a sample is addressed empirically by our gates. (Exactly flat asymptotes would follow from $K\!\propto\!1/r$, not adopted here.)
 		
@@ -408,9 +406,15 @@ For broader context see \citep{famaey2012mondreview} and \citet{bekenstein2004te
 		$\rho_{\rm eff}$ is an \emph{effective} source defined by inverting Poisson’s equation for the modeled $\Phi_{\rm eff}$; local sign changes can occur and should not be interpreted as literal negative mass. Lensing is computed from $\Phi_{\rm eff}$ itself, and $\rho_{\rm eff}$ is used only as a diagnostic decomposition.
 		
 		\section{Lensing from the same potential}\label{app:lensing}
-I map the same $\Phi_{\rm eff}$ to lensing under the Newtonian Poisson closure,
-$\nabla^2\Phi_{\rm eff}=4\pi G(\rho_b+\rho_{\rm eff})$,
-treating $\rho_{\rm eff}$ as an \emph{effective} source field to be tested observationally.
+I map the same $\Phi_{\rm eff}$ to lensing via the Newtonian Poisson closure,
+\[
+\nabla^2\Phi_{\rm eff}=4\pi G\,\rho_{\rm tot},\qquad
+\rho_{\rm tot}\equiv\rho_b+\rho_{\rm eff}.
+\]
+The \emph{prediction} uses $\Sigma_{\rm tot}(R)=\int \rho_{\rm tot}\,{\rm d}l$ and 
+$\Delta\Sigma(R)=\bar{\Sigma}_{\rm tot}(<R)-\Sigma_{\rm tot}(R)$.
+I also report the \emph{diagnostic} component $\rho_{\rm eff}\equiv\rho_{\rm tot}-\rho_b$ to assess compensation; it is not used for gating.
+
 		
 		\textbf{(ii) Surface density and shear.} Project along the line of sight to get
 		\[
