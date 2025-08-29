@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from src.baryons import make_exponential_disk
 from src.fft_pipeline import conv_fft, gradient_from_phi, laplacian_from_phi
 from src.kernels import U_plummer, U_exp_core
+from src.newtonian import phi_newtonian_from_rho, G
+from src.fft_pipeline import laplacian_from_phi
 
 # global knobs
 n = 64
