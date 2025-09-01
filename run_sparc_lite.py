@@ -14,11 +14,11 @@ from src.newtonian import phi_newtonian_from_rho, G
 
 # ---- knobs (fast defaults for CI/local) ----
 GRID_N = 64
-LBOX = 20.0  # kpc (cube spans [-LBOX, +LBOX])
+LBOX = 40.0  # kpc (cube spans [-LBOX, +LBOX])
 RADIAL_BINS = 30 ## REFINEMENT 2: Define nbins once as a global knob
 KERNELS = ("plummer", "exp-core")
-L_LIST  = [6.0, 10.0, 14.0, 18.0, 22.0, 26.0, 30.0]
-MU_LIST = [1.0, 1.5, 2.0, 3.0, 4.5, 6.0, 8.0]
+L_LIST  = [6.0, 10.0, 15.0, 20.0, 30.0]
+MU_LIST = [0.8, 1.2, 2.0, 3.0, 5.0, 8.0]
 
 
 
