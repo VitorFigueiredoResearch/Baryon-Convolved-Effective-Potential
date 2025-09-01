@@ -17,8 +17,8 @@ GRID_N = 64
 LBOX = 20.0  # kpc (cube spans [-LBOX, +LBOX])
 RADIAL_BINS = 30 ## REFINEMENT 2: Define nbins once as a global knob
 KERNELS = ("plummer", "exp-core")
-L_LIST  = [4.0, 6.0, 8.0, 12.0, 16.0, 20.0]   # add bigger L
-MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0]      # allow stronger gain
+L_LIST  = [6.0, 10.0, 14.0, 18.0, 22.0, 26.0, 30.0]
+MU_LIST = [1.0, 1.5, 2.0, 3.0, 4.5, 6.0, 8.0]
 
 
 
@@ -174,8 +174,8 @@ def main():
     summary = []
     for gal in gals:
         total_M = gal["Mstar"] + gal["Mgas"]
-        print(f"[{gal['name']}] total baryonic mass read = {total_M:.3e} Msun")
-        U_grid = U_grid_cache[(best["kernel"], best["L"])]
+        print(f"[{gal['name']}] M*= {gal['Mstar']:.2e} Msun, Mgas= {gal['Mgas']:.2e} Msun, "
+        f"Rd*= {gal['Rd_star']:.2f} kpc, Rd_gas= {gal['Rd_gas']:.2f} kpc (total= {total_M:.2e} Msun)")
         R_pred, V_pred = predict_rc_for_params(gal, best["L"], best["mu"], U_grid)
         obs = try_read_observed_rc(gal["name"])
 
