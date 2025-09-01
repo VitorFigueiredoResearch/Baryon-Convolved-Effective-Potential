@@ -165,17 +165,25 @@ def main():
         plt.tight_layout(); plt.savefig(out, dpi=150); plt.close()
         summary.append({"name": gal["name"], "mafe": score})
         print("Saved", out)
-# after plotting each galaxy:
-        np.savetxt(f"results/rc_pred_{gal['name']}_{best['kernel']}.csv",
-           np.c_[R_pred, V_pred],
-           delimiter=",", header="R_kpc,Vpred_kms", comments='')
+        # save the predicted curve for Excel: R and Vpred in km/s
+        np.savetxt(
+            f"results/rc_pred_{gal['name']}_{best['kernel']}.csv",
+            np.c_[R_pred, V_pred],
+            delimiter=",",
+            header="R_kpc,Vpred_kms",
+            comments=""
+        )
 
-        obs = try_read_observed_rc(gal["name"])
-          if obs is not None:
-           R_obs, V_obs = obs
-           np.savetxt(f"results/rc_obs_{gal['name']}.csv",
-               np.c_[R_obs, V_obs],
-               delimiter=",", header="R_kpc,V_kms", comments='')
+        # if you provided observed RC, save it too
+        if obs is not None:
+            R_obs, V_obs = obs
+            np.savetxt(
+                f"results/rc_obs_{gal['name']}.csv",
+                np.c_[R_obs, V_obs],
+                delimiter=",",
+                header="R_kpc,V_kms",
+                comments=""
+            )
 
        Commit: feat(results): export predicted/observed RC CSVs.
     # 4) save metrics
