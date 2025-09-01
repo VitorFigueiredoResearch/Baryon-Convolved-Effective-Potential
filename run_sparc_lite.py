@@ -165,10 +165,10 @@ def main():
         plt.tight_layout(); plt.savefig(out, dpi=150); plt.close()
         summary.append({"name": gal["name"], "mafe": score})
         print("Saved", out)
-        # save the predicted curve for Excel: R and Vpred in km/s
+                # --- save predicted curve for Excel: R and Vpred in km/s
         np.savetxt(
             f"results/rc_pred_{gal['name']}_{best['kernel']}.csv",
-            np.c_[R_pred, V_pred],
+            np.c_[R_kpc, V_pred],
             delimiter=",",
             header="R_kpc,Vpred_kms",
             comments=""
@@ -184,16 +184,17 @@ def main():
                 header="R_kpc,V_kms",
                 comments=""
             )
-
-       Commit: feat(results): export predicted/observed RC CSVs.
     # 4) save metrics
-    import json
-    with open("results/sparc_lite_best.json","w") as f:
-        json.dump(best, f, indent=2)
-    with open("results/sparc_lite_summary.csv","w") as f:
-        f.write("name,mafe\n")
-        for row in summary:
-            f.write(f"{row['name']},{row['mafe']}\n")
+  # 4) save metrics
+import json
+
+with open("results/sparc_lite_best.json", "w") as f:
+    json.dump(best, f, indent=2)
+
+with open("results/sparc_lite_summary.csv", "w") as f:
+    f.write("name,mafe\n")
+    for row in summary:
+        f.write(f"{row['name']},{row['mafe']}\n")
 
 if __name__ == "__main__":
     main()
