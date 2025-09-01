@@ -75,48 +75,55 @@ def run_for_kernel(kernel):
     out_sig = f"figs/sigma_toy_{kernel}.png"
     plt.figure(figsize=(5,4))
     plt.plot(centers, Smean, "-o", ms=3)
-    plt.xlabel("R [kpc]"); plt.ylabel("toy Σ (arb. units)")
+    plt.xlabel("R [kpc]"); plt.ylabel(r"$\Delta\Sigma$ [$M_\odot \, \mathrm{pc}^{-2}$]")
     plt.title(f"Projected Σ from {kernel} kernel")
     plt.tight_layout(); plt.savefig(out_sig, dpi=150); plt.close()
 
-    # --- Σ(R) and ΔΣ(R) from the same total field ---
+   # --- Σ(R) and ΔΣ(R) in physical units ---
     # Build Newtonian baryon potential (physical units via G), then add kernel part.
     phi_b  = phi_newtonian_from_rho(rho, Lbox, Gval=G)
     phi_tot = phi_b + phiK  # IMPORTANT: lensing uses total potential
 
     # 3D Laplacian → total volume density, then project to Σ
-    lap_tot = laplacian_from_phi(phi_tot, Lbox)           # ∇²φ_tot
-    rho_tot = lap_tot / (4.0 * np.pi * G)                 # ρ_tot = (∇²φ_tot)/(4πG)
-    Sigma   = np.sum(rho_tot, axis=2) * dx                # project along z
+    lap_tot = laplacian_from_phi(phi_tot, Lbox)      # ∇²φ_tot
+    rho_tot = lap_tot / (4.0 * np.pi * G)            # ρ_tot = (∇²φ_tot)/(4πG)
+    Sigma_kpc2 = np.sum(rho_tot, axis=2) * dx         # Project along z. Units: Msun/kpc^2
 
-    centers, Smean, rbins, R2D = radial_profile(Sigma, dx, nbins=30)
+    # <<< THIS IS THE PATCH >>>
+    # Convert Σ from Msun/kpc^2 to Msun/pc^2 for standard plotting
+    KPC2_PER_PC2 = 1.0e6
+    Sigma_phys   = Sigma_kpc2 / KPC2_PER_PC2
 
-    # Non-negativity diagnostic (should be ≥0 within toy noise)
-    frac_neg = float(np.mean(Sigma < 0.0))
-    print(f"[diag] Σ_tot: min={Sigma.min():.3e}, max={Sigma.max():.3e}, frac<0={frac_neg:.3%}")
+    # Now, calculate all radial profiles using the physically-scaled Sigma_phys
+    centers, Smean, rbins, R2D = radial_profile(Sigma_phys, dx, nbins=30)
 
-    # --- ΔΣ(R) = mean(<R) - Σ(R) ---
+    # ΔΣ in Msun/pc^2
     cum_mean = []
     for r1 in rbins[1:]:
         m = (R2D < r1)
-        cum_mean.append(float(np.mean(Sigma[m])) if np.any(m) else np.nan)
+        cum_mean.append(float(np.mean(Sigma_phys[m])) if np.any(m) else np.nan)
     cum_mean   = np.array(cum_mean)
     DeltaSigma = cum_mean - Smean
+    # <<< END OF PATCH >>>
+
+    # Non-negativity diagnostic (should be ≥0 within toy noise)
+    frac_neg = float(np.mean(Sigma_phys < 0.0))
+    print(f"[diag] Σ_tot: min={Sigma_phys.min():.3e}, max={Sigma_phys.max():.3e}, frac<0={frac_neg:.3%}")
 
     out_sig  = f"figs/sigma_toy_{kernel}.png"
     out_dsig = f"figs/delta_sigma_toy_{kernel}.png"
 
+    # Update plot labels to reflect new physical units
     plt.figure(figsize=(5,4))
     plt.plot(centers, Smean, "-o", ms=3)
-    plt.xlabel("R [kpc]"); plt.ylabel("toy Σ (arb. units)")
-    plt.title(f"Projected Σ (total) from {kernel} kernel")
+    plt.xlabel("R [kpc]"); plt.ylabel(r"$\Sigma$ [$M_\odot \, \mathrm{pc}^{-2}$]")
+    plt.title(f"Projected Surface Density (total) from {kernel} kernel")
     plt.tight_layout(); plt.savefig(out_sig, dpi=150); plt.close()
 
     plt.figure(figsize=(5,4))
     plt.plot(centers, DeltaSigma, "-o", ms=3)
-    plt.xlabel("R [kpc]"); plt.ylabel("toy ΔΣ (arb. units)")
-    plt.title(f"ΔΣ (total) from {kernel} kernel")
+    plt.xlabel("R [kpc]"); plt.ylabel(r"$\Delta\Sigma$ [$M_\odot \, \mathrm{pc}^{-2}$]")
+    plt.title(f"Differential Surface Density (total) from {kernel} kernel")
     plt.tight_layout(); plt.savefig(out_dsig, dpi=150); plt.close()
 
     print(f"Saved: {out_rc}, {out_sig}, {out_dsig}")
-
