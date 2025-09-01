@@ -13,8 +13,8 @@ from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
 
 # ---- knobs (fast defaults for CI/local) ----
-GRID_N = 64
-LBOX = 40.0  # kpc (cube spans [-LBOX, +LBOX])
+GRID_N = 96
+LBOX = 80.0  # kpc (cube spans [-LBOX, +LBOX])
 RADIAL_BINS = 30 ## REFINEMENT 2: Define nbins once as a global knob
 KERNELS = ("plummer", "exp-core")
 L_LIST  = [6.0, 10.0, 15.0, 20.0, 30.0]
