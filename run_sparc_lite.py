@@ -1,3 +1,10 @@
+# ---- knobs ----
+RADIAL_BINS = 30
+KERNELS = ("plummer", "exp-core")
+
+# coarse grid 
+L_LIST  = [2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0]
+MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 # run_sparc_lite.py — SPARC-lite loop (stars+gas) in physical km/s
 
 import os
@@ -20,6 +27,16 @@ KERNELS = ("plummer", "exp-core")
 L_LIST  = [6.0, 10.0, 15.0, 20.0, 30.0]
 MU_LIST = [0.8, 1.2, 2.0, 3.0, 5.0, 8.0]
 
+def choose_box_and_grid(R_obs_max, L):
+    # aim: box big enough for galaxy and kernel tail; dx ~ 0.5–1.0 kpc
+    target_half = max(1.5 * R_obs_max, 6.0 * L, 20.0)   # kpc
+    Lbox = float(target_half)
+    # pick grid so that dx ~ 0.6–0.8 kpc (cap to keep CI fast)
+    n = int(np.clip(round(2*Lbox / 0.7), 64, 160))      # side length in cells
+    # n must be even (helps mid-plane indexing)
+    if n % 2 == 1:
+        n += 1
+    return Lbox, n
 
 
 def build_U_grid(n, Lbox, L, kernel):
@@ -68,7 +85,10 @@ def read_galaxy_table(path_csv):
                 "hz_star": num(row["hz_star_kpc"]),
                 "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
                 "Mgas":    num(row.get("Mgas_Msun", "0")),
-                "hz_gas":  num(row.get("hz_gas_kpc", "0.3")),
+                "hz_gas":  num(row.get("hz_gas_kpc", "1.8")),
+                if out[-1]["Rd_gas"] <= 0:
+    out[-1]["Rd_gas"] = 1.8 * out[-1]["Rd_star"]
+
             })
     return out
 
@@ -88,6 +108,12 @@ def try_read_observed_rc(name):
 
 def predict_rc_for_params(gal, L, mu, U_grid_cached): ## REFINEMENT 3: Pass in the cached U_grid
     # Build baryon density
+    # Decide box/grid per galaxy (use observed extent if available)
+R_obs_max = 15.0  # fallback
+obs_try = try_read_observed_rc(gal["name"])
+if obs_try is not None:
+    R_obs_max = float(np.nanmax(obs_try[0]))
+Lbox, nside = choose_box_and_grid(R_obs_max, L)
     rho, dx = two_component_disk(
         GRID_N, LBOX,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
@@ -105,6 +131,16 @@ def predict_rc_for_params(gal, L, mu, U_grid_cached): ## REFINEMENT 3: Pass in t
     # Scale by mu*G to get units of (km/s)^2, a true potential
     phi_K = mu * G * phi_K_raw
     gx_K, gy_K, gz_K = gradient_from_phi(phi_K, LBOX)
+# mid-plane circular-speed pieces
+iz = nside // 2
+g_b = np.sqrt(gx_b[:,:,iz]**2 + gy_b[:,:,iz]**2)
+g_K = np.sqrt(gx_K[:,:,iz]**2 + gy_K[:,:,iz]**2)
+Rc, gb = radial_profile_2d(g_b, Lbox/nside, nbins=RADIAL_BINS)
+_, gk   = radial_profile_2d(g_K, Lbox/nside, nbins=RADIAL_BINS)
+v_b = np.sqrt(np.maximum(Rc * gb, 0.0))
+v_k = np.sqrt(np.maximum(Rc * gk, 0.0))
+v_tot = np.sqrt(np.maximum(Rc * (gb+gk), 0.0))
+return Rc, v_tot, v_b, v_k
 
     # Total mid-plane ring-averaged RC
     iz = GRID_N // 2
@@ -207,7 +243,9 @@ def main():
             header="R_kpc,Vpred_kms",
             comments=""
         )
-
+R_pred, V_pred, V_b, V_k = predict_rc_for_params(...)
+plt.plot(R_pred, V_b,  ':',  lw=1, label='baryons-only')
+plt.plot(R_pred, V_k,  '--', lw=1, label='kernel-only')
         # export observed curve if present
         if obs is not None:
             np.savetxt(
