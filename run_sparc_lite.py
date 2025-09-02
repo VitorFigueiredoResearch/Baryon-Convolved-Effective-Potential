@@ -1,16 +1,8 @@
-# ---- knobs ----
-RADIAL_BINS = 30
-KERNELS = ("plummer", "exp-core")
-
-# coarse grid 
-L_LIST  = [2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0]
-MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 # run_sparc_lite.py — SPARC-lite loop (stars+gas) in physical km/s
 
 import os
 import csv
 import json
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -19,24 +11,15 @@ from src.kernels import U_plummer, U_exp_core
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
 
-# ---- knobs (fast defaults for CI/local) ----
+# ---- knobs (fast defaults) ----
 GRID_N = 96
-LBOX = 80.0  # kpc (cube spans [-LBOX, +LBOX])
-RADIAL_BINS = 30 ## REFINEMENT 2: Define nbins once as a global knob
+LBOX   = 80.0   # kpc (cube spans [-LBOX, +LBOX])
+RADIAL_BINS = 30
 KERNELS = ("plummer", "exp-core")
-L_LIST  = [6.0, 10.0, 15.0, 20.0, 30.0]
-MU_LIST = [0.8, 1.2, 2.0, 3.0, 5.0, 8.0]
 
-def choose_box_and_grid(R_obs_max, L):
-    # aim: box big enough for galaxy and kernel tail; dx ~ 0.5–1.0 kpc
-    target_half = max(1.5 * R_obs_max, 6.0 * L, 20.0)   # kpc
-    Lbox = float(target_half)
-    # pick grid so that dx ~ 0.6–0.8 kpc (cap to keep CI fast)
-    n = int(np.clip(round(2*Lbox / 0.7), 64, 160))      # side length in cells
-    # n must be even (helps mid-plane indexing)
-    if n % 2 == 1:
-        n += 1
-    return Lbox, n
+# coarse grid to search
+L_LIST  = [2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0]
+MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 
 
 def build_U_grid(n, Lbox, L, kernel):
@@ -49,7 +32,7 @@ def build_U_grid(n, Lbox, L, kernel):
         U = U_exp_core(r, L)
     else:
         raise ValueError("kernel must be 'plummer' or 'exp-core'")
-    # zero DC mode so phi's absolute level is irrelevant
+    # zero DC mode (absolute level of potential is irrelevant)
     U.flat[0] = 0.0
     return U
 
@@ -61,8 +44,7 @@ def radial_profile_2d(arr2d, dx, nbins=30):
     R = np.sqrt((xx - cx + 0.5) ** 2 + (yy - cy + 0.5) ** 2) * dx
     rb = np.linspace(0, (n // 2 - 1) * dx, nbins + 1)
     centers = 0.5 * (rb[1:] + rb[:-1])
-    prof = np.empty(nbins)
-    prof[:] = np.nan
+    prof = np.empty(nbins); prof[:] = np.nan
     for i, (r0, r1) in enumerate(zip(rb[:-1], rb[1:])):
         m = (R >= r0) & (R < r1)
         prof[i] = float(np.mean(arr2d[m])) if np.any(m) else np.nan
@@ -78,22 +60,24 @@ def read_galaxy_table(path_csv):
                     return float(x)
                 except:
                     return 0.0
-            out.append({
-                "name": row["name"],
+            d = {
+                "name":    row["name"],
                 "Rd_star": num(row["Rd_star_kpc"]),
                 "Mstar":   num(row["Mstar_Msun"]),
                 "hz_star": num(row["hz_star_kpc"]),
                 "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
                 "Mgas":    num(row.get("Mgas_Msun", "0")),
-                "hz_gas":  num(row.get("hz_gas_kpc", "1.8")),
-                if out[-1]["Rd_gas"] <= 0:
-    out[-1]["Rd_gas"] = 1.8 * out[-1]["Rd_star"]
-
-            })
+                "hz_gas":  num(row.get("hz_gas_kpc", "0.3")),
+            }
+            # if gas disk scalelength is not provided, tie it to stars
+            if d["Rd_gas"] <= 0:
+                d["Rd_gas"] = 1.8 * d["Rd_star"]
+            out.append(d)
     return out
 
 
 def try_read_observed_rc(name):
+    """Reads data/sparc/<NAME>_rc.csv with columns: R_kpc,V_kms."""
     path = os.path.join("data", "sparc", f"{name}_rc.csv")
     if not os.path.exists(path):
         return None
@@ -106,49 +90,33 @@ def try_read_observed_rc(name):
     return np.array(R), np.array(V)
 
 
-def predict_rc_for_params(gal, L, mu, U_grid_cached): ## REFINEMENT 3: Pass in the cached U_grid
-    # Build baryon density
-    # Decide box/grid per galaxy (use observed extent if available)
-R_obs_max = 15.0  # fallback
-obs_try = try_read_observed_rc(gal["name"])
-if obs_try is not None:
-    R_obs_max = float(np.nanmax(obs_try[0]))
-Lbox, nside = choose_box_and_grid(R_obs_max, L)
+def predict_rc_for_params(gal, L, mu, U_grid):
+    """Return (R_pred, V_pred) for one galaxy at given (L, mu) and kernel grid."""
+    # baryon density and grid spacing
     rho, dx = two_component_disk(
         GRID_N, LBOX,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
         Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
     )
-    # Newtonian baryon potential and field
+
+    # Newtonian field from baryons
     phi_b = phi_newtonian_from_rho(rho, LBOX, Gval=G)
     gx_b, gy_b, gz_b = gradient_from_phi(phi_b, LBOX)
 
-    # Kernel potential part: mu * G * conv(rho, U)
-    # The convolution gives a "raw" potential with units of mass/length
-    phi_K_raw = conv_fft(rho, U_grid_cached, zero_mode=True)
-    
-    ## REFINEMENT 1: Add comment for clarity
-    # Scale by mu*G to get units of (km/s)^2, a true potential
+    # Kernel potential part: phi_K = mu * G * conv(rho, U)
+    phi_K_raw = conv_fft(rho, U_grid, zero_mode=True)
     phi_K = mu * G * phi_K_raw
     gx_K, gy_K, gz_K = gradient_from_phi(phi_K, LBOX)
-# mid-plane circular-speed pieces
-iz = nside // 2
-g_b = np.sqrt(gx_b[:,:,iz]**2 + gy_b[:,:,iz]**2)
-g_K = np.sqrt(gx_K[:,:,iz]**2 + gy_K[:,:,iz]**2)
-Rc, gb = radial_profile_2d(g_b, Lbox/nside, nbins=RADIAL_BINS)
-_, gk   = radial_profile_2d(g_K, Lbox/nside, nbins=RADIAL_BINS)
-v_b = np.sqrt(np.maximum(Rc * gb, 0.0))
-v_k = np.sqrt(np.maximum(Rc * gk, 0.0))
-v_tot = np.sqrt(np.maximum(Rc * (gb+gk), 0.0))
-return Rc, v_tot, v_b, v_k
 
-    # Total mid-plane ring-averaged RC
+    # mid-plane total acceleration magnitude
     iz = GRID_N // 2
     gmag = np.sqrt((gx_b[:, :, iz] + gx_K[:, :, iz]) ** 2 +
                    (gy_b[:, :, iz] + gy_K[:, :, iz]) ** 2)
-    centers, gmean = radial_profile_2d(gmag, dx, nbins=RADIAL_BINS)
-    vpred = np.sqrt(np.maximum(centers * gmean, 0.0))  # km/s
-    return centers, vpred
+
+    # ring-average and convert to circular speed
+    R_centers, gmean = radial_profile_2d(gmag, dx, nbins=RADIAL_BINS)
+    V_pred = np.sqrt(np.maximum(R_centers * gmean, 0.0))  # km/s
+    return R_centers, V_pred
 
 
 def mafe(pred_at_R, obs_V):
@@ -159,7 +127,7 @@ def main():
     os.makedirs("figs", exist_ok=True)
     os.makedirs("results", exist_ok=True)
 
-    # 1) read tiny galaxy list
+    # 1) read galaxy list
     table_path = os.path.join("data", "galaxies.csv")
     if not os.path.exists(table_path):
         print("No data/galaxies.csv found. Add it and commit.")
@@ -169,7 +137,7 @@ def main():
         print("galaxies.csv is empty.")
         return
 
-    ## REFINEMENT 3: Pre-calculate and cache all U grids to avoid redundant work
+    # 2) precompute potential kernels
     print("Pre-calculating potential kernels (U_grid)...")
     U_grid_cache = {}
     for kernel in KERNELS:
@@ -177,7 +145,7 @@ def main():
             U_grid_cache[(kernel, L)] = build_U_grid(GRID_N, LBOX, L, kernel)
     print("...done.")
 
-    # 2) grid-search global (L, mu) minimizing median MAFE over galaxies with observed RC
+    # 3) grid-search (L, mu, kernel) minimizing median MAFE over galaxies with obs RC
     best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
     for kernel in KERNELS:
         for L in L_LIST:
@@ -188,10 +156,8 @@ def main():
                     if obs is None:
                         continue
                     R_obs, V_obs = obs
-                    # Fetch the pre-calculated U_grid from the cache
                     U_grid = U_grid_cache[(kernel, L)]
                     R_pred, V_pred = predict_rc_for_params(gal, L, mu, U_grid)
-                    # interpolate prediction at observed radii
                     Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
                     m = np.isfinite(Vp)
                     if np.any(m):
@@ -201,17 +167,14 @@ def main():
                     if med < best["mafe"]:
                         best = {"L": float(L), "mu": float(mu), "mafe": med, "kernel": kernel}
 
-    # If no observed RCs present, pick defaults (still plot/export predictions)
     if best["L"] is None:
         best = {"L": 6.0, "mu": 1.0, "mafe": float("nan"), "kernel": "plummer"}
     print("Best (median MAFE):", best)
 
-    # 3) per-galaxy plots + CSV exports with best params
+    # 4) per-galaxy plots + CSV exports with best params
     summary = []
     for gal in gals:
-        total_M = gal["Mstar"] + gal["Mgas"]
-        print(f"[{gal['name']}] M*= {gal['Mstar']:.2e} Msun, Mgas= {gal['Mgas']:.2e} Msun, "
-        f"Rd*= {gal['Rd_star']:.2f} kpc, Rd_gas= {gal['Rd_gas']:.2f} kpc (total= {total_M:.2e} Msun)")
+        U_grid = U_grid_cache[(best["kernel"], best["L"])]
         R_pred, V_pred = predict_rc_for_params(gal, best["L"], best["mu"], U_grid)
         obs = try_read_observed_rc(gal["name"])
 
@@ -235,7 +198,7 @@ def main():
         summary.append({"name": gal["name"], "mafe": score})
         print("Saved", out)
 
-        # export predicted curve (for Excel)
+        # export predicted curve
         np.savetxt(
             f"results/rc_pred_{gal['name']}_{best['kernel']}.csv",
             np.c_[R_pred, V_pred],
@@ -243,9 +206,6 @@ def main():
             header="R_kpc,Vpred_kms",
             comments=""
         )
-R_pred, V_pred, V_b, V_k = predict_rc_for_params(...)
-plt.plot(R_pred, V_b,  ':',  lw=1, label='baryons-only')
-plt.plot(R_pred, V_k,  '--', lw=1, label='kernel-only')
         # export observed curve if present
         if obs is not None:
             np.savetxt(
@@ -256,7 +216,7 @@ plt.plot(R_pred, V_k,  '--', lw=1, label='kernel-only')
                 comments=""
             )
 
-    # 4) save metrics (left margin, no indent)
+    # 5) save metrics
     with open("results/sparc_lite_best.json", "w") as f:
         json.dump(best, f, indent=2)
 
@@ -268,3 +228,4 @@ plt.plot(R_pred, V_k,  '--', lw=1, label='kernel-only')
 
 if __name__ == "__main__":
     main()
+
