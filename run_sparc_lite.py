@@ -22,7 +22,7 @@ L_LIST  = [2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0]
 MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 
 
-def build_U_grid(n, Lbox, L, kernel):
+def build_(n, Lbox, L, kernel):
     axis = np.linspace(-Lbox, Lbox, n, endpoint=False)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     r = np.sqrt(x * x + y * y + z * z)
@@ -60,7 +60,7 @@ def read_galaxy_table(path_csv):
                     return float(x)
                 except:
                     return 0.0
-            d = {
+            g = {
                 "name":    row["name"],
                 "Rd_star": num(row["Rd_star_kpc"]),
                 "Mstar":   num(row["Mstar_Msun"]),
@@ -69,10 +69,10 @@ def read_galaxy_table(path_csv):
                 "Mgas":    num(row.get("Mgas_Msun", "0")),
                 "hz_gas":  num(row.get("hz_gas_kpc", "0.3")),
             }
-            # if gas disk scalelength is not provided, tie it to stars
-            if d["Rd_gas"] <= 0:
-                d["Rd_gas"] = 1.8 * d["Rd_star"]
-            out.append(d)
+            # If Rd_gas is missing/zero, set it to ~1.8 × Rd_star (a sensible default)
+            if g["Rd_gas"] <= 0:
+                g["Rd_gas"] = 1.8 * g["Rd_star"]
+            out.append(g)
     return out
 
 
@@ -89,22 +89,50 @@ def try_read_observed_rc(name):
             V.append(float(row["V_kms"]))
     return np.array(R), np.array(V)
 
+U_CACHE = {}
+def get_(n, Lbox, L, kernel):
+    key = (kernel, float(L), int(n), round(float(Lbox), 3))
+    if key not in U_CACHE:
+        U_CACHE[key] = build_(n, Lbox, L, kernel)
+    return U_CACHE[key]
 
-def predict_rc_for_params(gal, L, mu, U_grid):
-    """Return (R_pred, V_pred) for one galaxy at given (L, mu) and kernel grid."""
-    # baryon density and grid spacing
+def predict_rc_for_params(gal, L, mu, kernel):
+    # Decide box/grid from the galaxy’s observed extent + kernel scale
+    obs = try_read_observed_rc(gal["name"])
+    R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
+    Lbox, n = choose_box_and_grid(R_obs_max, L)   # half-size (kpc), grid side (cells)
+
+    # Baryon density on that grid
     rho, dx = two_component_disk(
-        GRID_N, LBOX,
+        n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
         Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
     )
+
+    # Newtonian piece
+    phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G)
+    gx_b, gy_b, gz_b = gradient_from_phi(phi_b, Lbox)
+
+    # Kernel piece: mu * G * conv(rho, U)
+    U = get_(n, Lbox, L, kernel)
+    phi_K_raw = conv_fft(rho, U, zero_mode=True)
+    phi_K = mu * G * phi_K_raw
+    gx_K, gy_K, gz_K = gradient_from_phi(phi_K, Lbox)
+
+    # Mid-plane circular speed (ring-averaged)
+    iz = n // 2
+    gmag = np.sqrt((gx_b[:, :, iz] + gx_K[:, :, iz])**2 +
+                   (gy_b[:, :, iz] + gy_K[:, :, iz])**2)
+    R_centers, g_mean = radial_profile_2d(gmag, dx, nbins=RADIAL_BINS)
+    vpred = np.sqrt(np.maximum(R_centers * g_mean, 0.0))  # km/s
+    return R_centers, vpred
 
     # Newtonian field from baryons
     phi_b = phi_newtonian_from_rho(rho, LBOX, Gval=G)
     gx_b, gy_b, gz_b = gradient_from_phi(phi_b, LBOX)
 
     # Kernel potential part: phi_K = mu * G * conv(rho, U)
-    phi_K_raw = conv_fft(rho, U_grid, zero_mode=True)
+    phi_K_raw = conv_fft(rho, , zero_mode=True)
     phi_K = mu * G * phi_K_raw
     gx_K, gy_K, gz_K = gradient_from_phi(phi_K, LBOX)
 
@@ -138,11 +166,11 @@ def main():
         return
 
     # 2) precompute potential kernels
-    print("Pre-calculating potential kernels (U_grid)...")
-    U_grid_cache = {}
+    print("Pre-calculating potential kernels ()...")
+    _cache = {}
     for kernel in KERNELS:
         for L in L_LIST:
-            U_grid_cache[(kernel, L)] = build_U_grid(GRID_N, LBOX, L, kernel)
+            _cache[(kernel, L)] = build_(GRID_N, LBOX, L, kernel)
     print("...done.")
 
     # 3) grid-search (L, mu, kernel) minimizing median MAFE over galaxies with obs RC
@@ -156,8 +184,8 @@ def main():
                     if obs is None:
                         continue
                     R_obs, V_obs = obs
-                    U_grid = U_grid_cache[(kernel, L)]
-                    R_pred, V_pred = predict_rc_for_params(gal, L, mu, U_grid)
+                     = _cache[(kernel, L)]
+                    R_pred, V_pred = predict_rc_for_params(gal, L, mu, )
                     Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
                     m = np.isfinite(Vp)
                     if np.any(m):
@@ -174,8 +202,8 @@ def main():
     # 4) per-galaxy plots + CSV exports with best params
     summary = []
     for gal in gals:
-        U_grid = U_grid_cache[(best["kernel"], best["L"])]
-        R_pred, V_pred = predict_rc_for_params(gal, best["L"], best["mu"], U_grid)
+         = _cache[(best["kernel"], best["L"])]
+        R_pred, V_pred = predict_rc_for_params(gal, best["L"], best["mu"], )
         obs = try_read_observed_rc(gal["name"])
 
         # plot
