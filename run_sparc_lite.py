@@ -1,4 +1,4 @@
-# run_sparc_lite.py — Harmonized Version (R2-5 + Safe Math Patch)
+# run_sparc_lite.py — Harmonized Version (R2-6 Memory Safe + Gap Filler)
 
 import os
 import csv
@@ -6,7 +6,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Note: We removed the 'src.baryons' import to use a local, safe version
+# Note: We use local safe versions of physics functions to prevent crashes
 from src.kernels import U_plummer, U_exp_core
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
@@ -38,15 +38,13 @@ def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_g
         radial = np.exp(-R / Rd)
         
         # Vertical: sech^2(z/hz) with SAFETY CLAMP
-        # If z is too large, cosh explodes. But density is ~0 there anyway.
         z_scaled = np.abs(z / hz)
         vertical = np.zeros_like(z)
-        # Only calculate where z is reasonable (< 20 scale heights)
+        # Only calculate where z is reasonable (< 20 scale heights) to avoid overflow
         mask = z_scaled < 20.0 
         vertical[mask] = (1.0 / np.cosh(z_scaled[mask]))**2
         
-        # Normalization: Total Mass = M
-        # rho0 * (4 * pi * Rd^2 * hz) = M
+        # Normalization
         rho0 = M / (4 * np.pi * Rd**2 * hz)
         return rho0 * radial * vertical
 
@@ -56,10 +54,13 @@ def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_g
     return rho_star + rho_gas, dx
 
 def choose_box_and_grid(R_obs_max, L):
-    target_half = max(1.5 * R_obs_max, 6.0 * L, 20.0)
+    # OPTIMIZATION: Reduced padding from 6.0 to 4.0 to save memory
+    target_half = max(1.5 * R_obs_max, 4.0 * L, 20.0)
     Lbox = float(target_half)
-    # Cap grid at 512 for resolution
-    n = int(np.clip(round(2 * Lbox / 0.5), 64, 512))
+    
+    # SAFETY: Cap grid at 320 to prevent Out-Of-Memory crashes
+    # This gives good resolution without killing the server
+    n = int(np.clip(round(2 * Lbox / 0.5), 64, 320))
     if n % 2 == 1: n += 1
     return Lbox, n
 
@@ -84,7 +85,7 @@ def get_U_grid(n, Lbox, L, kernel):
     return U_CACHE[key]
 
 def fill_nans(arr):
-    """Interpolate small gaps in the profile."""
+    """Interpolate small gaps in the profile to prevent broken lines."""
     mask = np.isnan(arr)
     if not np.any(mask): return arr
     if np.all(mask): return arr
@@ -93,7 +94,7 @@ def fill_nans(arr):
     return arr
 
 def radial_profile_2d(arr2d, dx, max_r, nbins=30):
-    """Calculate profile only within the galaxy radius (Zoomed)."""
+    """Calculate profile within the galaxy radius and fill gaps."""
     n = arr2d.shape[0]
     cx = cy = n // 2
     yy, xx = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
@@ -110,6 +111,7 @@ def radial_profile_2d(arr2d, dx, max_r, nbins=30):
         if np.any(m):
             prof[i] = float(np.mean(arr2d[m]))
     
+    # Fill gaps caused by resolution mismatch
     return centers, fill_nans(prof)
 
 def read_galaxy_table(path_csv):
@@ -147,10 +149,10 @@ def predict_rc_for_params(gal, L, mu, kernel):
     obs = try_read_observed_rc(gal["name"])
     R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
     
-    # 1. Build Box
+    # 1. Build Box (Optimized size)
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
-    # 2. Baryons (Using LOCAL SAFE function)
+    # 2. Baryons (Using SAFE local function)
     rho, dx = safe_two_component_disk(
         n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
@@ -174,7 +176,7 @@ def predict_rc_for_params(gal, L, mu, kernel):
     gmag_baryons = np.sqrt(gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2)
     gmag_kernel = np.sqrt(gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2)
 
-    # 6. Profiles
+    # 6. Profiles (Zoomed + Filled)
     R_centers, g_mean_total = radial_profile_2d(gmag_total, dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_baryons = radial_profile_2d(gmag_baryons, dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_kernel = radial_profile_2d(gmag_kernel, dx, R_obs_max, nbins=RADIAL_BINS)
@@ -202,7 +204,7 @@ def main():
         print("galaxies.csv is empty.")
         return
 
-    print("Starting grid search with SAFE math...")
+    print("Starting grid search with MEMORY-SAFE settings...")
     best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
     
     for kernel in KERNELS:
