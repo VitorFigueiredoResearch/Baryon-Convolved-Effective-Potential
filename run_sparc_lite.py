@@ -18,22 +18,21 @@ KERNELS = ("plummer", "exp-core")
 L_LIST  = [2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0]
 MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 
-# ---- Helper Functions ----
+# ---- Helper Functions (Updated for R2-4 Resolution Fix) ----
 
 def choose_box_and_grid(R_obs_max, L):
     """
-    Chooses an appropriate box size and grid resolution for a given galaxy
-    and kernel length scale to avoid numerical artifacts.
-    (R2-0 Implementation)
+    Chooses an appropriate box size and grid resolution.
     """
     # Rule: Box must be large enough for the galaxy and the kernel's "tail"
     target_half = max(1.5 * R_obs_max, 6.0 * L, 20.0)
     Lbox = float(target_half)
     
     # Rule: Keep pixel size (dx) reasonable, but cap grid size for speed
-    n = int(np.clip(round(2 * Lbox / 0.7), 64, 160))
+    # We bump the cap slightly to 200 to handle large L better
+    n = int(np.clip(round(2 * Lbox / 0.7), 64, 200))
     
-    # Rule: Grid size must be even for easier indexing of the mid-plane
+    # Rule: Grid size must be even
     if n % 2 == 1:
         n += 1
     return Lbox, n
@@ -53,36 +52,45 @@ def build_U_grid(n, Lbox, L, kernel):
 
 U_CACHE = {}
 def get_U_grid(n, Lbox, L, kernel):
-    """Smarter cache that handles dynamic grid sizes."""
     key = (kernel, float(L), int(n), round(float(Lbox), 3))
     if key not in U_CACHE:
         U_CACHE[key] = build_U_grid(n, Lbox, L, kernel)
     return U_CACHE[key]
 
-def radial_profile_2d(arr2d, dx, nbins=30):
+# --- UPDATED FUNCTION ---
+def radial_profile_2d(arr2d, dx, max_r, nbins=30):
+    """
+    Calculates radial profile ONLY up to max_r (The Galaxy Edge),
+    ignoring the empty padding of the simulation box.
+    """
     n = arr2d.shape[0]
     cx = cy = n // 2
     yy, xx = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
+    # Distance of every pixel from center (in kpc)
     R = np.sqrt((xx - cx + 0.5) ** 2 + (yy - cy + 0.5) ** 2) * dx
-    rb = np.linspace(0, (n // 2 - 1) * dx, nbins + 1)
+    
+    # Bin edges: From 0 up to max_r (Focus on the galaxy!)
+    # We add a small buffer (1.1x) to ensure we catch the last point
+    rb = np.linspace(0, max_r * 1.1, nbins + 1)
+    
     centers = 0.5 * (rb[1:] + rb[:-1])
     prof = np.empty(nbins)
     prof[:] = np.nan
+    
     for i, (r0, r1) in enumerate(zip(rb[:-1], rb[1:])):
         m = (R >= r0) & (R < r1)
-        prof[i] = float(np.mean(arr2d[m])) if np.any(m) else np.nan
+        if np.any(m):
+            prof[i] = float(np.mean(arr2d[m]))
+    
     return centers, prof
 
 def read_galaxy_table(path_csv):
-    """Corrected version of the CSV reader."""
-    out = []
+out = []
     with open(path_csv, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             def num(x):
-                try:
-                    return float(x)
-                except:
-                    return 0.0
+                try: return float(x)
+                except: return 0.0
             g = {
                 "name":    row["name"],
                 "Rd_star": num(row["Rd_star_kpc"]),
@@ -92,8 +100,7 @@ def read_galaxy_table(path_csv):
                 "Mgas":    num(row.get("Mgas_Msun", "0")),
                 "hz_gas":  num(row.get("hz_gas_kpc", "0.3")),
             }
-            if g["Rd_gas"] <= 0:
-                g["Rd_gas"] = 1.8 * g["Rd_star"]
+            if g["Rd_gas"] <= 0: g["Rd_gas"] = 1.8 * g["Rd_star"]
             out.append(g)
     return out
 
@@ -112,15 +119,16 @@ def try_read_observed_rc(name):
 
 def predict_rc_for_params(gal, L, mu, kernel):
     """
-    Fully updated to return total, baryon, and kernel velocity components.
-    (R2-0 Adaptive Box + R2-3 Component Decomposition)
+    Fully updated with R2-4 Zoom Fix.
     """
-    # 1. Decide box/grid from the galaxy’s observed extent + kernel scale
     obs = try_read_observed_rc(gal["name"])
+    # Determine the extent of the galaxy (where the data is)
     R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
+    
+    # 1. Build the simulation box (Huge, to fit the Ananta Hair)
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
-    # 2. Baryon density on that auto-sized grid
+    # 2. Baryon density
     rho, dx = two_component_disk(
         n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
@@ -137,28 +145,24 @@ def predict_rc_for_params(gal, L, mu, kernel):
     phi_K = mu * G * phi_K_raw
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
 
-    # 5. --- R2-3 IMPLEMENTATION: Calculate separate force components ---
-    iz = n // 2  # Index for the galactic mid-plane
-
-    # Total force (vector sum)
+    # 5. Force Components
+    iz = n // 2 
     gmag_total = np.sqrt((gx_b[:, :, iz] + gx_K[:, :, iz])**2 +
                          (gy_b[:, :, iz] + gy_K[:, :, iz])**2)
-    # Baryon-only force
     gmag_baryons = np.sqrt(gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2)
-    # Kernel-only force
     gmag_kernel = np.sqrt(gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2)
 
-    # 6. Get radial profiles for each component
-    R_centers, g_mean_total = radial_profile_2d(gmag_total, dx, nbins=RADIAL_BINS)
-    _, g_mean_baryons = radial_profile_2d(gmag_baryons, dx, nbins=RADIAL_BINS)
-    _, g_mean_kernel = radial_profile_2d(gmag_kernel, dx, nbins=RADIAL_BINS)
+    # 6. Get radial profiles (ZOOMED IN)
+    # We pass R_obs_max so we measure the galaxy, not the empty box.
+    R_centers, g_mean_total = radial_profile_2d(gmag_total, dx, R_obs_max, nbins=RADIAL_BINS)
+    _, g_mean_baryons = radial_profile_2d(gmag_baryons, dx, R_obs_max, nbins=RADIAL_BINS)
+    _, g_mean_kernel = radial_profile_2d(gmag_kernel, dx, R_obs_max, nbins=RADIAL_BINS)
     
-    # 7. Calculate final velocity curves for each component
+    # 7. Final velocities
     v_total = np.sqrt(np.maximum(R_centers * g_mean_total, 0.0))
     v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
     v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
     
-    # 8. Return all three curves
     return R_centers, v_total, v_baryons, v_kernel
 
 
