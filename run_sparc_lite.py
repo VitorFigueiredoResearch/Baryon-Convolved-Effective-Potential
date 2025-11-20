@@ -204,86 +204,95 @@ def main():
         print("galaxies.csv is empty.")
         return
 
-    print("Starting grid search with MEMORY-SAFE settings...")
-    best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
+    print("Starting PER-GALAXY grid search (R2-7)...")
     
-    for kernel in KERNELS:
-        for L in L_LIST:
-            for mu in MU_LIST:
-                scores = []
-                for gal in gals:
-                    obs = try_read_observed_rc(gal["name"])
-                    if obs is None: continue
-                    
-                    R_obs, V_obs = obs
+    # Store best params for each galaxy to save later
+    all_best_params = {}
+    summary = []
+
+    # --- Loop Over Each Galaxy First ---
+    for gal in gals:
+        print(f"Analyzing {gal['name']}...")
+        obs = try_read_observed_rc(gal["name"])
+        if obs is None: 
+            print(f"  -> No data found for {gal['name']}, skipping.")
+            continue
+        
+        R_obs, V_obs = obs
+        
+        # --- Grid Search for THIS Galaxy ---
+        local_best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
+        
+        for kernel in KERNELS:
+            for L in L_LIST:
+                for mu in MU_LIST:
+                    # Run prediction
                     R_pred, V_pred, _, _ = predict_rc_for_params(gal, L, mu, kernel)
                     
+                    # Score it
                     Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
                     m = np.isfinite(Vp)
                     if np.any(m):
-                        scores.append(mafe(Vp[m], V_obs[m]))
+                        score = mafe(Vp[m], V_obs[m])
+                        
+                        # Is this the new champion for this galaxy?
+                        if score < local_best["mafe"]:
+                            local_best = {
+                                "L": float(L), 
+                                "mu": float(mu), 
+                                "mafe": score, 
+                                "kernel": kernel
+                            }
 
-                if scores:
-                    med = float(np.median(scores))
-                    if med < best["mafe"]:
-                        best = {"L": float(L), "mu": float(mu), "mafe": med, "kernel": kernel}
-    
-    if best["L"] is None:
-        best = {"L": 6.0, "mu": 1.0, "mafe": float("nan"), "kernel": "plummer"}
-    print("Best (median MAFE):", best)
+        # Save the winner for this galaxy
+        if local_best["L"] is None:
+            print(f"  -> Could not fit {gal['name']}")
+            continue
+            
+        all_best_params[gal["name"]] = local_best
+        summary.append({"name": gal["name"], "mafe": local_best["mafe"], "L": local_best["L"], "mu": local_best["mu"]})
+        
+        print(f"  -> Best Fit: L={local_best['L']} kpc, mu={local_best['mu']} (Error: {local_best['mafe']:.4f})")
 
-    summary = []
-    for gal in gals:
-        R_pred, V_pred, V_b, V_k = predict_rc_for_params(gal, best["L"], best["mu"], best["kernel"])
-        obs = try_read_observed_rc(gal["name"])
+        # --- Generate Final Plot for THIS Galaxy using ITS Best Params ---
+        R_pred, V_pred, V_b, V_k = predict_rc_for_params(
+            gal, local_best["L"], local_best["mu"], local_best["kernel"]
+        )
 
-        out = f"figs/rc_{gal['name']}_{best['kernel']}.png"
+        out = f"figs/rc_{gal['name']}_best.png"
         plt.figure(figsize=(5, 4))
         
-        plt.plot(R_pred, V_pred, "-", color='orange', lw=2, label=f'H1 Total (L={best["L"]:.1f}, μ={best["mu"]:.2f})')
+        # Plot Total
+        plt.plot(R_pred, V_pred, "-", color='orange', lw=2, label=f'H1 Total')
         
-        if obs is not None:
-            R_obs, V_obs = obs
-            plt.plot(R_obs, V_obs, "o", color='white', mec='black', ms=4, mew=0.5, label="Observed RC")
-            Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
-            m = np.isfinite(Vp)
-            score = mafe(Vp[m], V_obs[m]) if np.any(m) else float("nan")
-        else:
-            score = float("nan")
+        # Plot Data
+        plt.plot(R_obs, V_obs, "o", color='white', mec='black', ms=4, mew=0.5, label="Observed")
 
-        plt.plot(R_pred, V_b, ':', color='cyan', lw=1.5, label='Baryons-only')
-        plt.plot(R_pred, V_k, '--', color='lime', lw=1.5, label='Kernel-only')
+        # Plot Components
+        plt.plot(R_pred, V_b, ':', color='cyan', lw=1.5, label='Baryons')
+        plt.plot(R_pred, V_k, '--', color='lime', lw=1.5, label=f'Kernel (L={local_best["L"]}, $\mu$={local_best["mu"]})')
         
         plt.xlabel("R [kpc]"); plt.ylabel("v [km/s]")
-        plt.title(f"{gal['name']} — {best['kernel']}")
-        
-        if obs is not None:
-            plt.xlim(0, np.nanmax(R_obs) * 1.1)
-            
+        plt.title(f"{gal['name']} — Best Fit")
+        plt.xlim(0, np.nanmax(R_obs) * 1.1)
         plt.legend(fontsize=8)
         plt.tight_layout(); plt.savefig(out, dpi=150); plt.close()
         
-        summary.append({"name": gal["name"], "mafe": score})
-        print("Saved", out)
-
+        # Export Data
         np.savetxt(
-            f"results/rc_decomp_{gal['name']}_{best['kernel']}.csv",
+            f"results/rc_decomp_{gal['name']}_best.csv",
             np.c_[R_pred, V_b, V_k, V_pred], 
-            delimiter=",",
-            header="R_kpc,V_baryon_kms,V_kernel_kms,V_total_kms",
-            comments=""
+            delimiter=",", header="R_kpc,V_baryon,V_kernel,V_total", comments=""
         )
-        
-        if obs is not None:
-            np.savetxt(f"results/rc_obs_{gal['name']}.csv", np.c_[R_obs, V_obs], delimiter=",", header="R_kpc,V_kms", comments="")
 
-    with open("results/sparc_lite_best.json", "w") as f:
-        json.dump(best, f, indent=2)
+    # --- Save Global Summary ---
+    with open("results/all_galaxy_params.json", "w") as f:
+        json.dump(all_best_params, f, indent=2)
 
     with open("results/sparc_lite_summary.csv", "w") as f:
-        f.write("name,mafe\n")
+        f.write("name,mafe,best_L,best_mu\n")
         for row in summary:
-            f.write(f"{row['name']},{row['mafe']}\n")
+            f.write(f"{row['name']},{row['mafe']},{row['L']},{row['mu']}\n")
 
 if __name__ == "__main__":
     main()
