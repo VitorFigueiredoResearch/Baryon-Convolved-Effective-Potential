@@ -1,14 +1,10 @@
-# run_sparc_lite.py — Harmonized Version with R2-0 Adaptive Box Implemented
+# run_sparc_lite.py — Harmonized Version (R2-0 + R2-3 Implemented)
 
 import os
 import csv
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-
-# These imports will be used in a later refinement (R2-1)
-# from dataclasses import dataclass
-# import yaml, argparse
 
 from src.baryons import two_component_disk
 from src.kernels import U_plummer, U_exp_core
@@ -24,11 +20,11 @@ MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 
 # ---- Helper Functions ----
 
-## R2-0 IMPLEMENTATION: This is the new "smart" box selector
 def choose_box_and_grid(R_obs_max, L):
     """
     Chooses an appropriate box size and grid resolution for a given galaxy
     and kernel length scale to avoid numerical artifacts.
+    (R2-0 Implementation)
     """
     # Rule: Box must be large enough for the galaxy and the kernel's "tail"
     target_half = max(1.5 * R_obs_max, 6.0 * L, 20.0)
@@ -115,32 +111,55 @@ def try_read_observed_rc(name):
 
 
 def predict_rc_for_params(gal, L, mu, kernel):
-    """Fully updated prediction function with auto-sizing grid."""
-    ## R2-0 IMPLEMENTATION: The adaptive grid is now called here
+    """
+    Fully updated to return total, baryon, and kernel velocity components.
+    (R2-0 Adaptive Box + R2-3 Component Decomposition)
+    """
+    # 1. Decide box/grid from the galaxy’s observed extent + kernel scale
     obs = try_read_observed_rc(gal["name"])
     R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
+    # 2. Baryon density on that auto-sized grid
     rho, dx = two_component_disk(
         n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
         Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
     )
 
+    # 3. Newtonian (Baryon) piece
     phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G)
     gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
 
+    # 4. Kernel (Ananta) piece
     U = get_U_grid(n, Lbox, L, kernel)
     phi_K_raw = conv_fft(rho, U, zero_mode=True)
     phi_K = mu * G * phi_K_raw
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
 
-    iz = n // 2
-    gmag = np.sqrt((gx_b[:, :, iz] + gx_K[:, :, iz])**2 +
-                   (gy_b[:, :, iz] + gy_K[:, :, iz])**2)
-    R_centers, g_mean = radial_profile_2d(gmag, dx, nbins=RADIAL_BINS)
-    vpred = np.sqrt(np.maximum(R_centers * g_mean, 0.0))
-    return R_centers, vpred
+    # 5. --- R2-3 IMPLEMENTATION: Calculate separate force components ---
+    iz = n // 2  # Index for the galactic mid-plane
+
+    # Total force (vector sum)
+    gmag_total = np.sqrt((gx_b[:, :, iz] + gx_K[:, :, iz])**2 +
+                         (gy_b[:, :, iz] + gy_K[:, :, iz])**2)
+    # Baryon-only force
+    gmag_baryons = np.sqrt(gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2)
+    # Kernel-only force
+    gmag_kernel = np.sqrt(gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2)
+
+    # 6. Get radial profiles for each component
+    R_centers, g_mean_total = radial_profile_2d(gmag_total, dx, nbins=RADIAL_BINS)
+    _, g_mean_baryons = radial_profile_2d(gmag_baryons, dx, nbins=RADIAL_BINS)
+    _, g_mean_kernel = radial_profile_2d(gmag_kernel, dx, nbins=RADIAL_BINS)
+    
+    # 7. Calculate final velocity curves for each component
+    v_total = np.sqrt(np.maximum(R_centers * g_mean_total, 0.0))
+    v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
+    v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
+    
+    # 8. Return all three curves
+    return R_centers, v_total, v_baryons, v_kernel
 
 
 def mafe(pred_at_R, obs_V):
@@ -148,8 +167,6 @@ def mafe(pred_at_R, obs_V):
 
 
 def main():
-    # ... (The main function remains largely the same, but the calls inside
-    #      will now use the updated predict_rc_for_params function)
     os.makedirs("figs", exist_ok=True)
     os.makedirs("results", exist_ok=True)
 
@@ -164,6 +181,8 @@ def main():
 
     print("Starting grid search with adaptive box...")
     best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
+    
+    # --- Grid Search Loop ---
     for kernel in KERNELS:
         for L in L_LIST:
             for mu in MU_LIST:
@@ -173,8 +192,8 @@ def main():
                     if obs is None: continue
                     
                     R_obs, V_obs = obs
-                    # This call now uses the fully updated, adaptive function
-                    R_pred, V_pred = predict_rc_for_params(gal, L, mu, kernel)
+                    # Unpack the 4 return values (we only need R_pred and V_pred for scoring)
+                    R_pred, V_pred, _, _ = predict_rc_for_params(gal, L, mu, kernel)
                     
                     Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
                     m = np.isfinite(Vp)
@@ -190,33 +209,56 @@ def main():
         best = {"L": 6.0, "mu": 1.0, "mafe": float("nan"), "kernel": "plummer"}
     print("Best (median MAFE):", best)
 
+    # --- Plotting & Export Loop ---
     summary = []
     for gal in gals:
-        R_pred, V_pred = predict_rc_for_params(gal, best["L"], best["mu"], best["kernel"])
+        # Call the function and unpack ALL components for plotting
+        R_pred, V_pred, V_b, V_k = predict_rc_for_params(gal, best["L"], best["mu"], best["kernel"])
         obs = try_read_observed_rc(gal["name"])
 
         out = f"figs/rc_{gal['name']}_{best['kernel']}.png"
         plt.figure(figsize=(5, 4))
-        plt.plot(R_pred, V_pred, "-", lw=2, label=f'H1 pred (L={best["L"]:.1f} kpc, μ={best["mu"]:.2f})')
+        
+        # Plot Total Prediction
+        plt.plot(R_pred, V_pred, "-", color='orange', lw=2, label=f'H1 Total (L={best["L"]:.1f}, μ={best["mu"]:.2f})')
+        
+        # Plot Observed Data
         if obs is not None:
             R_obs, V_obs = obs
-            plt.plot(R_obs, V_obs, "o", ms=3, label="observed RC")
+            plt.plot(R_obs, V_obs, "o", color='white', mec='black', ms=4, mew=0.5, label="Observed RC")
+            
+            # Calculate score for summary
             Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
             m = np.isfinite(Vp)
             score = mafe(Vp[m], V_obs[m]) if np.any(m) else float("nan")
         else:
             score = float("nan")
+
+        # Plot Diagnostic Overlays (R2-3)
+        plt.plot(R_pred, V_b, ':', color='cyan', lw=1.5, label='Baryons-only')
+        plt.plot(R_pred, V_k, '--', color='lime', lw=1.5, label='Kernel-only')
         
         plt.xlabel("R [kpc]"); plt.ylabel("v [km/s]")
         plt.title(f"{gal['name']} — {best['kernel']}")
-        plt.legend()
+        
         if obs is not None: # Auto-adjust x-axis to the data range
             plt.xlim(0, np.nanmax(R_obs) * 1.1)
+            
+        plt.legend(fontsize=8)
         plt.tight_layout(); plt.savefig(out, dpi=150); plt.close()
+        
         summary.append({"name": gal["name"], "mafe": score})
         print("Saved", out)
 
-        np.savetxt(f"results/rc_pred_{gal['name']}_{best['kernel']}.csv", np.c_[R_pred, V_pred], delimiter=",", header="R_kpc,Vpred_kms", comments="")
+        # Export Decomposed Data (R2-3)
+        np.savetxt(
+            f"results/rc_decomp_{gal['name']}_{best['kernel']}.csv",
+            np.c_[R_pred, V_b, V_k, V_pred], 
+            delimiter=",",
+            header="R_kpc,V_baryon_kms,V_kernel_kms,V_total_kms",
+            comments=""
+        )
+        
         if obs is not None:
             np.savetxt(f"results/rc_obs_{gal['name']}.csv", np.c_[R_obs, V_obs], delimiter=",", header="R_kpc,V_kms", comments="")
 
