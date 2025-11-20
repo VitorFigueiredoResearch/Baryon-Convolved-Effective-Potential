@@ -1,4 +1,4 @@
-# run_sparc_lite.py — Harmonized Version (R2-5 Resolution Boost + Gap Filler)
+# run_sparc_lite.py — Harmonized Version (R2-5 + Safe Math Patch)
 
 import os
 import csv
@@ -6,7 +6,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src.baryons import two_component_disk
+# Note: We removed the 'src.baryons' import to use a local, safe version
 from src.kernels import U_plummer, U_exp_core
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
@@ -20,21 +20,47 @@ MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 
 # ---- Helper Functions ----
 
+def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_gas):
+    """
+    Local, crash-proof version of the galaxy density generator.
+    Handles large coordinates safely by clamping cosh().
+    """
+    axis = np.linspace(-Lbox, Lbox, n, endpoint=False)
+    x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
+    R = np.sqrt(x**2 + y**2)
+    dx = axis[1] - axis[0]
+    
+    def get_rho(M, Rd, hz):
+        if M <= 0 or Rd <= 0: return np.zeros_like(R)
+        hz = max(hz, 1e-3) # Safety floor
+        
+        # Radial: standard exponential disk
+        radial = np.exp(-R / Rd)
+        
+        # Vertical: sech^2(z/hz) with SAFETY CLAMP
+        # If z is too large, cosh explodes. But density is ~0 there anyway.
+        z_scaled = np.abs(z / hz)
+        vertical = np.zeros_like(z)
+        # Only calculate where z is reasonable (< 20 scale heights)
+        mask = z_scaled < 20.0 
+        vertical[mask] = (1.0 / np.cosh(z_scaled[mask]))**2
+        
+        # Normalization: Total Mass = M
+        # rho0 * (4 * pi * Rd^2 * hz) = M
+        rho0 = M / (4 * np.pi * Rd**2 * hz)
+        return rho0 * radial * vertical
+
+    rho_star = get_rho(Mstar, Rd_star, hz_star)
+    rho_gas = get_rho(Mgas, Rd_gas, hz_gas)
+    
+    return rho_star + rho_gas, dx
+
 def choose_box_and_grid(R_obs_max, L):
-    """
-    Chooses an appropriate box size and grid resolution.
-    """
-    # Rule: Box must be large enough for the galaxy and the kernel's "tail"
     target_half = max(1.5 * R_obs_max, 6.0 * L, 20.0)
     Lbox = float(target_half)
-    
-    # Rule: Keep pixel size (dx) reasonable.
-    # R2-5 UPDATE: Increased cap to 512 to prevent aliasing on small galaxies
+    # Cap grid at 512 for resolution
     n = int(np.clip(round(2 * Lbox / 0.5), 64, 512))
-    
-    # Rule: Grid size must be even
-    if n % 2 == 1:
-        n += 1
+    if n % 2 == 1: n += 1
     return Lbox, n
 
 def build_U_grid(n, Lbox, L, kernel):
@@ -58,28 +84,23 @@ def get_U_grid(n, Lbox, L, kernel):
     return U_CACHE[key]
 
 def fill_nans(arr):
-    """Helper to interpolate over nan values in a 1D array."""
+    """Interpolate small gaps in the profile."""
     mask = np.isnan(arr)
     if not np.any(mask): return arr
     if np.all(mask): return arr
-    # Indices of valid data
     idx = np.where(~mask)[0]
-    # Interpolate
     arr[mask] = np.interp(np.where(mask)[0], idx, arr[idx])
     return arr
 
 def radial_profile_2d(arr2d, dx, max_r, nbins=30):
-    """
-    Calculates radial profile with Gap Filling (R2-5).
-    """
+    """Calculate profile only within the galaxy radius (Zoomed)."""
     n = arr2d.shape[0]
     cx = cy = n // 2
     yy, xx = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
     R = np.sqrt((xx - cx + 0.5) ** 2 + (yy - cy + 0.5) ** 2) * dx
     
-    # Bin edges up to max_r
+    # Bin only up to the galaxy edge
     rb = np.linspace(0, max_r * 1.1, nbins + 1)
-    
     centers = 0.5 * (rb[1:] + rb[:-1])
     prof = np.empty(nbins)
     prof[:] = np.nan
@@ -89,10 +110,7 @@ def radial_profile_2d(arr2d, dx, max_r, nbins=30):
         if np.any(m):
             prof[i] = float(np.mean(arr2d[m]))
     
-    # R2-5 FIX: Fill any empty bins (nans) caused by resolution mismatch
-    prof = fill_nans(prof)
-    
-    return centers, prof
+    return centers, fill_nans(prof)
 
 def read_galaxy_table(path_csv):
     out = []
@@ -116,8 +134,7 @@ def read_galaxy_table(path_csv):
 
 def try_read_observed_rc(name):
     path = os.path.join("data", "sparc", f"{name}_rc.csv")
-    if not os.path.exists(path):
-        return None
+    if not os.path.exists(path): return None
     R, V = [], []
     with open(path, newline="", encoding="utf-8") as f:
         rd = csv.DictReader(f)
@@ -127,15 +144,14 @@ def try_read_observed_rc(name):
     return np.array(R), np.array(V)
 
 def predict_rc_for_params(gal, L, mu, kernel):
-    """Fully updated prediction pipeline."""
     obs = try_read_observed_rc(gal["name"])
     R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
     
     # 1. Build Box
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
-    # 2. Baryons
-    rho, dx = two_component_disk(
+    # 2. Baryons (Using LOCAL SAFE function)
+    rho, dx = safe_two_component_disk(
         n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
         Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
@@ -158,7 +174,7 @@ def predict_rc_for_params(gal, L, mu, kernel):
     gmag_baryons = np.sqrt(gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2)
     gmag_kernel = np.sqrt(gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2)
 
-    # 6. Profiles (Zoomed + Filled)
+    # 6. Profiles
     R_centers, g_mean_total = radial_profile_2d(gmag_total, dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_baryons = radial_profile_2d(gmag_baryons, dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_kernel = radial_profile_2d(gmag_kernel, dx, R_obs_max, nbins=RADIAL_BINS)
@@ -186,7 +202,7 @@ def main():
         print("galaxies.csv is empty.")
         return
 
-    print("Starting grid search with resolution boost...")
+    print("Starting grid search with SAFE math...")
     best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
     
     for kernel in KERNELS:
