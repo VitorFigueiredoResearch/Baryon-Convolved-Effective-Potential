@@ -125,10 +125,10 @@ def read_galaxy_table(path_csv):
                 "name":    row["name"],
                 "Rd_star": num(row["Rd_star_kpc"]),
                 "Mstar":   num(row["Mstar_Msun"]),
-                "hz_star": num(row["hz_star_kpc"]),
+                "hz_star": num(row.get("hz_star_kpc", "0.3")), # Default 0.3 if missing
                 "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
                 "Mgas":    num(row.get("Mgas_Msun", "0")),
-                "hz_gas":  num(row.get("hz_gas_kpc", "0.3")),
+                "hz_gas":  num(row.get("hz_gas_kpc", "0.1")), # FIX: Thinner gas disk (0.1)
             }
             if g["Rd_gas"] <= 0: g["Rd_gas"] = 1.8 * g["Rd_star"]
             out.append(g)
