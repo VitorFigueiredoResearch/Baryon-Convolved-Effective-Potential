@@ -1,4 +1,4 @@
-# run_sparc_lite.py — Harmonized Version (R2-0 + R2-3 Implemented)
+# run_sparc_lite.py — Harmonized Version (R2-0 + R2-3 + Indentation Fix)
 
 import os
 import csv
@@ -85,7 +85,8 @@ def radial_profile_2d(arr2d, dx, max_r, nbins=30):
     return centers, prof
 
 def read_galaxy_table(path_csv):
-out = []
+    # INDENTATION FIXED HERE:
+    out = []
     with open(path_csv, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             def num(x):
