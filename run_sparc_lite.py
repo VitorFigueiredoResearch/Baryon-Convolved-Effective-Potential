@@ -135,16 +135,59 @@ def read_galaxy_table(path_csv):
     return out
 
 def try_read_observed_rc(name):
-    path = os.path.join("data", "sparc", f"{name}_rc.csv")
-    if not os.path.exists(path): return None
-    R, V = [], []
-    with open(path, newline="", encoding="utf-8") as f:
-        rd = csv.DictReader(f)
-        for row in rd:
-            R.append(float(row["R_kpc"]))
-            V.append(float(row["V_kms"]))
-    return np.array(R), np.array(V)
+    # 1. Try to find the official SPARC file (.dat)
+    # It's usually named "Name_rotmod.dat"
+    path_dat = os.path.join("data", "sparc", f"{name}_rotmod.dat")
+    
+    # 2. Fallback: Try the old CSV format if dat is missing
+    path_csv = os.path.join("data", "sparc", f"{name}_rc.csv")
+    
+    file_to_read = None
+    is_dat = False
+    
+    if os.path.exists(path_dat):
+        file_to_read = path_dat
+        is_dat = True
+    elif os.path.exists(path_csv):
+        file_to_read = path_csv
+        is_dat = False
+    else:
+        return None # No file found
 
+    R, V = [], []
+    
+    try:
+        with open(file_to_read, "r") as f:
+            # Skip header lines if it's a .dat file (lines starting with # or empty)
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or line.startswith("Rad"): continue
+                
+                # Split by comma (CSV) or whitespace (DAT)
+                if is_dat:
+                    parts = line.split() # Splits by any space/tab
+                    # SPARC .dat format: Col 0 = Rad, Col 1 = Vobs
+                    if len(parts) >= 2:
+                        try:
+                            r_val = float(parts[0])
+                            v_val = float(parts[1])
+                            R.append(r_val)
+                            V.append(v_val)
+                        except ValueError: continue
+                else:
+                    # Old CSV format (R_kpc, V_kms)
+                    parts = line.split(',')
+                    if len(parts) >= 2:
+                        try:
+                            R.append(float(parts[0]))
+                            V.append(float(parts[1]))
+                        except ValueError: continue
+                        
+        return np.array(R), np.array(V)
+        
+    except Exception as e:
+        print(f"Error reading {file_to_read}: {e}")
+        return None
 def predict_rc_for_params(gal, L, mu, kernel):
     obs = try_read_observed_rc(gal["name"])
     R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
