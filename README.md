@@ -42,3 +42,25 @@ latexmk -pdf main.tex
 - **RAR:** scatter ≤ 0.13 dex with no trend (α=0.01)  
 - **Lensing (prediction):** ≥10% residual‑variance reduction at 2σ vs baseline (baryons‑only + NFW with Dutton–Macciò)
 
+project/
+│
+├── data/
+│   ├── sparc_lite/
+│   │   ├── sparc_lite_best.json
+│   │   ├── sparc_lite_summary.csv
+│   │   ├── RC_obs/
+│   │   │   ├── rc_obs_DDO_154.csv
+│   │   │   └── rc_obs_NGC_2403.csv
+│   │   └── RC_pred_plummer/
+│   │       ├── rc_pred_DDO_154_plummer.csv
+│   │       └── rc_pred_NGC_2403_plummer.csv
+│   │
+│   └── galaxies.csv
+│
+├── src/
+│   ├── load_sparc.py
+│   ├── plummer_model.py
+│   ├── plot_rotation_curves.py
+│   └── utils.py
+│
+└── README.md
