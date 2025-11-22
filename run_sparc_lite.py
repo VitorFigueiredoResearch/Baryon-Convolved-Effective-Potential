@@ -1,9 +1,9 @@
-# run_sparc_lite.py — R3-0 "The Ananta Surveyor" (Auto-Download + Serial Processing + Backup List)
+# run_sparc_lite.py — R3-3 "The Heavy Lifter" (Hybrid Kernel + Massive Grid)
 
 import os
 import csv
 import json
-import gc  # Garbage Collector (The Memory Cleaner)
+import gc
 import urllib.request
 import zipfile
 import numpy as np
@@ -14,14 +14,17 @@ from src.kernels import U_plummer, U_exp_core, U_ananta_hybrid
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
 
-# ---- KNOBS ----
+# ---- KNOBS (THE HEAVY LIFTER SETTINGS) ----
 RADIAL_BINS = 30
-KERNELS = ("ananta-hybrid",)
+
+# CRITICAL: We force the use of the Ananta Hybrid Kernel
+KERNELS = ("ananta-hybrid",) 
+
+# CRITICAL: The "Heavy" Grid to unlock the Scaling Law
 L_LIST  = [10.0, 30.0, 50.0, 80.0, 120.0, 200.0] 
 MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
 # ---- THE NIGHTMARE FLEET (Backup Data) ----
-# If galaxies.csv is missing, we run these galaxies automatically.
 NIGHTMARE_FLEET = [
     {"name": "IC2574",   "Rd_star": 2.19, "Mstar": 5.08e8,  "hz_star": 0.32, "Rd_gas": 5.0,  "Mgas": 1.96e9, "hz_gas": 0.15},
     {"name": "NGC3198",  "Rd_star": 3.19, "Mstar": 1.91e10, "hz_star": 0.42, "Rd_gas": 8.0,  "Mgas": 1.08e10,"hz_gas": 0.15},
@@ -38,38 +41,25 @@ NIGHTMARE_FLEET = [
 # ---- AUTOMATION TOOLS ----
 
 def download_and_extract_data():
-    """
-    AUTONOMOUS DATA FETCHING.
-    Checks if data exists. If not, downloads SPARC data directly.
-    """
     data_dir = "data/sparc"
     os.makedirs(data_dir, exist_ok=True)
-    
-    # Check if we already have data files
+    url = "http://astroweb.cwru.edu/SPARC/Rotmod_LTG.zip"
+    zip_path = os.path.join("data", "Rotmod_LTG.zip")
     existing_files = [f for f in os.listdir(data_dir) if f.endswith("_rotmod.dat")]
     
     if len(existing_files) < 5:
         print(">>> AUTOMATION: SPARC data missing. Initiating Download Sequence...")
-        url = "http://astroweb.cwru.edu/SPARC/Rotmod_LTG.zip"
-        zip_path = os.path.join("data", "Rotmod_LTG.zip")
-        
         try:
-            print(f"Downloading from {url}...")
             urllib.request.urlretrieve(url, zip_path)
-            print("Download complete. Extracting...")
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(data_dir)
-            print("Extraction complete. The fuel is loaded.")
+            print("Extraction complete.")
         except Exception as e:
             print(f"!!! DOWNLOAD ERROR: {e}")
-            print("Proceeding with whatever local files exist...")
-    else:
-        print(">>> AUTOMATION: Data detected. Skipping download.")
 
 # ---- PHYSICS ENGINE (Safe & Light) ----
 
 def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_gas):
-    # Force 32-bit float to save RAM
     axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     R = np.sqrt(x**2 + y**2)
@@ -93,7 +83,6 @@ def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_g
 def choose_box_and_grid(R_obs_max, L):
     target_half = max(1.5 * R_obs_max, 4.0 * L, 20.0)
     Lbox = float(target_half)
-    # 320 is the "Goldilocks" resolution: High detail, fits in GitHub RAM
     n = int(np.clip(round(2 * Lbox / 0.5), 64, 320))
     if n % 2 == 1: n += 1
     return Lbox, n
@@ -102,16 +91,16 @@ def build_U_grid(n, Lbox, L, kernel):
     axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     r = np.sqrt(x * x + y * y + z * z)
-
+    
+    # Explicit Kernel Selection
     if kernel == "plummer": U = U_plummer(r, L)
     elif kernel == "exp-core": U = U_exp_core(r, L)
-    elif kernel == "ananta-hybrid": U = U_ananta_hybrid(r, L) # <--- NEW LINE
+    elif kernel == "ananta-hybrid": U = U_ananta_hybrid(r, L)
     else: raise ValueError("kernel error")
-
+    
     U.flat[0] = 0.0
     return U.astype(np.float32)
 
-# Global Cache (We clear this often)
 U_CACHE = {}
 def get_U_grid(n, Lbox, L, kernel):
     key = (kernel, float(L), int(n), round(float(Lbox), 2))
@@ -144,7 +133,6 @@ def radial_profile_2d(arr2d, dx, max_r, nbins=30):
 # ---- DATA IO ----
 
 def read_galaxy_table(path_csv):
-    # Tweak: Try to read CSV. If fails or empty, return Nightmare Fleet.
     out = []
     if os.path.exists(path_csv):
         try:
@@ -157,10 +145,10 @@ def read_galaxy_table(path_csv):
                         "name":    row["name"],
                         "Rd_star": num(row["Rd_star_kpc"]),
                         "Mstar":   num(row["Mstar_Msun"]),
-                        "hz_star": num(row["hz_star_kpc"]),
+                        "hz_star": num(row.get("hz_star_kpc", "0.3")),
                         "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
                         "Mgas":    num(row.get("Mgas_Msun", "0")),
-                        "hz_gas":  num(row.get("hz_gas_kpc", "0.15")), 
+                        "hz_gas":  num(row.get("hz_gas_kpc", "0.15")), # Thin Disk Fixed
                     }
                     if g["Rd_gas"] <= 0: g["Rd_gas"] = 1.8 * g["Rd_star"]
                     out.append(g)
@@ -170,17 +158,12 @@ def read_galaxy_table(path_csv):
     if not out:
         print(">>> Using Hardcoded NIGHTMARE FLEET (Backup Mode)")
         return NIGHTMARE_FLEET
-    
     return out
 
 def try_read_observed_rc(name):
-    # Universal Reader: Checks .dat first, then .csv
-    # Handles nested folders if unzip creates subdirs
     base_dirs = ["data/sparc", "data/sparc/Rotmod_LTG"]
-    
     file_to_read = None
     is_dat = False
-    
     for d in base_dirs:
         path_dat = os.path.join(d, f"{name}_rotmod.dat")
         path_csv = os.path.join(d, f"{name}_rc.csv")
@@ -190,7 +173,6 @@ def try_read_observed_rc(name):
         elif os.path.exists(path_csv):
             file_to_read, is_dat = path_csv, False
             break
-    
     if file_to_read is None: return None
 
     R, V = [], []
@@ -214,54 +196,45 @@ def try_read_observed_rc(name):
                             V.append(float(parts[1]))
                         except ValueError: continue
         return np.array(R, dtype=np.float32), np.array(V, dtype=np.float32)
-    except Exception as e:
-        print(f"Error reading {file_to_read}: {e}")
-        return None
+    except Exception: return None
 
 # ---- CORE PIPELINE ----
 
 def predict_rc_for_params(gal, L, mu, kernel):
     obs = try_read_observed_rc(gal["name"])
     R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
-    
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
-    # 1. Baryons
     rho, dx = safe_two_component_disk(
         n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
         Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
     )
 
-    # 2. Newtonian Forces (Baryons)
     G32 = np.float32(G)
     phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G32)
     gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
 
-    # 3. Kernel Forces (Ananta)
     U = get_U_grid(n, Lbox, L, kernel)
     phi_K_raw = conv_fft(rho, U, zero_mode=True)
     phi_K = (mu * G32 * phi_K_raw).astype(np.float32)
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
 
-    # 4. Radial Profiles (The "Gauge" Check)
+    # GAUGE FIX: Calculate Velocities CORRECTLY
     iz = n // 2 
-    
-    # Force Vectors
     g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + (gy_b[:, :, iz] + gy_K[:, :, iz])**2
     g_baryon_sq = gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2
     g_kernel_sq = gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2
 
-    # Convert to Radial Averages
     R_centers, g_mean_total = radial_profile_2d(np.sqrt(g_total_sq), dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_baryons = radial_profile_2d(np.sqrt(g_baryon_sq), dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_kernel = radial_profile_2d(np.sqrt(g_kernel_sq), dx, R_obs_max, nbins=RADIAL_BINS)
     
-    # 5. Velocities (V = sqrt(R * g))
     v_total = np.sqrt(np.maximum(R_centers * g_mean_total, 0.0))
     v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
     v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
     
+    del rho, phi_b, phi_K_raw, phi_K, gx_b, gy_b, gx_K, gy_K, g_total_sq
     return R_centers, v_total, v_baryons, v_kernel
 
 def mafe(pred_at_R, obs_V):
@@ -272,31 +245,25 @@ def mafe(pred_at_R, obs_V):
 def main():
     os.makedirs("figs", exist_ok=True)
     os.makedirs("results", exist_ok=True)
-
-    # 1. AUTOMATION: Download data if missing
     download_and_extract_data()
 
     table_path = os.path.join("data", "galaxies.csv")
     gals = read_galaxy_table(table_path)
     
     print(f"Initializing Ananta Surveyor for {len(gals)} galaxies...")
-    print("Mode: Serial Processing (Load -> Compute -> Erase)")
+    print("Mode: R3-3 HEAVY LIFTER (Hybrid Kernel + Extended Grid)")
     
     all_best_params = {}
     summary = []
 
-    # --- THE SURVEYOR LOOP ---
     for i, gal in enumerate(gals):
         print(f"\n[{i+1}/{len(gals)}] Surveying {gal['name']}...")
-        
         obs = try_read_observed_rc(gal["name"])
         if obs is None: 
-            print(f"  -> MISSING DATA: Could not find _rotmod.dat or _rc.csv for {gal['name']}")
+            print(f"  -> MISSING DATA for {gal['name']}")
             continue
         
         R_obs, V_obs = obs
-        
-        # Local Grid Search
         local_best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
         
         for kernel in KERNELS:
@@ -310,8 +277,6 @@ def main():
                         score = mafe(Vp[m], V_obs[m])
                         if score < local_best["mafe"]:
                             local_best = {"L": float(L), "mu": float(mu), "mafe": score, "kernel": kernel}
-            
-                    # Force cleanup after every iteration
                     gc.collect()
 
         if local_best["L"] is None:
@@ -322,7 +287,6 @@ def main():
         summary.append({"name": gal["name"], "mafe": local_best["mafe"], "L": local_best["L"], "mu": local_best["mu"]})
         print(f"  -> Best Fit: L={local_best['L']} kpc, mu={local_best['mu']} (Error: {local_best['mafe']:.4f})")
 
-        # Generate Final High-Res Plot
         R_pred, V_pred, V_b, V_k = predict_rc_for_params(
             gal, local_best["L"], local_best["mu"], local_best["kernel"]
         )
@@ -337,8 +301,7 @@ def main():
         
         plt.xlabel("R [kpc]"); plt.ylabel("v [km/s]")
         plt.title(f"{gal['name']} — Best Fit")
-        if obs is not None:
-            plt.xlim(0, np.nanmax(R_obs) * 1.1)
+        if obs is not None: plt.xlim(0, np.nanmax(R_obs) * 1.1)
         plt.legend(fontsize=8)
         plt.tight_layout(); plt.savefig(out, dpi=150); plt.close()
         plt.clf() 
@@ -349,19 +312,13 @@ def main():
             delimiter=",", header="R_kpc,V_baryon,V_kernel,V_total", comments=""
         )
         
-        # --- CRITICAL STEP: FLUSH MEMORY ---
         del R_pred, V_pred, V_b, V_k
         gc.collect() 
-        print(f"  -> Memory Flushed. Ready for next galaxy.")
 
-    # Save Summaries
-    with open("results/all_galaxy_params.json", "w") as f:
-        json.dump(all_best_params, f, indent=2)
-
+    with open("results/all_galaxy_params.json", "w") as f: json.dump(all_best_params, f, indent=2)
     with open("results/sparc_lite_summary.csv", "w") as f:
         f.write("name,mafe,best_L,best_mu\n")
-        for row in summary:
-            f.write(f"{row['name']},{row['mafe']},{row['L']},{row['mu']}\n")
+        for row in summary: f.write(f"{row['name']},{row['mafe']},{row['L']},{row['mu']}\n")
 
 if __name__ == "__main__":
     main()
