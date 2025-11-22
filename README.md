@@ -41,3 +41,14 @@ latexmk -pdf main.tex
 - **BTFR:** slope 3.8–4.2 with σ_int ≤ 0.12 dex  
 - **RAR:** scatter ≤ 0.13 dex with no trend (α=0.01)  
 - **Lensing (prediction):** ≥10% residual‑variance reduction at 2σ vs baseline (baryons‑only + NFW with Dutton–Macciò)
+## Data Acknowledgements & Credits
+
+This project utilizes data from the **SPARC (Spitzer Photometry and Accurate Rotation Curves)** database. We gratefully acknowledge the work of the SPARC team in making this high-quality galactic kinematic data available for scientific research.
+
+**Primary Citation:**
+* Lelli, F., McGaugh, S. S., & Schombert, J. M. (2016). "SPARC: Mass Models for 175 Disk Galaxies with Spitzer Photometry at 3.6 μm." *The Astronomical Journal*, 152(6), 157. [doi:10.3847/0004-6256/152/6/157](https://doi.org/10.3847/0004-6256/152/6/157)
+
+**Data Source:**
+* [http://astroweb.cwru.edu/SPARC/](http://astroweb.cwru.edu/SPARC/)
+
+The rotation curve data (`_rotmod.dat`) and galaxy parameters used in this analysis are derived directly from the public SPARC repository.
