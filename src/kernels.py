@@ -1,5 +1,3 @@
-from src.kernels import U_plummer, U_exp_core, U_ananta_hybrid
-
 import numpy as np
 
 def U_plummer(r, L):
