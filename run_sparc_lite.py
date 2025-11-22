@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Use safe local physics
-from src.kernels import U_plummer, U_exp_core
+from src.kernels import U_plummer, U_exp_core, U_ananta_hybrid
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
 
@@ -105,9 +105,7 @@ def build_U_grid(n, Lbox, L, kernel):
 
     if kernel == "plummer": U = U_plummer(r, L)
     elif kernel == "exp-core": U = U_exp_core(r, L)
-    elif kernel == "ananta-hybrid": 
-        from src.kernels import U_ananta_hybrid # Import locally if needed or at top
-        U = U_ananta_hybrid(r, L)
+    elif kernel == "ananta-hybrid": U = U_ananta_hybrid(r, L) # <--- NEW LINE
     else: raise ValueError("kernel error")
 
     U.flat[0] = 0.0
