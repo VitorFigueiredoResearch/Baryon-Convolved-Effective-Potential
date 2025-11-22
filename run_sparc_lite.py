@@ -1,91 +1,122 @@
-# run_sparc_lite.py — Harmonized Version (R2-6 Memory Safe + Gap Filler)
+# run_sparc_lite.py — R3-0 "The Ananta Surveyor" (Auto-Download + Serial Processing + Backup List)
 
 import os
 import csv
 import json
+import gc  # Garbage Collector (The Memory Cleaner)
+import urllib.request
+import zipfile
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Note: We use local safe versions of physics functions to prevent crashes
+# Use safe local physics
 from src.kernels import U_plummer, U_exp_core
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
 
-# ---- knobs ----
+# ---- KNOBS ----
 RADIAL_BINS = 30
 KERNELS = ("plummer", "exp-core")
-# Coarse grid (can be widened as needed)
-L_LIST  = [2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0]
-MU_LIST = [0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
+L_LIST  = [2.0, 6.0, 10.0, 15.0, 20.0, 30.0] 
+MU_LIST = [1.0, 2.0, 3.0, 5.0, 8.0, 12.0]
 
-# ---- Helper Functions ----
+# ---- THE NIGHTMARE FLEET (Backup Data) ----
+# If galaxies.csv is missing, we run these galaxies automatically.
+NIGHTMARE_FLEET = [
+    {"name": "IC2574",   "Rd_star": 2.19, "Mstar": 5.08e8,  "hz_star": 0.32, "Rd_gas": 5.0,  "Mgas": 1.96e9, "hz_gas": 0.15},
+    {"name": "NGC3198",  "Rd_star": 3.19, "Mstar": 1.91e10, "hz_star": 0.42, "Rd_gas": 8.0,  "Mgas": 1.08e10,"hz_gas": 0.15},
+    {"name": "DDO161",   "Rd_star": 1.93, "Mstar": 2.23e8,  "hz_star": 0.29, "Rd_gas": 3.5,  "Mgas": 1.38e9, "hz_gas": 0.15},
+    {"name": "NGC5055",  "Rd_star": 3.08, "Mstar": 7.65e10, "hz_star": 0.41, "Rd_gas": 8.5,  "Mgas": 1.30e10,"hz_gas": 0.15},
+    {"name": "NGC2841",  "Rd_star": 4.22, "Mstar": 9.40e10, "hz_star": 0.50, "Rd_gas": 10.0, "Mgas": 1.80e10,"hz_gas": 0.15},
+    {"name": "NGC7331",  "Rd_star": 4.48, "Mstar": 1.25e11, "hz_star": 0.53, "Rd_gas": 11.0, "Mgas": 1.50e10,"hz_gas": 0.15},
+    {"name": "UGC00128", "Rd_star": 6.90, "Mstar": 2.63e9,  "hz_star": 0.69, "Rd_gas": 10.0, "Mgas": 7.20e9, "hz_gas": 0.15},
+    {"name": "F568-3",   "Rd_star": 3.02, "Mstar": 1.25e9,  "hz_star": 0.40, "Rd_gas": 6.0,  "Mgas": 4.57e9, "hz_gas": 0.15},
+    {"name": "DDO154",   "Rd_star": 0.65, "Mstar": 2.48e7,  "hz_star": 0.15, "Rd_gas": 2.5,  "Mgas": 3.6e8,  "hz_gas": 0.15},
+    {"name": "NGC2403",  "Rd_star": 2.16, "Mstar": 7.55e9,  "hz_star": 0.40, "Rd_gas": 6.0,  "Mgas": 3.2e9,  "hz_gas": 0.15},
+]
+
+# ---- AUTOMATION TOOLS ----
+
+def download_and_extract_data():
+    """
+    AUTONOMOUS DATA FETCHING.
+    Checks if data exists. If not, downloads SPARC data directly.
+    """
+    data_dir = "data/sparc"
+    os.makedirs(data_dir, exist_ok=True)
+    
+    # Check if we already have data files
+    existing_files = [f for f in os.listdir(data_dir) if f.endswith("_rotmod.dat")]
+    
+    if len(existing_files) < 5:
+        print(">>> AUTOMATION: SPARC data missing. Initiating Download Sequence...")
+        url = "http://astroweb.cwru.edu/SPARC/Rotmod_LTG.zip"
+        zip_path = os.path.join("data", "Rotmod_LTG.zip")
+        
+        try:
+            print(f"Downloading from {url}...")
+            urllib.request.urlretrieve(url, zip_path)
+            print("Download complete. Extracting...")
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(data_dir)
+            print("Extraction complete. The fuel is loaded.")
+        except Exception as e:
+            print(f"!!! DOWNLOAD ERROR: {e}")
+            print("Proceeding with whatever local files exist...")
+    else:
+        print(">>> AUTOMATION: Data detected. Skipping download.")
+
+# ---- PHYSICS ENGINE (Safe & Light) ----
 
 def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_gas):
-    """
-    Local, crash-proof version of the galaxy density generator.
-    Handles large coordinates safely by clamping cosh().
-    """
-    axis = np.linspace(-Lbox, Lbox, n, endpoint=False)
+    # Force 32-bit float to save RAM
+    axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     R = np.sqrt(x**2 + y**2)
     dx = axis[1] - axis[0]
     
     def get_rho(M, Rd, hz):
         if M <= 0 or Rd <= 0: return np.zeros_like(R)
-        hz = max(hz, 1e-3) # Safety floor
-        
-        # Radial: standard exponential disk
+        hz = max(hz, 1e-3)
         radial = np.exp(-R / Rd)
-        
-        # Vertical: sech^2(z/hz) with SAFETY CLAMP
         z_scaled = np.abs(z / hz)
         vertical = np.zeros_like(z)
-        # Only calculate where z is reasonable (< 20 scale heights) to avoid overflow
         mask = z_scaled < 20.0 
         vertical[mask] = (1.0 / np.cosh(z_scaled[mask]))**2
-        
-        # Normalization
         rho0 = M / (4 * np.pi * Rd**2 * hz)
-        return rho0 * radial * vertical
+        return (rho0 * radial * vertical).astype(np.float32)
 
     rho_star = get_rho(Mstar, Rd_star, hz_star)
     rho_gas = get_rho(Mgas, Rd_gas, hz_gas)
-    
     return rho_star + rho_gas, dx
 
 def choose_box_and_grid(R_obs_max, L):
-    # OPTIMIZATION: Reduced padding from 6.0 to 4.0 to save memory
     target_half = max(1.5 * R_obs_max, 4.0 * L, 20.0)
     Lbox = float(target_half)
-    
-    # SAFETY: Cap grid at 320 to prevent Out-Of-Memory crashes
-    # This gives good resolution without killing the server
+    # 320 is the "Goldilocks" resolution: High detail, fits in GitHub RAM
     n = int(np.clip(round(2 * Lbox / 0.5), 64, 320))
     if n % 2 == 1: n += 1
     return Lbox, n
 
 def build_U_grid(n, Lbox, L, kernel):
-    axis = np.linspace(-Lbox, Lbox, n, endpoint=False)
+    axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     r = np.sqrt(x * x + y * y + z * z)
-    if kernel == "plummer":
-        U = U_plummer(r, L)
-    elif kernel == "exp-core":
-        U = U_exp_core(r, L)
-    else:
-        raise ValueError("kernel must be 'plummer' or 'exp-core'")
+    if kernel == "plummer": U = U_plummer(r, L)
+    elif kernel == "exp-core": U = U_exp_core(r, L)
+    else: raise ValueError("kernel error")
     U.flat[0] = 0.0
-    return U
+    return U.astype(np.float32)
 
+# Global Cache (We clear this often)
 U_CACHE = {}
 def get_U_grid(n, Lbox, L, kernel):
-    key = (kernel, float(L), int(n), round(float(Lbox), 3))
+    key = (kernel, float(L), int(n), round(float(Lbox), 2))
     if key not in U_CACHE:
         U_CACHE[key] = build_U_grid(n, Lbox, L, kernel)
     return U_CACHE[key]
 
 def fill_nans(arr):
-    """Interpolate small gaps in the profile to prevent broken lines."""
     mask = np.isnan(arr)
     if not np.any(mask): return arr
     if np.all(mask): return arr
@@ -94,241 +125,229 @@ def fill_nans(arr):
     return arr
 
 def radial_profile_2d(arr2d, dx, max_r, nbins=30):
-    """Calculate profile within the galaxy radius and fill gaps."""
     n = arr2d.shape[0]
     cx = cy = n // 2
     yy, xx = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
-    R = np.sqrt((xx - cx + 0.5) ** 2 + (yy - cy + 0.5) ** 2) * dx
-    
-    # Bin only up to the galaxy edge
-    rb = np.linspace(0, max_r * 1.1, nbins + 1)
+    R = np.sqrt(((xx - cx + 0.5) * dx)**2 + ((yy - cy + 0.5) * dx)**2).astype(np.float32)
+    rb = np.linspace(0, max_r * 1.1, nbins + 1).astype(np.float32)
     centers = 0.5 * (rb[1:] + rb[:-1])
-    prof = np.empty(nbins)
+    prof = np.empty(nbins, dtype=np.float32)
     prof[:] = np.nan
-    
     for i, (r0, r1) in enumerate(zip(rb[:-1], rb[1:])):
         m = (R >= r0) & (R < r1)
-        if np.any(m):
-            prof[i] = float(np.mean(arr2d[m]))
-    
-    # Fill gaps caused by resolution mismatch
+        if np.any(m): prof[i] = np.mean(arr2d[m])
     return centers, fill_nans(prof)
 
+# ---- DATA IO ----
+
 def read_galaxy_table(path_csv):
+    # Tweak: Try to read CSV. If fails or empty, return Nightmare Fleet.
     out = []
-    with open(path_csv, newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            def num(x):
-                try: return float(x)
-                except: return 0.0
-            g = {
-                "name":    row["name"],
-                "Rd_star": num(row["Rd_star_kpc"]),
-                "Mstar":   num(row["Mstar_Msun"]),
-                "hz_star": num(row.get("hz_star_kpc", "0.3")), # Default 0.3 if missing
-                "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
-                "Mgas":    num(row.get("Mgas_Msun", "0")),
-                "hz_gas":  num(row.get("hz_gas_kpc", "0.1")), # FIX: Thinner gas disk (0.1)
-            }
-            if g["Rd_gas"] <= 0: g["Rd_gas"] = 1.8 * g["Rd_star"]
-            out.append(g)
+    if os.path.exists(path_csv):
+        try:
+            with open(path_csv, newline="", encoding="utf-8") as f:
+                for row in csv.DictReader(f):
+                    def num(x):
+                        try: return float(x)
+                        except: return 0.0
+                    g = {
+                        "name":    row["name"],
+                        "Rd_star": num(row["Rd_star_kpc"]),
+                        "Mstar":   num(row["Mstar_Msun"]),
+                        "hz_star": num(row["hz_star_kpc"]),
+                        "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
+                        "Mgas":    num(row.get("Mgas_Msun", "0")),
+                        "hz_gas":  num(row.get("hz_gas_kpc", "0.15")), 
+                    }
+                    if g["Rd_gas"] <= 0: g["Rd_gas"] = 1.8 * g["Rd_star"]
+                    out.append(g)
+        except Exception as e:
+            print(f"Note: Error reading CSV ({e}).")
+    
+    if not out:
+        print(">>> Using Hardcoded NIGHTMARE FLEET (Backup Mode)")
+        return NIGHTMARE_FLEET
+    
     return out
 
 def try_read_observed_rc(name):
-    # 1. Try to find the official SPARC file (.dat)
-    # It's usually named "Name_rotmod.dat"
-    path_dat = os.path.join("data", "sparc", f"{name}_rotmod.dat")
-    
-    # 2. Fallback: Try the old CSV format if dat is missing
-    path_csv = os.path.join("data", "sparc", f"{name}_rc.csv")
+    # Universal Reader: Checks .dat first, then .csv
+    # Handles nested folders if unzip creates subdirs
+    base_dirs = ["data/sparc", "data/sparc/Rotmod_LTG"]
     
     file_to_read = None
     is_dat = False
     
-    if os.path.exists(path_dat):
-        file_to_read = path_dat
-        is_dat = True
-    elif os.path.exists(path_csv):
-        file_to_read = path_csv
-        is_dat = False
-    else:
-        return None # No file found
+    for d in base_dirs:
+        path_dat = os.path.join(d, f"{name}_rotmod.dat")
+        path_csv = os.path.join(d, f"{name}_rc.csv")
+        if os.path.exists(path_dat):
+            file_to_read, is_dat = path_dat, True
+            break
+        elif os.path.exists(path_csv):
+            file_to_read, is_dat = path_csv, False
+            break
+    
+    if file_to_read is None: return None
 
     R, V = [], []
-    
     try:
         with open(file_to_read, "r") as f:
-            # Skip header lines if it's a .dat file (lines starting with # or empty)
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#") or line.startswith("Rad"): continue
-                
-                # Split by comma (CSV) or whitespace (DAT)
                 if is_dat:
-                    parts = line.split() # Splits by any space/tab
-                    # SPARC .dat format: Col 0 = Rad, Col 1 = Vobs
+                    parts = line.split()
                     if len(parts) >= 2:
                         try:
-                            r_val = float(parts[0])
-                            v_val = float(parts[1])
-                            R.append(r_val)
-                            V.append(v_val)
+                            R.append(float(parts[0]))
+                            V.append(float(parts[1]))
                         except ValueError: continue
                 else:
-                    # Old CSV format (R_kpc, V_kms)
                     parts = line.split(',')
                     if len(parts) >= 2:
                         try:
                             R.append(float(parts[0]))
                             V.append(float(parts[1]))
                         except ValueError: continue
-                        
-        return np.array(R), np.array(V)
-        
+        return np.array(R, dtype=np.float32), np.array(V, dtype=np.float32)
     except Exception as e:
         print(f"Error reading {file_to_read}: {e}")
         return None
+
+# ---- CORE PIPELINE ----
+
 def predict_rc_for_params(gal, L, mu, kernel):
     obs = try_read_observed_rc(gal["name"])
     R_obs_max = float(np.nanmax(obs[0])) if obs is not None else 15.0
     
-    # 1. Build Box (Optimized size)
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
-    # 2. Baryons (Using SAFE local function)
     rho, dx = safe_two_component_disk(
         n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
         Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
     )
 
-    # 3. Newtonian
-    phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G)
+    G32 = np.float32(G)
+    phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G32)
     gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
 
-    # 4. Kernel
     U = get_U_grid(n, Lbox, L, kernel)
     phi_K_raw = conv_fft(rho, U, zero_mode=True)
-    phi_K = mu * G * phi_K_raw
+    phi_K = (mu * G32 * phi_K_raw).astype(np.float32)
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
 
-    # 5. Forces
     iz = n // 2 
     gmag_total = np.sqrt((gx_b[:, :, iz] + gx_K[:, :, iz])**2 +
                          (gy_b[:, :, iz] + gy_K[:, :, iz])**2)
     gmag_baryons = np.sqrt(gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2)
     gmag_kernel = np.sqrt(gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2)
 
-    # 6. Profiles (Zoomed + Filled)
     R_centers, g_mean_total = radial_profile_2d(gmag_total, dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_baryons = radial_profile_2d(gmag_baryons, dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_kernel = radial_profile_2d(gmag_kernel, dx, R_obs_max, nbins=RADIAL_BINS)
     
-    # 7. Velocities
     v_total = np.sqrt(np.maximum(R_centers * g_mean_total, 0.0))
     v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
     v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
+    
+    # Explicitly delete large arrays to free memory for GC
+    del rho, phi_b, phi_K_raw, phi_K, gx_b, gy_b, gx_K, gy_K, gmag_total
     
     return R_centers, v_total, v_baryons, v_kernel
 
 def mafe(pred_at_R, obs_V):
     return float(np.median(np.abs(pred_at_R - obs_V) / np.clip(obs_V, 1e-6, None)))
 
+# ---- MAIN CONTROLLER ----
+
 def main():
     os.makedirs("figs", exist_ok=True)
     os.makedirs("results", exist_ok=True)
 
-    table_path = os.path.join("data", "galaxies.csv")
-    if not os.path.exists(table_path):
-        print("No data/galaxies.csv found.")
-        return
-    gals = read_galaxy_table(table_path)
-    if not gals:
-        print("galaxies.csv is empty.")
-        return
+    # 1. AUTOMATION: Download data if missing
+    download_and_extract_data()
 
-    print("Starting PER-GALAXY grid search (R2-7)...")
+    table_path = os.path.join("data", "galaxies.csv")
+    gals = read_galaxy_table(table_path)
     
-    # Store best params for each galaxy to save later
+    print(f"Initializing Ananta Surveyor for {len(gals)} galaxies...")
+    print("Mode: Serial Processing (Load -> Compute -> Erase)")
+    
     all_best_params = {}
     summary = []
 
-    # --- Loop Over Each Galaxy First ---
-    for gal in gals:
-        print(f"Analyzing {gal['name']}...")
+    # --- THE SURVEYOR LOOP ---
+    for i, gal in enumerate(gals):
+        print(f"\n[{i+1}/{len(gals)}] Surveying {gal['name']}...")
+        
         obs = try_read_observed_rc(gal["name"])
         if obs is None: 
-            print(f"  -> No data found for {gal['name']}, skipping.")
+            print(f"  -> MISSING DATA: Could not find _rotmod.dat or _rc.csv for {gal['name']}")
             continue
         
         R_obs, V_obs = obs
         
-        # --- Grid Search for THIS Galaxy ---
+        # Local Grid Search
         local_best = {"L": None, "mu": None, "mafe": 1e99, "kernel": None}
         
         for kernel in KERNELS:
             for L in L_LIST:
                 for mu in MU_LIST:
-                    # Run prediction
                     R_pred, V_pred, _, _ = predict_rc_for_params(gal, L, mu, kernel)
                     
-                    # Score it
                     Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
                     m = np.isfinite(Vp)
                     if np.any(m):
                         score = mafe(Vp[m], V_obs[m])
-                        
-                        # Is this the new champion for this galaxy?
                         if score < local_best["mafe"]:
-                            local_best = {
-                                "L": float(L), 
-                                "mu": float(mu), 
-                                "mafe": score, 
-                                "kernel": kernel
-                            }
+                            local_best = {"L": float(L), "mu": float(mu), "mafe": score, "kernel": kernel}
+            
+                    # Force cleanup after every iteration
+                    gc.collect()
 
-        # Save the winner for this galaxy
         if local_best["L"] is None:
-            print(f"  -> Could not fit {gal['name']}")
+            print(f"  -> Fit Failed for {gal['name']}")
             continue
             
         all_best_params[gal["name"]] = local_best
         summary.append({"name": gal["name"], "mafe": local_best["mafe"], "L": local_best["L"], "mu": local_best["mu"]})
-        
         print(f"  -> Best Fit: L={local_best['L']} kpc, mu={local_best['mu']} (Error: {local_best['mafe']:.4f})")
 
-        # --- Generate Final Plot for THIS Galaxy using ITS Best Params ---
+        # Generate Final High-Res Plot
         R_pred, V_pred, V_b, V_k = predict_rc_for_params(
             gal, local_best["L"], local_best["mu"], local_best["kernel"]
         )
 
         out = f"figs/rc_{gal['name']}_best.png"
         plt.figure(figsize=(5, 4))
-        
-        # Plot Total
         plt.plot(R_pred, V_pred, "-", color='orange', lw=2, label=f'H1 Total')
-        
-        # Plot Data
-        plt.plot(R_obs, V_obs, "o", color='white', mec='black', ms=4, mew=0.5, label="Observed")
-
-        # Plot Components
+        if obs is not None:
+            plt.plot(R_obs, V_obs, "o", color='white', mec='black', ms=4, mew=0.5, label="Observed")
         plt.plot(R_pred, V_b, ':', color='cyan', lw=1.5, label='Baryons')
         plt.plot(R_pred, V_k, '--', color='lime', lw=1.5, label=f'Kernel (L={local_best["L"]}, $\mu$={local_best["mu"]})')
         
         plt.xlabel("R [kpc]"); plt.ylabel("v [km/s]")
         plt.title(f"{gal['name']} — Best Fit")
-        plt.xlim(0, np.nanmax(R_obs) * 1.1)
+        if obs is not None:
+            plt.xlim(0, np.nanmax(R_obs) * 1.1)
         plt.legend(fontsize=8)
         plt.tight_layout(); plt.savefig(out, dpi=150); plt.close()
+        plt.clf() 
         
-        # Export Data
         np.savetxt(
             f"results/rc_decomp_{gal['name']}_best.csv",
             np.c_[R_pred, V_b, V_k, V_pred], 
             delimiter=",", header="R_kpc,V_baryon,V_kernel,V_total", comments=""
         )
+        
+        # --- CRITICAL STEP: FLUSH MEMORY ---
+        del R_pred, V_pred, V_b, V_k
+        gc.collect() 
+        print(f"  -> Memory Flushed. Ready for next galaxy.")
 
-    # --- Save Global Summary ---
+    # Save Summaries
     with open("results/all_galaxy_params.json", "w") as f:
         json.dump(all_best_params, f, indent=2)
 
