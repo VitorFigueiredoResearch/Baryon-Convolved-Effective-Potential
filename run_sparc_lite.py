@@ -16,7 +16,7 @@ from src.newtonian import phi_newtonian_from_rho, G
 
 # ---- KNOBS ----
 RADIAL_BINS = 30
-KERNELS = ("plummer", "exp-core")
+KERNELS = ("ananta-hybrid",)
 L_LIST  = [2.0, 6.0, 10.0, 15.0, 20.0, 30.0] 
 MU_LIST = [1.0, 2.0, 3.0, 5.0, 8.0, 12.0]
 
@@ -102,9 +102,14 @@ def build_U_grid(n, Lbox, L, kernel):
     axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     r = np.sqrt(x * x + y * y + z * z)
+
     if kernel == "plummer": U = U_plummer(r, L)
     elif kernel == "exp-core": U = U_exp_core(r, L)
+    elif kernel == "ananta-hybrid": 
+        from src.kernels import U_ananta_hybrid # Import locally if needed or at top
+        U = U_ananta_hybrid(r, L)
     else: raise ValueError("kernel error")
+
     U.flat[0] = 0.0
     return U.astype(np.float32)
 
