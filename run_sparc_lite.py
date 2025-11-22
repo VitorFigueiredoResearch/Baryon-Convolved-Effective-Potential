@@ -17,8 +17,8 @@ from src.newtonian import phi_newtonian_from_rho, G
 # ---- KNOBS ----
 RADIAL_BINS = 30
 KERNELS = ("ananta-hybrid",)
-L_LIST  = [2.0, 6.0, 10.0, 15.0, 20.0, 30.0] 
-MU_LIST = [1.0, 2.0, 3.0, 5.0, 8.0, 12.0]
+L_LIST  = [10.0, 30.0, 50.0, 80.0, 120.0, 200.0] 
+MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
 # ---- THE NIGHTMARE FLEET (Backup Data) ----
 # If galaxies.csv is missing, we run these galaxies automatically.
