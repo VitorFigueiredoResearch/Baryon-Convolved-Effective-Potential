@@ -226,37 +226,41 @@ def predict_rc_for_params(gal, L, mu, kernel):
     
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
+    # 1. Baryons
     rho, dx = safe_two_component_disk(
         n, Lbox,
         Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
         Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
     )
 
+    # 2. Newtonian Forces (Baryons)
     G32 = np.float32(G)
     phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G32)
     gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
 
+    # 3. Kernel Forces (Ananta)
     U = get_U_grid(n, Lbox, L, kernel)
     phi_K_raw = conv_fft(rho, U, zero_mode=True)
     phi_K = (mu * G32 * phi_K_raw).astype(np.float32)
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
 
+    # 4. Radial Profiles (The "Gauge" Check)
     iz = n // 2 
-    gmag_total = np.sqrt((gx_b[:, :, iz] + gx_K[:, :, iz])**2 +
-                         (gy_b[:, :, iz] + gy_K[:, :, iz])**2)
-    gmag_baryons = np.sqrt(gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2)
-    gmag_kernel = np.sqrt(gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2)
-
-    R_centers, g_mean_total = radial_profile_2d(gmag_total, dx, R_obs_max, nbins=RADIAL_BINS)
-    _, g_mean_baryons = radial_profile_2d(gmag_baryons, dx, R_obs_max, nbins=RADIAL_BINS)
-    _, g_mean_kernel = radial_profile_2d(gmag_kernel, dx, R_obs_max, nbins=RADIAL_BINS)
     
+    # Force Vectors
+    g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + (gy_b[:, :, iz] + gy_K[:, :, iz])**2
+    g_baryon_sq = gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2
+    g_kernel_sq = gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2
+
+    # Convert to Radial Averages
+    R_centers, g_mean_total = radial_profile_2d(np.sqrt(g_total_sq), dx, R_obs_max, nbins=RADIAL_BINS)
+    _, g_mean_baryons = radial_profile_2d(np.sqrt(g_baryon_sq), dx, R_obs_max, nbins=RADIAL_BINS)
+    _, g_mean_kernel = radial_profile_2d(np.sqrt(g_kernel_sq), dx, R_obs_max, nbins=RADIAL_BINS)
+    
+    # 5. Velocities (V = sqrt(R * g))
     v_total = np.sqrt(np.maximum(R_centers * g_mean_total, 0.0))
     v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
     v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
-    
-    # Explicitly delete large arrays to free memory for GC
-    del rho, phi_b, phi_K_raw, phi_K, gx_b, gy_b, gx_K, gy_K, gmag_total
     
     return R_centers, v_total, v_baryons, v_kernel
 
