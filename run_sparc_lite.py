@@ -92,13 +92,20 @@ def build_U_grid(n, Lbox, L, kernel):
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     r = np.sqrt(x * x + y * y + z * z)
     
-    # Explicit Kernel Selection
-    if kernel == "plummer": U = U_plummer(r, L)
-    elif kernel == "exp-core": U = U_exp_core(r, L)
-    elif kernel == "ananta-hybrid": U = U_ananta_hybrid(r, L)
-    else: raise ValueError("kernel error")
-    
-    U.flat[0] = 0.0
+    if kernel == "plummer": 
+        U = U_plummer(r, L)
+        U.flat[0] = 1.0 / L # Finite center
+    elif kernel == "exp-core": 
+        U = U_exp_core(r, L)
+        U.flat[0] = 1.0 / (L * 2.718) # Approx finite
+    elif kernel == "ananta-hybrid": 
+        # Import locally to ensure we get the new version
+        from src.kernels import U_ananta_hybrid 
+        U = U_ananta_hybrid(r, L)
+        # Do NOT zero the center! The log kernel handles r=0 gracefully now.
+    else: 
+        raise ValueError("kernel error")
+        
     return U.astype(np.float32)
 
 U_CACHE = {}
