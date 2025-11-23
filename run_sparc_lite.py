@@ -135,7 +135,8 @@ def read_galaxy_table(path_csv):
     if os.path.exists(path_csv):
         try:
             with open(path_csv, newline="", encoding="utf-8") as f:
-                for row in csv.DictReader(f):
+                if row["name"].strip() != "NGC3198":
+                    continue  # Skip all others
                     def num(x):
                         try: return float(x)
                         except: return 0.0
