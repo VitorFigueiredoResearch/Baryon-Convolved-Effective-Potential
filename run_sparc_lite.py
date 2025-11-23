@@ -138,8 +138,9 @@ def read_galaxy_table(path_csv):
                 for row in csv.DictReader(f):
 
                     # --- FAST MODE FILTER: ONLY NGC3198 ---
-                    if row["name"].strip() != "NGC3198":
-                        continue
+if row["name"].strip() != "NGC3198":
+    continue
+
 
                     def num(x):
                         try: 
@@ -231,6 +232,18 @@ def predict_rc_for_params(gal, L, mu, kernel):
     phi_K_raw = conv_fft(rho, U, zero_mode=True)
     phi_K = (mu * G32 * phi_K_raw).astype(np.float32)
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
+    # --- DIAGNOSTIC: Force check for polarity ---
+try:
+    ix = n // 2 + int(10.0 / dx)   # ~10 kpc from center
+    iy = n // 2
+    iz = n // 2
+    print("DIAGNOSTIC:",
+          "L=", L, "mu=", mu,
+          "baryon_fx=", float(gx_b[ix, iy, iz]),
+          "kernel_fx=", float(gx_K[ix, iy, iz]))
+except Exception as e:
+    print("DIAGNOSTIC ERROR:", e)
+
 
     # GAUGE FIX: Calculate Velocities CORRECTLY
     iz = n // 2 
