@@ -1,6 +1,6 @@
 import numpy as np
 import yaml, json, os
-from .kernels import U_hat_isotropic
+# from .kernels import U_hat_isotropic
 
 def pass_fail_report(results_dir: str, cfg: dict):
     # Placeholder: read metrics.json and check cfg['gates']
