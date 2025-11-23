@@ -135,29 +135,42 @@ def read_galaxy_table(path_csv):
     if os.path.exists(path_csv):
         try:
             with open(path_csv, newline="", encoding="utf-8") as f:
-                if row["name"].strip() != "NGC3198":
-                    continue  # Skip all others
+                for row in csv.DictReader(f):
+
+                    # --- FAST MODE FILTER: ONLY NGC3198 ---
+                    if row["name"].strip() != "NGC3198":
+                        continue
+
                     def num(x):
-                        try: return float(x)
-                        except: return 0.0
+                        try: 
+                            return float(x)
+                        except:
+                            return 0.0
+
                     g = {
                         "name":    row["name"],
                         "Rd_star": num(row["Rd_star_kpc"]),
                         "Mstar":   num(row["Mstar_Msun"]),
-                        "hz_star": num(row.get("hz_star_kpc", "0.3")),
-                        "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
-                        "Mgas":    num(row.get("Mgas_Msun", "0")),
-                        "hz_gas":  num(row.get("hz_gas_kpc", "0.15")), # Thin Disk Fixed
+                        "hz_star": num(row.get("hz_star_kpc","0.3")),
+                        "Rd_gas":  num(row.get("Rd_gas_kpc","0")),
+                        "Mgas":    num(row.get("Mgas_Msun","0")),
+                        "hz_gas":  num(row.get("hz_gas_kpc","0.15")),
                     }
-                    if g["Rd_gas"] <= 0: g["Rd_gas"] = 1.8 * g["Rd_star"]
+
+                    if g["Rd_gas"] <= 0:
+                        g["Rd_gas"] = 1.8 * g["Rd_star"]
+
                     out.append(g)
+
         except Exception as e:
             print(f"Note: Error reading CSV ({e}).")
-    
+
     if not out:
-        print(">>> Using Hardcoded NIGHTMARE FLEET (Backup Mode)")
+        print(">>> Using Hardcoded NIGHTMARE FLEET (Backup Mode - NGC3198 Only)")
         return NIGHTMARE_FLEET
+
     return out
+
 
 def try_read_observed_rc(name):
     base_dirs = ["data/sparc", "data/sparc/Rotmod_LTG"]
