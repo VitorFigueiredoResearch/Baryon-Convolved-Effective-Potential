@@ -26,16 +26,7 @@ MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
 # ---- THE NIGHTMARE FLEET (Backup Data) ----
 NIGHTMARE_FLEET = [
-    {"name": "IC2574",   "Rd_star": 2.19, "Mstar": 5.08e8,  "hz_star": 0.32, "Rd_gas": 5.0,  "Mgas": 1.96e9, "hz_gas": 0.15},
     {"name": "NGC3198",  "Rd_star": 3.19, "Mstar": 1.91e10, "hz_star": 0.42, "Rd_gas": 8.0,  "Mgas": 1.08e10,"hz_gas": 0.15},
-    {"name": "DDO161",   "Rd_star": 1.93, "Mstar": 2.23e8,  "hz_star": 0.29, "Rd_gas": 3.5,  "Mgas": 1.38e9, "hz_gas": 0.15},
-    {"name": "NGC5055",  "Rd_star": 3.08, "Mstar": 7.65e10, "hz_star": 0.41, "Rd_gas": 8.5,  "Mgas": 1.30e10,"hz_gas": 0.15},
-    {"name": "NGC2841",  "Rd_star": 4.22, "Mstar": 9.40e10, "hz_star": 0.50, "Rd_gas": 10.0, "Mgas": 1.80e10,"hz_gas": 0.15},
-    {"name": "NGC7331",  "Rd_star": 4.48, "Mstar": 1.25e11, "hz_star": 0.53, "Rd_gas": 11.0, "Mgas": 1.50e10,"hz_gas": 0.15},
-    {"name": "UGC00128", "Rd_star": 6.90, "Mstar": 2.63e9,  "hz_star": 0.69, "Rd_gas": 10.0, "Mgas": 7.20e9, "hz_gas": 0.15},
-    {"name": "F568-3",   "Rd_star": 3.02, "Mstar": 1.25e9,  "hz_star": 0.40, "Rd_gas": 6.0,  "Mgas": 4.57e9, "hz_gas": 0.15},
-    {"name": "DDO154",   "Rd_star": 0.65, "Mstar": 2.48e7,  "hz_star": 0.15, "Rd_gas": 2.5,  "Mgas": 3.6e8,  "hz_gas": 0.15},
-    {"name": "NGC2403",  "Rd_star": 2.16, "Mstar": 7.55e9,  "hz_star": 0.40, "Rd_gas": 6.0,  "Mgas": 3.2e9,  "hz_gas": 0.15},
 ]
 
 # ---- AUTOMATION TOOLS ----
