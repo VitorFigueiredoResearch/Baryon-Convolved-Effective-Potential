@@ -20,7 +20,7 @@ def phi_newtonian_from_rho(rho, Lbox, Gval=G):
     rho_k = np.fft.fftn(rho, norm=None)
     phi_k = np.zeros_like(rho_k, dtype=complex)
     mask = (k2 != 0.0)
-    phi_k[mask] = -4.0 * np.pi * Gval * rho_k[mask] / k2[mask]
+    phi_k[mask] = +4.0 * np.pi * Gval * rho_k[mask] / k2[mask]
     phi_k[~mask] = 0.0
     phi = np.fft.ifftn(phi_k).real
     return phi
