@@ -3,7 +3,6 @@
 # Notes:
 #  - Set TARGET_GALAXY = "NGC3198" to debug one galaxy
 #  - Set TARGET_GALAXY = None to run the whole fleet (or CSV)
-#  - If you want to flip polarity, set POLARITY_SIGN = -1.0 else 1.0
 
 import os
 import csv
@@ -23,13 +22,13 @@ from src.newtonian import phi_newtonian_from_rho, G
 # ---- CONFIG ----
 RADIAL_BINS = 30
 
-# Kernel search lists (kept broad but you can reduce for speed)
+# Kernel search lists 
 KERNELS = ("ananta-hybrid",)
 L_LIST = [10.0, 30.0, 50.0, 80.0, 120.0, 200.0]
 MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
 # Target: set to a string to run ONE galaxy (fast debug), or None for all from CSV
-TARGET_GALAXY = "NGC3198"  # e.g. "NGC3198" for fast debug
+ = none  # e.g. "NGC3198" for fast debug
 
 # If you need to flip kernel sign for testing (polarity fix), change to -1.0
 POLARITY_SIGN = 1.0
