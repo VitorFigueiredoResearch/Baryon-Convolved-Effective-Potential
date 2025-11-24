@@ -159,42 +159,35 @@ def read_galaxy_table(path_csv):
         try:
             with open(path_csv, newline="", encoding="utf-8") as f:
                 for row in csv.DictReader(f):
-                    name = row.get("name", "").strip()
-                    # If target is set, only include that galaxy
-                    if TARGET_GALAXY is not None and name != TARGET_GALAXY:
+                    # --- FAST MODE FILTER: only keep the TARGET if it is set ---
+                    if TARGET_GALAXY and row["name"].strip() != TARGET_GALAXY:
                         continue
 
                     def num(x):
-                        try:
-                            return float(x)
-                        except Exception:
-                            return 0.0
+                        try: return float(x)
+                        except: return 0.0
 
                     g = {
-                        "name": name,
-                        "Rd_star": num(row.get("Rd_star_kpc", 0.0)),
-                        "Mstar": num(row.get("Mstar_Msun", 0.0)),
-                        "hz_star": num(row.get("hz_star_kpc", 0.3)),
-                        "Rd_gas": num(row.get("Rd_gas_kpc", 0.0)),
-                        "Mgas": num(row.get("Mgas_Msun", 0.0)),
-                        "hz_gas": num(row.get("hz_gas_kpc", 0.15)),
+                        "name":    row["name"].strip(),
+                        "Rd_star": num(row.get("Rd_star_kpc", 0)),
+                        "Mstar":   num(row.get("Mstar_Msun", 0)),
+                        "hz_star": num(row.get("hz_star_kpc", "0.3")),
+                        "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
+                        "Mgas":    num(row.get("Mgas_Msun", "0")),
+                        "hz_gas":  num(row.get("hz_gas_kpc", "0.15")),
                     }
                     if g["Rd_gas"] <= 0:
-                        g["Rd_gas"] = 1.8 * max(g["Rd_star"], 1e-6)
+                        g["Rd_gas"] = 1.8 * (g["Rd_star"] if g["Rd_star"] > 0 else 1.0)
                     out.append(g)
         except Exception as e:
             print(f"Note: Error reading CSV ({e}).")
 
     if not out:
-        print(">>> Using hardcoded fallback (NIGHTMARE_FLEET)")
-        # If TARGET_GALAXY is set, prefer that single entry from the fleet
-        if TARGET_GALAXY is not None:
-            for g in NIGHTMARE_FLEET:
-                if g["name"] == TARGET_GALAXY:
-                    return [g]
-            # fallback if not found
+        print(">>> Using hardcoded fallback (NGC3198)")
         return NIGHTMARE_FLEET
+
     return out
+
 
 def try_read_observed_rc(name):
     base_dirs = ["data/sparc", "data/sparc/Rotmod_LTG"]
