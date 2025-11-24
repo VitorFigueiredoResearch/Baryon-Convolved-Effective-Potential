@@ -22,8 +22,7 @@ from src.newtonian import phi_newtonian_from_rho, G
 # ---- SETTINGS ----
 RADIAL_BINS = 30
 
-# We'll only test NGC3198 to save time
-TARGET_GALAXY = "NGC3198"
+TARGET_GALAXY = None
 
 # Kernel / grid parameter lists used during the grid search
 KERNELS = ("ananta-hybrid",)
@@ -32,9 +31,18 @@ MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
 # If CSV or SPARC data not found, fallback to this minimal entry
 NIGHTMARE_FLEET = [
-    {"name": "NGC3198", "Rd_star": 3.19, "Mstar": 1.91e10, "hz_star": 0.42,
-     "Rd_gas": 8.0, "Mgas": 1.08e10, "hz_gas": 0.15},
+    {"name": "IC2574",   "Rd_star": 2.19, "Mstar": 5.08e8,  "hz_star": 0.32, "Rd_gas": 5.0,  "Mgas": 1.96e9, "hz_gas": 0.15},
+    {"name": "NGC3198",  "Rd_star": 3.19, "Mstar": 1.91e10, "hz_star": 0.42, "Rd_gas": 8.0,  "Mgas": 1.08e10,"hz_gas": 0.15},
+    {"name": "DDO161",   "Rd_star": 1.93, "Mstar": 2.23e8,  "hz_star": 0.29, "Rd_gas": 3.5,  "Mgas": 1.38e9, "hz_gas": 0.15},
+    {"name": "NGC5055",  "Rd_star": 3.08, "Mstar": 7.65e10, "hz_star": 0.41, "Rd_gas": 8.5,  "Mgas": 1.30e10,"hz_gas": 0.15},
+    {"name": "NGC2841",  "Rd_star": 4.22, "Mstar": 9.40e10, "hz_star": 0.50, "Rd_gas": 10.0, "Mgas": 1.80e10,"hz_gas": 0.15},
+    {"name": "NGC7331",  "Rd_star": 4.48, "Mstar": 1.25e11, "hz_star": 0.53, "Rd_gas": 11.0, "Mgas": 1.50e10,"hz_gas": 0.15},
+    {"name": "UGC00128", "Rd_star": 6.90, "Mstar": 2.63e9,  "hz_star": 0.69, "Rd_gas": 10.0, "Mgas": 7.20e9, "hz_gas": 0.15},
+    {"name": "F568-3",   "Rd_star": 3.02, "Mstar": 1.25e9,  "hz_star": 0.40, "Rd_gas": 6.0,  "Mgas": 4.57e9, "hz_gas": 0.15},
+    {"name": "DDO154",   "Rd_star": 0.65, "Mstar": 2.48e7,  "hz_star": 0.15, "Rd_gas": 2.5,  "Mgas": 3.6e8,  "hz_gas": 0.15},
+    {"name": "NGC2403",  "Rd_star": 2.16, "Mstar": 7.55e9,  "hz_star": 0.40, "Rd_gas": 6.0,  "Mgas": 3.2e9,  "hz_gas": 0.15},
 ]
+
 
 # ---- UTILITIES ----
 
@@ -248,19 +256,19 @@ def predict_rc_for_params(gal, L, mu, kernel):
     phi_K = (-1.0 * mu * G32 * phi_K_raw).astype(np.float32)
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
 
-    # DIAGNOSTIC: print a local force comparison at ~10 kpc (if resolvable)
+    # --- SILENT DIAGNOSTIC (keeps safety, avoids log spam)
     iz = n // 2
     try:
-        # compute approximate index offset for ~10 kpc
-        offset = int(round(10.0 / ( (2.0 * Lbox) / float(n) )))
-        ix = n // 2 + offset
+        ix = n // 2 + int(10.0 / dx)   # ~10 kpc offset
         iy = n // 2
-        if 0 <= ix < n:
-            b_fx = float(gx_b[ix, iy, iz])
-            k_fx = float(gx_K[ix, iy, iz])
-            print(f"[DIAGNOSTIC] L={L}, mu={mu} -> baryon_fx={b_fx:.4e}, kernel_fx={k_fx:.4e}")
-    except Exception as e:
-        print(f"[DIAGNOSTIC ERROR] {e}")
+        iz = n // 2
+        _b = float(gx_b[ix, iy, iz])
+        _k = float(gx_K[ix, iy, iz])
+        # Warn only if sign is opposite
+        if (_b > 0 and _k < 0) or (_b < 0 and _k > 0):
+        print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: baryon={_b:.3e}, kernel={_k:.3e}")
+        except Exception:
+                pass
 
     # GAUGE: compose scalar squared magnitudes (vector addition allowed)
     g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + (gy_b[:, :, iz] + gy_K[:, :, iz])**2
