@@ -246,23 +246,31 @@ def predict_rc_for_params(gal, L, mu, kernel):
     G32 = np.float32(G)
     phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G32)
     gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
-
+    # --- Kernel: build and compute safely (defensive) ---
     U = get_U_grid(n, Lbox, L, kernel)
-        # Convolve to get the kernel potential (raw)
-    phi_K_raw = conv_fft(rho, U, zero_mode=True).astype(np.float32)
 
-    # Compute gradient of the *raw* potential (vector field)
-    gx_K_raw, gy_K_raw, gz_K_raw = gradient_from_phi(phi_K_raw, Lbox)
+    # prepare safe fallbacks
+    phi_K_raw = None
+    phi_K = None
+    gx_K = np.zeros_like(gx_b, dtype=np.float32)
+    gy_K = np.zeros_like(gy_b, dtype=np.float32)
 
-    # Convert raw gradient into physical forces contributed by the kernel:
-    # force = - mu * G * grad(phi_raw)
-    # (we negate the gradient because gravitational acceleration = -grad(phi))
-    gx_K = - (mu * G32) * gx_K_raw
-    gy_K = - (mu * G32) * gy_K_raw
-    gz_K = - (mu * G32) * gz_K_raw
+    try:
+        # convolution -> raw kernel potential
+        phi_K_raw = conv_fft(rho, U, zero_mode=True)
 
+        # Apply polarity sign (POLARITY_SIGN = +1 unless flipped intentionally)
+        phi_K = (POLARITY_SIGN * mu * G32 * phi_K_raw).astype(np.float32)
 
-    # --- SILENT DIAGNOSTIC (keeps logs clean; warns only on polarity mismatch)
+        # gradients -> forces from kernel
+        gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
+
+    except Exception as e:
+        print(f"[ERROR] Kernel computation failed for L={L}, mu={mu}: {e}")
+        # leave gx_K, gy_K = zeros
+        # phi_K_raw / phi_K remain None to indicate failure
+
+    # --- SILENT DIAGNOSTIC (no spam, only warns if sign is wrong) ---
     iz = n // 2
     try:
         offset = int(round(10.0 / max(1e-6, (2.0 * Lbox) / float(n))))
@@ -271,7 +279,6 @@ def predict_rc_for_params(gal, L, mu, kernel):
         if 0 <= ix < n:
             _b = float(gx_b[ix, iy, iz])
             _k = float(gx_K[ix, iy, iz])
-            # If kernel produces force with opposite sign to baryons, warn
             if (_b > 0 and _k < 0) or (_b < 0 and _k > 0):
                 print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: baryon={_b:.3e}, kernel={_k:.3e}")
     except Exception:
@@ -290,7 +297,15 @@ def predict_rc_for_params(gal, L, mu, kernel):
     v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
     v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
 
-    del rho, phi_b, phi_K_raw, phi_K, gx_b, gy_b, gx_K, gy_K, g_total_sq
+    # Safe cleanup (avoids UnboundLocalError)
+    for v in ("rho", "phi_b", "phi_K_raw", "phi_K",
+              "gx_b", "gy_b", "gx_K", "gy_K", "g_total_sq"):
+        if v in locals():
+            try:
+                del locals()[v]
+            except Exception:
+                pass
+
     gc.collect()
     return R_centers, v_total, v_baryons, v_kernel
 
