@@ -137,9 +137,9 @@ def read_galaxy_table(path_csv):
             with open(path_csv, newline="", encoding="utf-8") as f:
                 for row in csv.DictReader(f):
 
-                    # --- FAST MODE FILTER: ONLY NGC3198 ---
-					if row["name"].strip() != "NGC3198":
-					continue
+ # --- FAST MODE FILTER: ONLY NGC3198 ---
+                   if row["name"].strip() != "NGC3198":
+                    continue
 
 
                     def num(x):
