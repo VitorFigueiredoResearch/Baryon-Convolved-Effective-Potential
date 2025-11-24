@@ -135,33 +135,31 @@ def read_galaxy_table(path_csv):
     if os.path.exists(path_csv):
         try:
             with open(path_csv, newline="", encoding="utf-8") as f:
-                for row in csv.DictReader(f):
-
- # --- FAST MODE FILTER: ONLY NGC3198 ---
-                   if row["name"].strip() != "NGC3198":
+                            for row in csv.DictReader(f):
+                # FAST MODE FILTER: Only load NGC3198
+                if row.get("name", "").strip() != "NGC3198":
                     continue
 
+                def num(x):
+                    try:
+                        return float(x)
+                    except:
+                        return 0.0
 
-                    def num(x):
-                        try: 
-                            return float(x)
-                        except:
-                            return 0.0
+                g = {
+                    "name":    row["name"].strip(),
+                    "Rd_star": num(row.get("Rd_star_kpc", "0")),
+                    "Mstar":   num(row.get("Mstar_Msun", "0")),
+                    "hz_star": num(row.get("hz_star_kpc", "0.3")),
+                    "Rd_gas":  num(row.get("Rd_gas_kpc", "0")),
+                    "Mgas":    num(row.get("Mgas_Msun", "0")),
+                    "hz_gas":  num(row.get("hz_gas_kpc", "0.15")),
+                }
 
-                    g = {
-                        "name":    row["name"],
-                        "Rd_star": num(row["Rd_star_kpc"]),
-                        "Mstar":   num(row["Mstar_Msun"]),
-                        "hz_star": num(row.get("hz_star_kpc","0.3")),
-                        "Rd_gas":  num(row.get("Rd_gas_kpc","0")),
-                        "Mgas":    num(row.get("Mgas_Msun","0")),
-                        "hz_gas":  num(row.get("hz_gas_kpc","0.15")),
-                    }
+                if g["Rd_gas"] <= 0:
+                    g["Rd_gas"] = 1.8 * g["Rd_star"]
 
-                    if g["Rd_gas"] <= 0:
-                        g["Rd_gas"] = 1.8 * g["Rd_star"]
-
-                    out.append(g)
+                out.append(g)
 
         except Exception as e:
             print(f"Note: Error reading CSV ({e}).")
@@ -244,18 +242,23 @@ except Exception as e:
     print("DIAGNOSTIC ERROR:", e)
 
 Replace:
-    gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
+        gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
+
     # --- DIAGNOSTIC: Force check for kernel vs baryon polarity ---
     try:
-        ix = n // 2 + int(10.0 / dx)   # ~10 kpc offset from center
-        iy = n // 2
+        # choose a point ~10 kpc out from center (safely clipped)
         iz = n // 2
+        iy = n // 2
+        ix = int(n // 2 + max(1, round(10.0 / dx)))
+        if ix >= n: ix = n - 1
+
         print("DIAGNOSTIC:",
-              "L=", L, "mu=", mu,
-              "baryon_fx=", float(gx_b[ix, iy, iz]),
-              "kernel_fx=", float(gx_K[ix, iy, iz]))
+              f"L={L}", f"mu={mu}",
+              f"baryon_fx={float(gx_b[ix, iy, iz]):.3e}",
+              f"kernel_fx={float(gx_K[ix, iy, iz]):.3e}")
     except Exception as e:
         print("DIAGNOSTIC ERROR:", e)
+
     # GAUGE FIX: Calculate Velocities CORRECTLY
     iz = n // 2 
     g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + (gy_b[:, :, iz] + gy_K[:, :, iz])**2
