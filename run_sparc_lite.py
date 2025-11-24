@@ -1,8 +1,9 @@
-# run_sparc_lite.py — R3-7 "CLEAN / SINGLE GALAXY / DIAGNOSTIC" (NGC3198)
-# Single-galaxy debug mode, keeps diagnostics inline and applies the polarity
-# reversal (phi_K = - mu * G * phi_K_raw) so the kernel contribution is easily
-# visible while we debug normalization/shape. Safe guards for empty input files
-# and sanitized filenames included.
+# run_sparc_lite.py — Cleaned R3-7 "Hardened Surveyor"
+# Ready-to-paste, minimal changes from your last version.
+# Notes:
+#  - Set TARGET_GALAXY = "NGC3198" to debug one galaxy
+#  - Set TARGET_GALAXY = None to run the whole fleet (or CSV)
+#  - If you want to flip polarity, set POLARITY_SIGN = -1.0 else 1.0
 
 import os
 import csv
@@ -14,22 +15,26 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Local physics modules (must be importable from project root)
+# Local physics modules (must be importable from repo root)
 from src.kernels import U_plummer, U_exp_core, U_ananta_hybrid
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
 
-# ---- SETTINGS ----
+# ---- CONFIG ----
 RADIAL_BINS = 30
 
-TARGET_GALAXY = None
-
-# Kernel / grid parameter lists used during the grid search
+# Kernel search lists (kept broad but you can reduce for speed)
 KERNELS = ("ananta-hybrid",)
-L_LIST  = [10.0, 30.0, 50.0, 80.0, 120.0, 200.0]
+L_LIST = [10.0, 30.0, 50.0, 80.0, 120.0, 200.0]
 MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
-# If CSV or SPARC data not found, fallback to this minimal entry
+# Target: set to a string to run ONE galaxy (fast debug), or None for all from CSV
+TARGET_GALAXY = None  # e.g. "NGC3198" for fast debug
+
+# If you need to flip kernel sign for testing (polarity fix), change to -1.0
+POLARITY_SIGN = 1.0
+
+# ---- Backup fleet (fallback if CSV not present or empty) ----
 NIGHTMARE_FLEET = [
     {"name": "IC2574",   "Rd_star": 2.19, "Mstar": 5.08e8,  "hz_star": 0.32, "Rd_gas": 5.0,  "Mgas": 1.96e9, "hz_gas": 0.15},
     {"name": "NGC3198",  "Rd_star": 3.19, "Mstar": 1.91e10, "hz_star": 0.42, "Rd_gas": 8.0,  "Mgas": 1.08e10,"hz_gas": 0.15},
@@ -43,12 +48,11 @@ NIGHTMARE_FLEET = [
     {"name": "NGC2403",  "Rd_star": 2.16, "Mstar": 7.55e9,  "hz_star": 0.40, "Rd_gas": 6.0,  "Mgas": 3.2e9,  "hz_gas": 0.15},
 ]
 
-
 # ---- UTILITIES ----
-
 def sanitize_filename(name: str) -> str:
     return re.sub(r'[^\w\-_\. ]', '_', name)
 
+# ---- DATA DOWNLOAD ----
 def download_and_extract_data():
     data_dir = "data/sparc"
     os.makedirs(data_dir, exist_ok=True)
@@ -59,18 +63,17 @@ def download_and_extract_data():
         print(">>> AUTOMATION: SPARC data missing. Initiating Download Sequence...")
         try:
             urllib.request.urlretrieve(url, zip_path)
-            with zipfile.ZipFile(zip_path, "r") as z:
-                z.extractall(data_dir)
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(data_dir)
             print("Extraction complete.")
         except Exception as e:
             print(f"!!! DOWNLOAD ERROR: {e}")
 
-# ---- PHYSICS ENGINE (light but consistent units) ----
-
+# ---- PHYSICS GRID & PROFILES ----
 def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_gas):
     axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
-    R = np.sqrt(x**2 + y**2)
+    R = np.sqrt(x * x + y * y)
     dx = axis[1] - axis[0]
 
     def get_rho(M, Rd, hz):
@@ -82,7 +85,7 @@ def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_g
         vertical = np.zeros_like(z, dtype=np.float32)
         mask = z_scaled < 20.0
         vertical[mask] = (1.0 / np.cosh(z_scaled[mask]))**2
-        rho0 = M / (4.0 * np.pi * Rd**2 * hz)  # Msun / kpc^3
+        rho0 = M / (4 * np.pi * Rd**2 * hz)
         return (rho0 * radial * vertical).astype(np.float32)
 
     rho_star = get_rho(Mstar, Rd_star, hz_star)
@@ -92,8 +95,7 @@ def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_g
 def choose_box_and_grid(R_obs_max, L):
     target_half = max(1.5 * R_obs_max, 4.0 * L, 20.0)
     Lbox = float(target_half)
-    # dx target ~0.5 kpc, n clipped to [64, 320]
-    n = int(np.clip(round(2.0 * Lbox / 0.5), 64, 320))
+    n = int(np.clip(round(2 * Lbox / 0.5), 64, 320))
     if n % 2 == 1:
         n += 1
     return Lbox, n
@@ -105,20 +107,19 @@ def build_U_grid(n, Lbox, L, kernel):
 
     if kernel == "plummer":
         U = U_plummer(r, L)
-        # give finite center for density-like kernels (if used)
-        U.flat[0] = max(U.flat[0], 1.0 / max(1e-3, float(L)))
+        # finite centre for density kernels
+        U.flat[0] = 1.0 / max(1e-6, float(L))
     elif kernel == "exp-core":
         U = U_exp_core(r, L)
-        U.flat[0] = max(U.flat[0], 1.0 / max(1e-3, float(L) * 2.718))
+        U.flat[0] = 1.0 / max(1e-6, (float(L) * 2.718))
     elif kernel == "ananta-hybrid":
-        # Use latest hybrid/potential kernel from src/kernels
+        # ananta kernel should handle r->0 internally (softened log or potential)
         U = U_ananta_hybrid(r, L)
-        # DON'T forcibly zero center for potential-like kernels
     else:
         raise ValueError("kernel error")
+
     return U.astype(np.float32)
 
-# simple cache to avoid rebuilding identical grids multiple times
 U_CACHE = {}
 def get_U_grid(n, Lbox, L, kernel):
     key = (kernel, float(L), int(n), round(float(Lbox), 2))
@@ -141,7 +142,7 @@ def radial_profile_2d(arr2d, dx, max_r, nbins=30):
     cx = cy = n // 2
     yy, xx = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
     R = np.sqrt(((xx - cx + 0.5) * dx)**2 + ((yy - cy + 0.5) * dx)**2).astype(np.float32)
-    rb = np.linspace(0.0, max_r * 1.1, nbins + 1).astype(np.float32)
+    rb = np.linspace(0, max_r * 1.1, nbins + 1).astype(np.float32)
     centers = 0.5 * (rb[1:] + rb[:-1])
     prof = np.empty(nbins, dtype=np.float32)
     prof[:] = np.nan
@@ -151,40 +152,47 @@ def radial_profile_2d(arr2d, dx, max_r, nbins=30):
             prof[i] = np.mean(arr2d[m])
     return centers, fill_nans(prof)
 
-# ---- DATA IO ----
-
+# ---- IO ----
 def read_galaxy_table(path_csv):
     out = []
     if os.path.exists(path_csv):
         try:
             with open(path_csv, newline="", encoding="utf-8") as f:
                 for row in csv.DictReader(f):
-                    # FAST MODE: only keep the target galaxy
                     name = row.get("name", "").strip()
-                    if name != TARGET_GALAXY:
+                    # If target is set, only include that galaxy
+                    if TARGET_GALAXY is not None and name != TARGET_GALAXY:
                         continue
+
                     def num(x):
                         try:
                             return float(x)
                         except Exception:
                             return 0.0
+
                     g = {
                         "name": name,
-                        "Rd_star": num(row.get("Rd_star_kpc", "0")),
-                        "Mstar": num(row.get("Mstar_Msun", "0")),
-                        "hz_star": num(row.get("hz_star_kpc", "0.3")),
-                        "Rd_gas": num(row.get("Rd_gas_kpc", "0")),
-                        "Mgas": num(row.get("Mgas_Msun", "0")),
-                        "hz_gas": num(row.get("hz_gas_kpc", "0.15")),
+                        "Rd_star": num(row.get("Rd_star_kpc", 0.0)),
+                        "Mstar": num(row.get("Mstar_Msun", 0.0)),
+                        "hz_star": num(row.get("hz_star_kpc", 0.3)),
+                        "Rd_gas": num(row.get("Rd_gas_kpc", 0.0)),
+                        "Mgas": num(row.get("Mgas_Msun", 0.0)),
+                        "hz_gas": num(row.get("hz_gas_kpc", 0.15)),
                     }
                     if g["Rd_gas"] <= 0:
-                        g["Rd_gas"] = 1.8 * g["Rd_star"]
+                        g["Rd_gas"] = 1.8 * max(g["Rd_star"], 1e-6)
                     out.append(g)
         except Exception as e:
-            print(f"Note: Error reading CSV ({e})")
+            print(f"Note: Error reading CSV ({e}).")
 
     if not out:
-        print(">>> Using hardcoded fallback (NGC3198)")
+        print(">>> Using hardcoded fallback (NIGHTMARE_FLEET)")
+        # If TARGET_GALAXY is set, prefer that single entry from the fleet
+        if TARGET_GALAXY is not None:
+            for g in NIGHTMARE_FLEET:
+                if g["name"] == TARGET_GALAXY:
+                    return [g]
+            # fallback if not found
         return NIGHTMARE_FLEET
     return out
 
@@ -204,8 +212,7 @@ def try_read_observed_rc(name):
     if file_to_read is None:
         return None
 
-    R = []
-    V = []
+    R, V = [], []
     try:
         with open(file_to_read, "r") as f:
             for line in f:
@@ -215,7 +222,7 @@ def try_read_observed_rc(name):
                 if is_dat:
                     parts = line.split()
                 else:
-                    parts = line.split(",")
+                    parts = line.split(',')
                 if len(parts) >= 2:
                     try:
                         R.append(float(parts[0]))
@@ -229,10 +236,8 @@ def try_read_observed_rc(name):
         return None
 
 # ---- CORE PIPELINE ----
-
 def predict_rc_for_params(gal, L, mu, kernel):
     obs = try_read_observed_rc(gal["name"])
-    # guard against missing/empty observed data
     if obs is None or obs[0].size == 0:
         return None
 
@@ -252,30 +257,30 @@ def predict_rc_for_params(gal, L, mu, kernel):
     U = get_U_grid(n, Lbox, L, kernel)
     phi_K_raw = conv_fft(rho, U, zero_mode=True)
 
-    # R3-7: Polarity reversal (try negative sign so kernel adds visibly)
-    phi_K = (-1.0 * mu * G32 * phi_K_raw).astype(np.float32)
+    # Apply polarity sign explicitly. Keep as +1 by default; flip to -1 only if desired.
+    phi_K = (POLARITY_SIGN * mu * G32 * phi_K_raw).astype(np.float32)
     gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
 
-    # --- SILENT DIAGNOSTIC (keeps safety, avoids log spam)
+    # --- SILENT DIAGNOSTIC (keeps logs clean; warns only on polarity mismatch)
     iz = n // 2
     try:
-        ix = n // 2 + int(10.0 / dx)   # ~10 kpc offset
+        offset = int(round(10.0 / max(1e-6, (2.0 * Lbox) / float(n))))
+        ix = n // 2 + offset
         iy = n // 2
-        iz = n // 2
-        _b = float(gx_b[ix, iy, iz])
-        _k = float(gx_K[ix, iy, iz])
-        # Warn only if sign is opposite
-        if (_b > 0 and _k < 0) or (_b < 0 and _k > 0):
-        print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: baryon={_b:.3e}, kernel={_k:.3e}")
-        except Exception:
-                pass
+        if 0 <= ix < n:
+            _b = float(gx_b[ix, iy, iz])
+            _k = float(gx_K[ix, iy, iz])
+            # If kernel produces force with opposite sign to baryons, warn
+            if (_b > 0 and _k < 0) or (_b < 0 and _k > 0):
+                print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: baryon={_b:.3e}, kernel={_k:.3e}")
+    except Exception:
+        pass
 
-    # GAUGE: compose scalar squared magnitudes (vector addition allowed)
+    # Combine vectors (vector sum) then convert to radial profile magnitudes
     g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + (gy_b[:, :, iz] + gy_K[:, :, iz])**2
     g_baryon_sq = gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2
     g_kernel_sq = gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2
 
-    # radial projection
     R_centers, g_mean_total = radial_profile_2d(np.sqrt(g_total_sq), dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_baryons = radial_profile_2d(np.sqrt(g_baryon_sq), dx, R_obs_max, nbins=RADIAL_BINS)
     _, g_mean_kernel = radial_profile_2d(np.sqrt(g_kernel_sq), dx, R_obs_max, nbins=RADIAL_BINS)
@@ -284,34 +289,32 @@ def predict_rc_for_params(gal, L, mu, kernel):
     v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
     v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
 
-    # cleanup heavy objects
     del rho, phi_b, phi_K_raw, phi_K, gx_b, gy_b, gx_K, gy_K, g_total_sq
     gc.collect()
-
     return R_centers, v_total, v_baryons, v_kernel
 
 def mafe(pred_at_R, obs_V):
     return float(np.median(np.abs(pred_at_R - obs_V) / np.clip(obs_V, 1e-6, None)))
 
-# ---- MAIN CONTROLLER ----
-
+# ---- MAIN ----
 def main():
     os.makedirs("figs", exist_ok=True)
     os.makedirs("results", exist_ok=True)
     download_and_extract_data()
 
-    # Read only NGC3198 (fast mode)
     table_path = os.path.join("data", "galaxies.csv")
     gals = read_galaxy_table(table_path)
 
-    print(f"Initializing Ananta Surveyor for {len(gals)} galaxy(ies) [SINGLE-GALAXY DEBUG MODE]")
+    print(f"Initializing Ananta Surveyor for {len(gals)} galaxies...")
+    mode = f"SINGLE({TARGET_GALAXY})" if TARGET_GALAXY is not None else "FULL"
+    print(f"Mode: {mode}")
+
     all_best_params = {}
     summary = []
 
     for i, gal in enumerate(gals):
-        safe_name = sanitize_filename(gal["name"])
+        safe_name = sanitize_filename(gal['name'])
         print(f"\n[{i+1}/{len(gals)}] Surveying {safe_name}...")
-
         obs = try_read_observed_rc(gal["name"])
         if obs is None:
             print(f"  -> MISSING DATA for {gal['name']}")
@@ -323,11 +326,10 @@ def main():
         for kernel in KERNELS:
             for L in L_LIST:
                 for mu in MU_LIST:
-                    result = predict_rc_for_params(gal, L, mu, kernel)
-                    if result is None:
+                    res = predict_rc_for_params(gal, L, mu, kernel)
+                    if res is None:
                         continue
-                    R_pred, V_pred, _, _ = result
-                    # interpolate predicted total onto observed radii
+                    R_pred, V_pred, _, _ = res
                     Vp = np.interp(R_obs, R_pred, V_pred, left=np.nan, right=np.nan)
                     m = np.isfinite(Vp)
                     if np.any(m):
@@ -344,40 +346,36 @@ def main():
         summary.append({"name": gal["name"], "mafe": local_best["mafe"], "L": local_best["L"], "mu": local_best["mu"]})
         print(f"  -> Best Fit: L={local_best['L']} kpc, mu={local_best['mu']} (Error: {local_best['mafe']:.4f})")
 
-        # compute final decomposition and save figure
-        final = predict_rc_for_params(gal, local_best["L"], local_best["mu"], local_best["kernel"])
-        if final is None:
+        final_res = predict_rc_for_params(gal, local_best["L"], local_best["mu"], local_best["kernel"])
+        if final_res is None:
             continue
-        R_pred, V_pred, V_b, V_k = final
+        R_pred, V_pred, V_b, V_k = final_res
 
-        out = f"figs/rc_{safe_name}_best.png"
-        plt.figure(figsize=(6, 4.5))
-        plt.plot(R_pred, V_pred, "-", color="orange", lw=2, label="H1 Total")
-        plt.plot(R_pred, V_b, ":", color="c", lw=1.5, label="Baryons")
-        plt.plot(R_pred, V_k, "--", color="lime", lw=1.5, label=f"Kernel (L={local_best['L']}, mu={local_best['mu']})")
-        plt.plot(R_obs, V_obs, "o", mec="black", mfc="white", ms=4, mew=0.6, label="Observed")
+        out = os.path.join("figs", f"rc_{safe_name}_best.png")
+        plt.figure(figsize=(5, 4))
+        plt.plot(R_pred, V_pred, "-", color='orange', lw=2, label='H1 Total')
+        plt.plot(R_pred, V_b, ':', color='cyan', lw=1.5, label='Baryons')
+        plt.plot(R_pred, V_k, '--', color='lime', lw=1.5, label=f'Kernel (L={local_best["L"]}, mu={local_best["mu"]})')
+        if obs is not None:
+            plt.plot(R_obs, V_obs, "o", color='white', mec='black', ms=4, mew=0.5, label="Observed")
         plt.xlabel("R [kpc]"); plt.ylabel("v [km/s]")
         plt.title(f"{gal['name']} — Best Fit")
-        try:
-            plt.xlim(0, float(np.nanmax(R_obs)) * 1.1)
-        except Exception:
-            pass
-        plt.legend(fontsize=9)
+        if obs is not None:
+            plt.xlim(0, np.nanmax(R_obs) * 1.1)
+        plt.legend(fontsize=8)
         plt.tight_layout()
         plt.savefig(out, dpi=150)
         plt.close()
 
         np.savetxt(
-            f"results/rc_decomp_{safe_name}_best.csv",
+            os.path.join("results", f"rc_decomp_{safe_name}_best.csv"),
             np.c_[R_pred, V_b, V_k, V_pred],
-            delimiter=",",
-            header="R_kpc,V_baryon,V_kernel,V_total",
-            comments=""
+            delimiter=",", header="R_kpc,V_baryon,V_kernel,V_total", comments=""
         )
 
+        del R_pred, V_pred, V_b, V_k
         gc.collect()
 
-    # write summaries
     with open("results/all_galaxy_params.json", "w") as f:
         json.dump(all_best_params, f, indent=2)
     with open("results/sparc_lite_summary.csv", "w") as f:
