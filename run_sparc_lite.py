@@ -138,8 +138,8 @@ def read_galaxy_table(path_csv):
                 for row in csv.DictReader(f):
 
                     # --- FAST MODE FILTER: ONLY NGC3198 ---
-if row["name"].strip() != "NGC3198":
-    continue
+					if row["name"].strip() != "NGC3198":
+					continue
 
 
                     def num(x):
