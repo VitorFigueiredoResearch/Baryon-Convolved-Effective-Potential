@@ -248,11 +248,19 @@ def predict_rc_for_params(gal, L, mu, kernel):
     gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
 
     U = get_U_grid(n, Lbox, L, kernel)
-    phi_K_raw = conv_fft(rho, U, zero_mode=True)
+        # Convolve to get the kernel potential (raw)
+    phi_K_raw = conv_fft(rho, U, zero_mode=True).astype(np.float32)
 
-    # Apply polarity sign explicitly. Keep as +1 by default; flip to -1 only if desired.
-    phi_K = (POLARITY_SIGN * mu * G32 * phi_K_raw).astype(np.float32)
-    gx_K, gy_K, _ = gradient_from_phi(phi_K, Lbox)
+    # Compute gradient of the *raw* potential (vector field)
+    gx_K_raw, gy_K_raw, gz_K_raw = gradient_from_phi(phi_K_raw, Lbox)
+
+    # Convert raw gradient into physical forces contributed by the kernel:
+    # force = - mu * G * grad(phi_raw)
+    # (we negate the gradient because gravitational acceleration = -grad(phi))
+    gx_K = - (mu * G32) * gx_K_raw
+    gy_K = - (mu * G32) * gy_K_raw
+    gz_K = - (mu * G32) * gz_K_raw
+
 
     # --- SILENT DIAGNOSTIC (keeps logs clean; warns only on polarity mismatch)
     iz = n // 2
