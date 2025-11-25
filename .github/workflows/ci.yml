@@ -19,14 +19,27 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r env/requirements.txt
+          
       - name: Run toy pipeline (first figure)
         run: |
           python run_local.py
+          
       - name: Run SPARC-lite loop
         run: |
           sudo mkdir -p /mnt/data
           sudo chmod 777 /mnt/data
           python run_sparc_lite.py
+
+      # --- NEW STEP: GATE B ---
+      - name: Run Gate B (Zero-Refit Test)
+        run: |
+          # Ensure /mnt/data exists (safe redundant check)
+          sudo mkdir -p /mnt/data
+          sudo chmod 777 /mnt/data
+          python gate_b_zero_refit.py
+        continue-on-error: true
+      # ------------------------
+
       - name: Run experiment
         run: |
           bash ./run_experiment.sh || true
@@ -38,6 +51,7 @@ jobs:
           path: |
             figs/**
             results/**
+            /mnt/data/gate_b_results.json
           if-no-files-found: ignore
           retention-days: 7
 
