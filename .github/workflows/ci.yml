@@ -30,15 +30,22 @@ jobs:
           sudo chmod 777 /mnt/data
           python run_sparc_lite.py
 
-      # --- NEW STEP: GATE B ---
+      # --- GATE B: Universality Check ---
       - name: Run Gate B (Zero-Refit Test)
         run: |
-          # Ensure /mnt/data exists (safe redundant check)
+          # Ensure /mnt/data exists
           sudo mkdir -p /mnt/data
           sudo chmod 777 /mnt/data
           python gate_b_zero_refit.py
         continue-on-error: true
-      # ------------------------
+      # ----------------------------------
+
+      # --- NEW STEP: GATE C (Beta Sweep) ---
+      - name: Run Gate C (Beta Sweep)
+        run: |
+          python gate_c_beta_sweep.py
+        continue-on-error: true
+      # -------------------------------------
 
       - name: Run experiment
         run: |
@@ -52,6 +59,8 @@ jobs:
             figs/**
             results/**
             /mnt/data/gate_b_results.json
+            results/gate_c_results.json
+            results/gate_c_figs/**
           if-no-files-found: ignore
           retention-days: 7
 
