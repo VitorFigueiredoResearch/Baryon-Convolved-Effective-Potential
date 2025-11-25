@@ -24,6 +24,8 @@ jobs:
           python run_local.py
       - name: Run SPARC-lite loop
         run: |
+          sudo mkdir -p /mnt/data
+          sudo chmod 777 /mnt/data
           python run_sparc_lite.py
       - name: Run experiment
         run: |
