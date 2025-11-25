@@ -397,12 +397,6 @@ def main():
         f.write("name,mafe,best_L,best_mu\n")
         for row in summary:
             f.write(f"{row['name']},{row['mafe']},{row['L']},{row['mu']}\n")
-# ... existing code ...
-
-    # TRIGGER GATE C (The Beta Sweep)
-    if os.path.exists("gate_c_beta_sweep.py"):
-        print("\n>>> LAUNCHING GATE C (BETA SWEEP)...")
-        os.system("python gate_c_beta_sweep.py")
 
 if __name__ == "__main__":
     main()
