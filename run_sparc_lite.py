@@ -28,7 +28,7 @@ L_LIST = [10.0, 30.0, 50.0, 80.0, 120.0, 200.0]
 MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
 # Target: set to a string to run ONE galaxy (fast debug), or None for all from CSV
- = none  # e.g. "NGC3198" for fast debug
+ = "NGC3198"  # e.g. "NGC3198" for fast debug
 
 # If you need to flip kernel sign for testing (polarity fix), change to -1.0
 POLARITY_SIGN = 1.0
