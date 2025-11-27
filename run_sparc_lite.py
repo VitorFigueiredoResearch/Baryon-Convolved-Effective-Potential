@@ -361,7 +361,7 @@ def main():
         for kernel in KERNELS:
             for L in L_LIST:
                 for mu in MU_LIST:
-                    res = predict_rc_for_params(gal, L, mu, kernel)
+                    res = predict_rc_for_params(gal, L, mu, kernel, beta=1.15)
                     if res is None:
                         continue
                     R_pred, V_pred, _, _ = res
@@ -381,7 +381,14 @@ def main():
         summary.append({"name": gal["name"], "mafe": local_best["mafe"], "L": local_best["L"], "mu": local_best["mu"]})
         print(f"  -> Best Fit: L={local_best['L']} kpc, mu={local_best['mu']} (Error: {local_best['mafe']:.4f})")
 
-        final_res = predict_rc_for_params(gal, local_best["L"], local_best["mu"], local_best["kernel"])
+        final_res = predict_rc_for_params(
+            gal,
+            local_best["L"],
+            local_best["mu"],
+            local_best["kernel"],
+            beta=1.15
+        )
+
         if final_res is None:
             continue
         R_pred, V_pred, V_b, V_k = final_res
