@@ -228,7 +228,12 @@ def try_read_observed_rc(name):
         return None
 
 # ---- CORE PIPELINE ----
-def predict_rc_for_params(gal, L, mu, kernel):
+def predict_rc_for_params(gal, L, mu, kernel, beta=1.0):
+    """
+    Compute predicted rotation curve for one galaxy.
+    Added: beta (global amplitude correction) forwarded to kernel grid.
+    """
+
     obs = try_read_observed_rc(gal["name"])
     if obs is None or obs[0].size == 0:
         return None
@@ -237,18 +242,26 @@ def predict_rc_for_params(gal, L, mu, kernel):
     Lbox, n = choose_box_and_grid(R_obs_max, L)
 
     rho, dx = safe_two_component_disk(
-        n, Lbox,
-        Rd_star=gal["Rd_star"], Mstar=gal["Mstar"], hz_star=gal["hz_star"],
-        Rd_gas=gal["Rd_gas"],   Mgas=gal["Mgas"],   hz_gas=gal["hz_gas"]
+        n,
+        Lbox,
+        Rd_star=gal["Rd_star"],
+        Mstar=gal["Mstar"],
+        hz_star=gal["hz_star"],
+        Rd_gas=gal["Rd_gas"],
+        Mgas=gal["Mgas"],
+        hz_gas=gal["hz_gas"]
     )
 
     G32 = np.float32(G)
+
+    # --- Baryonic Newtonian potential ---
     phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G32)
     gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
-    # --- Kernel: build and compute safely (defensive) ---
-    U = get_U_grid(n, Lbox, L, kernel)
 
-    # prepare safe fallbacks
+    # --- Kernel: build and compute safely (defensive) ---
+    # PATCH: pass beta into the kernel grid builder
+    U = get_U_grid(n, Lbox, L, kernel, beta=beta)
+
     phi_K_raw = None
     phi_K = None
     gx_K = np.zeros_like(gx_b, dtype=np.float32)
@@ -258,7 +271,7 @@ def predict_rc_for_params(gal, L, mu, kernel):
         # convolution -> raw kernel potential
         phi_K_raw = conv_fft(rho, U, zero_mode=True)
 
-        # Apply polarity sign (POLARITY_SIGN = +1 unless flipped intentionally)
+        # Apply polarity sign and coupling
         phi_K = (POLARITY_SIGN * mu * G32 * phi_K_raw).astype(np.float32)
 
         # gradients -> forces from kernel
@@ -266,22 +279,29 @@ def predict_rc_for_params(gal, L, mu, kernel):
 
     except Exception as e:
         print(f"[ERROR] Kernel computation failed for L={L}, mu={mu}: {e}")
-        # leave gx_K, gy_K = zeros
-        # phi_K_raw / phi_K remain None to indicate failure
+        # leave gx_K, gy_K as zeros
 
-    # --- SILENT DIAGNOSTIC (no spam, only warns if sign is wrong) ---
+    # --- Polarity diagnostic ---
     iz = n // 2
     try:
         offset = int(round(10.0 / max(1e-6, (2.0 * Lbox) / float(n))))
         ix = n // 2 + offset
         iy = n // 2
+
         if 0 <= ix < n:
             _b = float(gx_b[ix, iy, iz])
             _k = float(gx_K[ix, iy, iz])
             if (_b > 0 and _k < 0) or (_b < 0 and _k > 0):
-                print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: baryon={_b:.3e}, kernel={_k:.3e}")
+                print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: "
+                      f"baryon={_b:.3e}, kernel={_k:.3e}")
+
     except Exception:
         pass
+
+    # RETURN expected values (handled elsewhere in full pipeline)
+    # Not included here because you only gave the middle block.
+    # Your full file should already have the R_pred, V_pred logic below.
+
 
     # Combine vectors (vector sum) then convert to radial profile magnitudes
     g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + (gy_b[:, :, iz] + gy_K[:, :, iz])**2
