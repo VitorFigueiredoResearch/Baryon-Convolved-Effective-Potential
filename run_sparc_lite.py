@@ -99,7 +99,7 @@ def choose_box_and_grid(R_obs_max, L):
         n += 1
     return Lbox, n
 
-def build_U_grid(n, Lbox, L, kernel):
+def build_U_grid(n, Lbox, L, kernel, beta=1.0):
     axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     r = np.sqrt(x * x + y * y + z * z)
@@ -112,19 +112,19 @@ def build_U_grid(n, Lbox, L, kernel):
         U = U_exp_core(r, L)
         U.flat[0] = 1.0 / max(1e-6, (float(L) * 2.718))
     elif kernel == "ananta-hybrid":
-        # ananta kernel should handle r->0 internally (softened log or potential)
-        U = U_ananta_hybrid(r, L)
+        U = U_ananta_hybrid(r, L, beta=beta)
     else:
         raise ValueError("kernel error")
 
     return U.astype(np.float32)
 
 U_CACHE = {}
-def get_U_grid(n, Lbox, L, kernel):
-    key = (kernel, float(L), int(n), round(float(Lbox), 2))
+def get_U_grid(n, Lbox, L, kernel, beta=1.0):
+    key = (kernel, float(L), int(n), round(float(Lbox), 2), float(beta))
     if key not in U_CACHE:
-        U_CACHE[key] = build_U_grid(n, Lbox, L, kernel)
+        U_CACHE[key] = build_U_grid(n, Lbox, L, kernel, beta=beta)
     return U_CACHE[key]
+
 
 def fill_nans(arr):
     mask = np.isnan(arr)
