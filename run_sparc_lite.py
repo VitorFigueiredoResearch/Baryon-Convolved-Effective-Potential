@@ -69,46 +69,6 @@ NIGHTMARE_FLEET = [
     {"name": "NGC3769", "Rd_star": 1.3, "Mstar": 1.40e+10, "hz_star": 0.3, "Rd_gas": 3.2, "Mgas": 2.81e+09, "hz_gas": 0.15},
     {"name": "NGC3877", "Rd_star": 2.62, "Mstar": 4.46e+10, "hz_star": 0.3, "Rd_gas": 6.5, "Mgas": 8.91e+09, "hz_gas": 0.15},
     {"name": "NGC3893", "Rd_star": 1.45, "Mstar": 4.89e+10, "hz_star": 0.3, "Rd_gas": 3.6, "Mgas": 9.77e+09, "hz_gas": 0.15},
-    {"name": "IC2574", "Rd_star": 2.19, "Mstar": 5.08e8, "hz_star": 0.32, "Rd_gas": 5.0, "Mgas": 1.96e9, "hz_gas": 0.15},
-    {"name": "NGC3198", "Rd_star": 3.19, "Mstar": 1.91e10, "hz_star": 0.42, "Rd_gas": 8.0, "Mgas": 1.08e10,"hz_gas": 0.15},
-    {"name": "DDO161", "Rd_star": 1.93, "Mstar": 2.23e8, "hz_star": 0.29, "Rd_gas": 3.5, "Mgas": 1.38e9, "hz_gas": 0.15},
-    {"name": "NGC5055", "Rd_star": 3.08, "Mstar": 7.65e10, "hz_star": 0.41, "Rd_gas": 8.5, "Mgas": 1.30e10,"hz_gas": 0.15},
-    {"name": "NGC2841", "Rd_star": 4.22, "Mstar": 9.40e10, "hz_star": 0.50, "Rd_gas": 10.0, "Mgas": 1.80e10,"hz_gas": 0.15},
-    {"name": "NGC7331", "Rd_star": 4.48, "Mstar": 1.25e11, "hz_star": 0.53, "Rd_gas": 11.0, "Mgas": 1.50e10,"hz_gas": 0.15},
-    {"name": "UGC00128", "Rd_star": 6.90, "Mstar": 2.63e9, "hz_star": 0.69, "Rd_gas": 10.0, "Mgas": 7.20e9, "hz_gas": 0.15},
-    {"name": "F568-3", "Rd_star": 3.02, "Mstar": 1.25e9, "hz_star": 0.40, "Rd_gas": 6.0, "Mgas": 4.57e9, "hz_gas": 0.15},
-    {"name": "DDO154", "Rd_star": 0.65, "Mstar": 2.48e7, "hz_star": 0.15, "Rd_gas": 2.5, "Mgas": 3.6e8, "hz_gas": 0.15},
-    {"name": "NGC2403", "Rd_star": 2.16, "Mstar": 7.55e9, "hz_star": 0.40, "Rd_gas": 6.0, "Mgas": 3.2e9, "hz_gas": 0.15},
-
-    # --- New Dwarfs (Cusp-Core Tests) ---
-    {"name": "DDO064",   "Rd_star": 0.73, "Mstar": 9.60e7,  "hz_star": 0.15, "Rd_gas": 1.8,  "Mgas": 3.83e8, "hz_gas": 0.15},
-    {"name": "DDO168",   "Rd_star": 0.77, "Mstar": 9.60e7,  "hz_star": 0.15, "Rd_gas": 1.5,  "Mgas": 5.50e8, "hz_gas": 0.15},
-    {"name": "DDO170",   "Rd_star": 1.80, "Mstar": 2.80e8,  "hz_star": 0.25, "Rd_gas": 3.2,  "Mgas": 9.80e8, "hz_gas": 0.15},
-    {"name": "NGC2915",  "Rd_star": 0.50, "Mstar": 1.00e9,  "hz_star": 0.15, "Rd_gas": 3.0,  "Mgas": 1.20e9, "hz_gas": 0.15}, # Blue compact
-    {"name": "NGC3741",  "Rd_star": 0.20, "Mstar": 5.00e7,  "hz_star": 0.10, "Rd_gas": 1.5,  "Mgas": 1.00e9, "hz_gas": 0.15}, # Gas dominated
-
-    # --- New Massive Spirals (MOND Killers) ---
-    {"name": "NGC0289",  "Rd_star": 5.20, "Mstar": 8.00e10, "hz_star": 0.60, "Rd_gas": 12.0, "Mgas": 2.50e10,"hz_gas": 0.15},
-    {"name": "NGC0801",  "Rd_star": 6.10, "Mstar": 1.10e11, "hz_star": 0.70, "Rd_gas": 14.0, "Mgas": 3.00e10,"hz_gas": 0.15},
-    {"name": "NGC0891",  "Rd_star": 4.50, "Mstar": 9.50e10, "hz_star": 0.50, "Rd_gas": 10.0, "Mgas": 1.20e10,"hz_gas": 0.15},
-    {"name": "NGC2683",  "Rd_star": 2.80, "Mstar": 6.00e10, "hz_star": 0.40, "Rd_gas": 7.0,  "Mgas": 8.00e9, "hz_gas": 0.15},
-    {"name": "NGC2998",  "Rd_star": 4.80, "Mstar": 9.00e10, "hz_star": 0.55, "Rd_gas": 11.0, "Mgas": 1.80e10,"hz_gas": 0.15},
-    {"name": "NGC3521",  "Rd_star": 3.50, "Mstar": 8.50e10, "hz_star": 0.45, "Rd_gas": 8.0,  "Mgas": 1.50e10,"hz_gas": 0.15},
-    {"name": "NGC5907",  "Rd_star": 4.90, "Mstar": 9.80e10, "hz_star": 0.55, "Rd_gas": 12.0, "Mgas": 2.00e10,"hz_gas": 0.15},
-
-    # --- New Low Surface Brightness (Ghosts) ---
-    {"name": "ESO079-G014", "Rd_star": 4.21, "Mstar": 2.54e10, "hz_star": 0.50, "Rd_gas": 8.0, "Mgas": 4.10e9, "hz_gas": 0.15},
-    {"name": "ESO563-G021", "Rd_star": 6.30, "Mstar": 1.55e11, "hz_star": 0.70, "Rd_gas": 15.0, "Mgas": 3.10e10,"hz_gas": 0.15},
-    {"name": "F568-V1",     "Rd_star": 2.62, "Mstar": 1.90e9,  "hz_star": 0.35, "Rd_gas": 6.0,  "Mgas": 3.30e9, "hz_gas": 0.15},
-    {"name": "F583-1",      "Rd_star": 2.23, "Mstar": 5.00e8,  "hz_star": 0.30, "Rd_gas": 5.0,  "Mgas": 2.80e9, "hz_gas": 0.15},
-    {"name": "F563-V2",     "Rd_star": 2.50, "Mstar": 1.48e9,  "hz_star": 0.30, "Rd_gas": 5.5,  "Mgas": 2.90e9, "hz_gas": 0.15},
-    {"name": "F579-V1",     "Rd_star": 3.00, "Mstar": 5.89e9,  "hz_star": 0.40, "Rd_gas": 6.5,  "Mgas": 3.00e9, "hz_gas": 0.15},
-    {"name": "UGC05005",    "Rd_star": 3.20, "Mstar": 2.04e9,  "hz_star": 0.40, "Rd_gas": 7.0,  "Mgas": 4.10e9, "hz_gas": 0.15},
-
-    # --- Sculptor Group (Nearby / Resolved) ---
-    {"name": "NGC0055",  "Rd_star": 1.70, "Mstar": 1.20e9,  "hz_star": 0.25, "Rd_gas": 4.0,  "Mgas": 1.50e9, "hz_gas": 0.15},
-    {"name": "NGC0300",  "Rd_star": 2.00, "Mstar": 2.10e9,  "hz_star": 0.28, "Rd_gas": 5.0,  "Mgas": 1.50e9, "hz_gas": 0.15},
-    {"name": "NGC3109",  "Rd_star": 1.50, "Mstar": 8.00e8,  "hz_star": 0.20, "Rd_gas": 3.5,  "Mgas": 1.00e9, "hz_gas": 0.15},
 ]
 
 # ---- UTILITIES ----
