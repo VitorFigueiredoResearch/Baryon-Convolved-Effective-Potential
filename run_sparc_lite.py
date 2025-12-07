@@ -35,10 +35,8 @@ POLARITY_SIGN = 1.0
 
 # ---- Backup fleet (fallback if CSV not present or empty) ----
 NIGHTMARE_FLEET = [
-
-    
     # --- The Original Nightmare Fleet ---
-   {"name": "NGC3917", "Rd_star": 2.50, "Mstar": 1.09825e+10, "hz_star": 0.3424657534246575, "Rd_gas": 3.75, "Mgas": 2.1965e+10, "hz_gas": 0.15},
+    {"name": "NGC3917", "Rd_star": 2.50, "Mstar": 1.09825e+10, "hz_star": 0.3424657534246575, "Rd_gas": 3.75, "Mgas": 2.1965e+10, "hz_gas": 0.15},
     {"name": "NGC3949", "Rd_star": 2.50, "Mstar": 1.9015e+09, "hz_star": 0.3424657534246575, "Rd_gas": 3.75, "Mgas": 3.803e+09, "hz_gas": 0.15},
     {"name": "NGC3953", "Rd_star": 2.50, "Mstar": 1.41301e+11, "hz_star": 0.3424657534246575, "Rd_gas": 3.75, "Mgas": 2.829e+11, "hz_gas": 0.15},
     {"name": "NGC3972", "Rd_star": 2.50, "Mstar": 1.4353e+10, "hz_star": 0.3424657534246575, "Rd_gas": 3.75, "Mgas": 2.8706e+10, "hz_gas": 0.15},
