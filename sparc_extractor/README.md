@@ -26,12 +26,6 @@ python extract_sparc_params_v5.py
 
 This regenerates the H1 galaxy dataset exactly.
 
-## Citation
-
-If you use this pipeline, please cite:
-- Lelli, McGaugh & Schombert (2016), SPARC database
-## Citations
-
 If you use the H1 model or the SPARC-based galaxy parameters, please cite:
 
 **SPARC (Lelli, McGaugh & Schombert 2016)**  
