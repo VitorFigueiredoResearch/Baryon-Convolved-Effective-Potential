@@ -1,4 +1,4 @@
-name,Rd_star_kpc,Mstar_Msun,hz_star_kpc,Rd_gas_kpc,Mgas_Msun,hz_gas_kpc
+name,Rd_star_kpc,Mstar_Msun,hz_star_kpc,Rd_gas_kpc,Mgas_Msun,hz_gas_kpc,
 CamB,0.47,37500000.000000,0.09,0.85,15960000.000000,0.15,
 D512-2,1.24,162500000.000000,0.25,2.23,107730000.000000,0.15,
 D564-8,0.61,16500000.000000,0.12,1.10,38570000.000000,0.15,
