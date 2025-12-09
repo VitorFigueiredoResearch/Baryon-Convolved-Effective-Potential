@@ -7,7 +7,6 @@ the baryonic parameter table used in the H1 Baryon-Convolved Potential Model.
 
 - extract_sparc_params_v5.py — main extraction script
 - diagnose_table1.py — validator for SPARC Table1 alignment
-- make_batches.py — utility to split outputs into 40-galaxy batches
 - raw/ — unmodified SPARC data downloaded from CDS:
     * table1.mrt (Galaxy Sample, Lelli+2016)
     * Bulges.mrt (Bulge luminosities)
