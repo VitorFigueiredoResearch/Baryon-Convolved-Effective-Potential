@@ -1,10 +1,47 @@
-# run_sparc_lite.py — Cleaned R3-7 "Hardened Surveyor"
-# Ready-to-paste, minimal changes from your last version.
+# ✦        ·        ✧           ·        ✦  ·        ✧           ·                     ✧ 
+#      ·        ✦        ·             ✧      ✦        .         .         ✦        .         
+#  ✧       @       H1 — Baryon-Convolved Single-Field Potential             @         .   
+#      ·        ✦        ·             ✧
+# ✦        ·        ✧           ·        ✦          .         .           *             ✦
+#
+# Author: Vítor M. F. Figueiredo
+# ORCID:  https://orcid.org/0009-0004-7358-4622
+# Years:  2024–2025
+#
+# This code implements the frozen numerical pipeline used in:
+#   "H1: A Baryon-Convolved Single-Field Potential"
+#
+# Repository / DOI:
+#   https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential
+#
+# Built with care for numerical integrity,
+# empirical honesty, and reproducibility.
+# ✦        ·        ✧           ·        ✦         ✧           @               . 
+
 # Notes:
 #  - Set TARGET_GALAXY = "NGC3198" to debug one galaxy
-#  - Set TARGET_GALAXY = None to run the whole fleet (or CSV)
+#  - Set TARGET_GALAXY = None to run the whole fleet
 
 import os
+# ---- LOGGING / VERBOSITY CONTROL ----
+VERBOSE = os.environ.get("H1_VERBOSE", "0") == "1"
+DEBUG   = os.environ.get("H1_DEBUG",   "0") == "1"
+SHOW_FIX = os.environ.get("H1_FIX", "1") == "1"  # default ON
+
+def log(*args, **kwargs):
+    if VERBOSE:
+        print(*args, **kwargs)
+
+def debug(*args, **kwargs):
+    if DEBUG:
+        print(*args, **kwargs)
+
+def fix(*args, **kwargs):
+    if SHOW_FIX:
+        print(*args, **kwargs)
+def ok(*args, **kwargs):
+    print(*args, **kwargs)
+
 import csv
 import json
 import gc
@@ -14,7 +51,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Local physics modules (must be importable from repo root)
+# Local physics modules 
 from src.kernels import U_plummer, U_exp_core, U_ananta_hybrid
 from src.fft_pipeline import conv_fft, gradient_from_phi
 from src.newtonian import phi_newtonian_from_rho, G
@@ -28,14 +65,14 @@ L_LIST = [10.0, 30.0, 50.0, 80.0, 120.0, 200.0]
 MU_LIST = [10.0, 50.0, 100.0, 200.0, 300.0, 500.0]
 
 # Target: set to a string to run ONE galaxy (fast debug), or None for all from CSV
-TARGET_GALAXY = "NGC3198"   # e.g. "NGC3198" for fast debug
+TARGET_GALAXY = "NGC4559"   # e.g. "NGC3198" for fast debug
 
 # If you need to flip kernel sign for testing (polarity fix), change to -1.0
 POLARITY_SIGN = 1.0
 
 # ---- Backup fleet (fallback if CSV not present or empty) ----
 NIGHTMARE_FLEET = [
-    # --- The Original Nightmare Fleet ---
+    # --- The Original SPARC full Fleet ---
 {"name": "CamB", "Rd_star": 0.47, "Mstar": 37500000.0, "hz_star": 0.09, "Rd_gas": 0.85, "Mgas": 15960000.000000002, "hz_gas": 0.15},
 {"name": "D512-2", "Rd_star": 1.24, "Mstar": 162500000.0, "hz_star": 0.25, "Rd_gas": 2.23, "Mgas": 107730000.0, "hz_gas": 0.15},
 {"name": "D564-8", "Rd_star": 0.61, "Mstar": 16500000.0, "hz_star": 0.12, "Rd_gas": 1.1, "Mgas": 38570000.00000001, "hz_gas": 0.15},
@@ -260,30 +297,101 @@ def safe_two_component_disk(n, Lbox, Rd_star, Mstar, hz_star, Rd_gas, Mgas, hz_g
 def choose_box_and_grid(R_obs_max, L):
     target_half = max(1.5 * R_obs_max, 4.0 * L, 20.0)
     Lbox = float(target_half)
+
+    debug_dx = os.environ.get("DEBUG_DX", None)
+    if debug_dx is not None:
+        try:
+            dx_target = float(debug_dx)
+            Lbox_debug = 80.0  # kpc - reduces memory and keeps physics-local
+            Lbox = Lbox_debug
+
+            n_req = int(round(2.0 * Lbox / dx_target))
+            N_MIN = 64
+            N_MAX = 512   # (safe for my personal laptop 32g RAM)
+            n = max(N_MIN, min(N_MAX, n_req))
+            if n % 2 == 1:
+                n += 1
+
+            if n != n_req:
+                print(f"[WARN] requested dx={dx_target:.3g} => n_req={n_req} clipped -> n={n}")
+            debug(f"[DEBUG] Forced dx={dx_target:.3g} => n={n}, Lbox={Lbox}")
+            return Lbox, n
+        except Exception:
+            pass
+
     n = int(np.clip(round(2 * Lbox / 0.5), 64, 320))
     if n % 2 == 1:
         n += 1
     return Lbox, n
+
 
 def build_U_grid(n, Lbox, L, kernel, beta=1.0):
     axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
     x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
     r = np.sqrt(x * x + y * y + z * z)
 
+    # -------------------------------------------------------
+    # Build analytic kernel (no normalization here!)
+    # -------------------------------------------------------
     if kernel == "plummer":
         U = U_plummer(r, L)
-        # finite centre for density kernels
-        U.flat[0] = 1.0 / max(1e-6, float(L))
     elif kernel == "exp-core":
         U = U_exp_core(r, L)
-        U.flat[0] = 1.0 / max(1e-6, (float(L) * 2.718))
     elif kernel == "ananta-hybrid":
         U = U_ananta_hybrid(r, L, beta=beta)
     else:
         raise ValueError("kernel error")
 
-    return U.astype(np.float32)
+    debug("[DBG-K] U.dtype, U.min, U.max, U.mean =",
+          U.dtype, float(U.min()), float(U.max()), float(np.mean(U)))
 
+    # apply smooth spherical taper/cut to avoid long-range grid leakage
+    R = np.sqrt(x*x + y*y + z*z)
+    R_cut = min(3.0 * float(L), 0.45 * float(Lbox))
+    taper = np.ones_like(U, dtype=np.float64)
+
+    r0 = 0.85 * R_cut
+    mask = (R > r0) & (R <= R_cut)
+    if np.any(mask):
+        frac = (R[mask] - r0) / (R_cut - r0)
+        taper[mask] = 0.5 * (1.0 + np.cos(np.pi * frac))
+
+    taper[R > R_cut] = 0.0
+    U = U * taper
+
+    nonzero_frac = np.count_nonzero(taper) / taper.size
+    fix(f"[TAPER] nonzero fraction = {nonzero_frac:.6f}")
+
+    if nonzero_frac < 0.02:
+        raise RuntimeError(
+            f"[TAPER-FAIL] taper removed too much kernel: nonzero={nonzero_frac:.6f}"
+        )
+
+    # compute discrete integral and apply scale to enforce ∫U d^3r = 1/L exactly
+    dx = float(axis[1] - axis[0])
+    cell_vol = dx**3
+    current_integral = float(np.sum(U) * cell_vol)
+    desired_integral = 1.0 / max(1e-12, float(L))
+
+    if not np.isfinite(current_integral) or abs(current_integral) < 1e-30:
+        raise RuntimeError(
+            f"Bad kernel integral {current_integral:.3e} for L={L} at dx={dx}"
+        )
+
+    scale = desired_integral / current_integral
+    U *= scale
+
+    fix(
+        f"[FIX] kernel renormalized: integral {current_integral:.3e} "
+        f"-> {float(np.sum(U) * cell_vol):.3e} (scale={scale:.6e})"
+    )
+
+    #DC guard & single-point zero
+    U -= float(np.mean(U))
+    U.flat[0] = 0.0
+
+
+    return U.astype(np.float32)
 U_CACHE = {}
 def get_U_grid(n, Lbox, L, kernel, beta=1.0):
     key = (kernel, float(L), int(n), round(float(Lbox), 2), float(beta))
@@ -341,6 +449,10 @@ def read_galaxy_table(path_csv):
                         "Mgas":    num(row.get("Mgas_Msun", "0")),
                         "hz_gas":  num(row.get("hz_gas_kpc", "0.15")),
                     }
+                    # ---  helium correction for calculations ---
+                    HELIUM_FACTOR = 1.33
+                    g['Mgas_HI'] = float(g['Mgas'])            
+                    g['Mgas'] = float(g['Mgas_HI']) * HELIUM_FACTOR
                     if g["Rd_gas"] <= 0:
                         g["Rd_gas"] = 1.8 * (g["Rd_star"] if g["Rd_star"] > 0 else 1.0)
                     out.append(g)
@@ -417,15 +529,49 @@ def predict_rc_for_params(gal, L, mu, kernel, beta=1.0):
         Mgas=gal["Mgas"],
         hz_gas=gal["hz_gas"]
     )
+    # --- DEBUG / UNITS CHECK ---
+    Sigma_kpc2 = np.sum(rho, axis=2) * dx    # Msun / kpc^2  (dx in kpc; rho in Msun/kpc^3)
+    Sigma_pc2   = Sigma_kpc2 / 1e6           # Msun / pc^2
+    debug(f"[DBG] GAL: {gal['name']}")
+    debug("[DBG] Mstar (Msun):", gal['Mstar'], "Mgas_HI (Msun):", gal.get('Mgas_HI'), "Mgas_with_He:", gal['Mgas'])
+    debug(f"[DBG] Rd_star,kpc: {gal['Rd_star']}, Rd_gas,kpc: {gal['Rd_gas']}, hz_star: {gal['hz_star']}, hz_gas: {gal['hz_gas']}")
+    debug(f"[DBG] dx(kpc): {dx:.6e}, Sigma_kpc2 min/max: {Sigma_kpc2.min():.3e}/{Sigma_kpc2.max():.3e}, Sigma_pc2 min/max: {Sigma_pc2.min():.3e}/{Sigma_pc2.max():.3e}")
 
     G32 = np.float32(G)
+    # ============================================================
+    # SEPARATE STAR AND GAS POTENTIALS
+    # ============================================================
+    axis = np.linspace(-Lbox, Lbox, n, endpoint=False, dtype=np.float32)
+    x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
+    R = np.sqrt(x * x + y * y)
 
-    # --- Baryonic Newtonian potential ---
-    phi_b = phi_newtonian_from_rho(rho, Lbox, Gval=G32)
-    gx_b, gy_b, _ = gradient_from_phi(phi_b, Lbox)
+    def get_rho_component(M, Rd, hz):
+        if M <= 0 or Rd <= 0:
+            return np.zeros_like(R, dtype=np.float32)
+        hz = max(hz, 1e-3)
+        radial = np.exp(-R / Rd)
+        z_scaled = np.abs(z / hz)
+        vertical = np.zeros_like(z, dtype=np.float32)
+        maskz = z_scaled < 20.0
+        vertical[maskz] = (1.0 / np.cosh(z_scaled[maskz]))**2
+        rho0 = M / (4 * np.pi * Rd**2 * hz)
+        return (rho0 * radial * vertical).astype(np.float32)
 
-    # --- Kernel: build and compute safely (defensive) ---
-    # PATCH: pass beta into the kernel grid builder
+    rho_star = get_rho_component(gal["Mstar"], gal["Rd_star"], gal["hz_star"])
+    rho_gas  = get_rho_component(gal["Mgas"],  gal["Rd_gas"],  gal["hz_gas"])
+
+    # Newtonian potentials
+    phi_star = phi_newtonian_from_rho(rho_star, Lbox, Gval=G32)
+    gx_star, gy_star, _ = gradient_from_phi(phi_star, Lbox)
+
+    phi_gas = phi_newtonian_from_rho(rho_gas, Lbox, Gval=G32)
+    gx_gas, gy_gas, _ = gradient_from_phi(phi_gas, Lbox)
+
+    # Total baryonic field 
+    gx_b = gx_star + gx_gas
+    gy_b = gy_star + gy_gas
+
+    # --- Kernel: build and compute safely ---
     U = get_U_grid(n, Lbox, L, kernel, beta=beta)
 
     phi_K_raw = None
@@ -436,8 +582,58 @@ def predict_rc_for_params(gal, L, mu, kernel, beta=1.0):
     try:
         # convolution -> raw kernel potential
         phi_K_raw = conv_fft(rho, U, zero_mode=True)
+        # ---- EXTENDED FFT NORMALIZATION DIAGNOSTIC ----
+        # compute dx/cell_vol to convert sums <-> integrals
+        dx = float(axis[1] - axis[0])
+        cell_vol = dx**3
 
-        # Apply polarity sign and coupling
+        # basic sums for sanity
+        sum_U = float(np.sum(U) * cell_vol)
+        sum_rho = float(np.sum(rho) * cell_vol)
+        sum_phiKraw = None
+        try:
+            sum_phiKraw = float(np.sum(phi_K_raw) * cell_vol)
+        except Exception:
+            pass
+
+        # min/max checks
+        U_min, U_max = float(np.min(U)), float(np.max(U))
+        rho_min, rho_max = float(np.min(rho)), float(np.max(rho))
+
+        debug(f"[FFTDBG] dx={dx:.3g} sum_U={sum_U:.6e} sum_rho={sum_rho:.6e} raw_phi_sum={sum_phiKraw}")
+        debug(f"[FFTDBG] U_min/max={U_min:.6e}/{U_max:.6e} rho_min/max={rho_min:.6e}/{rho_max:.6e}")
+
+        # quick functional tests: convolve a uniform field and a test delta-like field
+        try:
+            ones = np.ones_like(rho, dtype=rho.dtype)
+            test_phi_ones = conv_fft(ones, U, zero_mode=True)
+            test_sum_ones = float(np.sum(test_phi_ones) * cell_vol)
+            debug(f"[FFTDBG] test_conv(ones) sum={test_sum_ones:.6e}")
+        except Exception as e:
+            debug(f"[FFTDBG] test_conv(ones) failed: {e}")
+
+        try:
+            # delta at center
+            delta = np.zeros_like(rho, dtype=rho.dtype)
+            cx = cy = n // 2
+            delta[cx, cy, n // 2] = 1.0 / cell_vol   # unit integral
+            test_phi_delta = conv_fft(delta, U, zero_mode=True)
+            test_sum_delta = float(np.sum(test_phi_delta) * cell_vol)
+            test_min, test_max = float(np.min(test_phi_delta)), float(np.max(test_phi_delta))
+            debug(f"[FFTDBG] test_conv(delta) sum={test_sum_delta:.6e} min={test_min:.6e} max={test_max:.6e}")
+        except Exception as e:
+            debug(f"[FFTDBG] test_conv(delta) failed: {e}")
+
+        # ---- FFT NORMALIZATION DIAGNOSTIC ----
+        dx = float(axis[1] - axis[0])
+        cell_vol = dx**3
+        try:
+            raw_sum = float(np.sum(phi_K_raw) * cell_vol)
+            debug(f"[FFTDBG] dx={dx:.3g} raw_phi_sum={raw_sum:.6e}")
+        except Exception:
+            debug("[FFTDBG] conv_fft returned non-array or failed sum diagnostic")
+
+        # polarity sign and coupling
         phi_K = (POLARITY_SIGN * mu * G32 * phi_K_raw).astype(np.float32)
 
         # gradients -> forces from kernel
@@ -445,44 +641,153 @@ def predict_rc_for_params(gal, L, mu, kernel, beta=1.0):
 
     except Exception as e:
         print(f"[ERROR] Kernel computation failed for L={L}, mu={mu}: {e}")
-        # leave gx_K, gy_K as zeros
-
-    # --- Polarity diagnostic ---
+    # ============================================================
+    #  POLARITY DIAGNOSTIC + AUTO-FLIP
+    # ============================================================
     iz = n // 2
     try:
         offset = int(round(10.0 / max(1e-6, (2.0 * Lbox) / float(n))))
         ix = n // 2 + offset
         iy = n // 2
-
         if 0 <= ix < n:
             _b = float(gx_b[ix, iy, iz])
             _k = float(gx_K[ix, iy, iz])
             if (_b > 0 and _k < 0) or (_b < 0 and _k > 0):
-                print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: "
-                      f"baryon={_b:.3e}, kernel={_k:.3e}")
+                print(f"[WARNING] Polarity mismatch at L={L}, mu={mu}: baryon={_b:.3e}, kernel={_k:.3e}")
+    except Exception:
+        pass
+
+    # Global dot-test for polarity
+    dot_prod = np.nansum(gx_b[:, :, iz] * gx_K[:, :, iz] +
+                         gy_b[:, :, iz] * gy_K[:, :, iz])
+    mag_bary = np.sqrt(np.nansum(gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2))
+    mag_kern = np.sqrt(np.nansum(gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2))
+    debug(f"[POLDBG] dot_prod={dot_prod:.6e}, mag_bary={mag_bary:.6e}, mag_kern={mag_kern:.6e}")
+
+    if (dot_prod < 0) and (mag_kern > 0) and (abs(dot_prod) > 1e-6 * mag_bary * mag_kern):
+        debug("[POLDBG] Anti-aligned fields detected. Flipping kernel sign.")
+        gx_K[:, :, iz] = -gx_K[:, :, iz]
+        gy_K[:, :, iz] = -gy_K[:, :, iz]
+
+    # ============================================================
+    #  RADIAL PROFILES — PER-COMPONENT g^2 MAPS
+    # ============================================================
+    g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + \
+                 (gy_b[:, :, iz] + gy_K[:, :, iz])**2
+    g_bary_sq = gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2
+    g_kern_sq = gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2
+    g_star_sq = gx_star[:, :, iz]**2 + gy_star[:, :, iz]**2
+    g_gas_sq  = gx_gas[:, :, iz]**2  + gy_gas[:, :, iz]**2
+
+    # ============================================================
+    # AVERAGE g^2 THEN TAKE SQRT
+    # ============================================================
+    R_centers, g2_mean_total = radial_profile_2d(g_total_sq, dx, R_obs_max, nbins=RADIAL_BINS)
+    _,         g2_mean_bary  = radial_profile_2d(g_bary_sq, dx, R_obs_max, nbins=RADIAL_BINS)
+    _,         g2_mean_kern  = radial_profile_2d(g_kern_sq, dx, R_obs_max, nbins=RADIAL_BINS)
+    _,         g2_mean_star  = radial_profile_2d(g_star_sq, dx, R_obs_max, nbins=RADIAL_BINS)
+    _,         g2_mean_gas   = radial_profile_2d(g_gas_sq,  dx, R_obs_max, nbins=RADIAL_BINS)
+
+    g_mean_total = np.sqrt(np.maximum(g2_mean_total, 0.0))
+    g_mean_bary  = np.sqrt(np.maximum(g2_mean_bary,  0.0))
+    g_mean_kern  = np.sqrt(np.maximum(g2_mean_kern,  0.0))
+    g_mean_star  = np.sqrt(np.maximum(g2_mean_star,  0.0))
+    g_mean_gas   = np.sqrt(np.maximum(g2_mean_gas,   0.0))
+
+    # ============================================================
+    #  VELOCITY FIELDS 
+    # ============================================================
+    v_total_model = np.sqrt(np.maximum(R_centers * g_mean_total, 0.0))
+    v_baryons     = np.sqrt(np.maximum(R_centers * g_mean_bary,  0.0))
+    v_kernel      = np.sqrt(np.maximum(R_centers * g_mean_kern,  0.0))
+    v_star        = np.sqrt(np.maximum(R_centers * g_mean_star,  0.0))
+    v_gas         = np.sqrt(np.maximum(R_centers * g_mean_gas,   0.0))
+
+    # ============================================================
+    #  AUTHORITATIVE QUADRATURE OVERWRITE 
+    # ============================================================
+    v_total = np.sqrt(np.maximum(v_star**2 + v_gas**2 + v_kernel**2, 0.0))
+    v_combined = np.sqrt(np.maximum(v_baryons**2 + v_kernel**2, 0.0))
+    maxdiff = np.nanmax(np.abs(v_total - v_combined))
+    if maxdiff > 1e-6:
+        fix(f"[FIX] Overwriting v_total by quadrature (diff={maxdiff:.3g})")
+        v_total = v_combined
+
+    # ============================================================
+    #  BUILD OBSERVED VELOCITIES ON MODEL RADIAL GRID
+    # ============================================================
+    try:
+        R_obs, V_obs = obs  
+        v_obs = np.interp(R_centers, R_obs, V_obs, left=np.nan, right=np.nan)
+    except Exception:
+        print("[ERROR] Could not build v_obs; skipping alpha-fit")
+        v_obs = np.full_like(R_centers, np.nan)
+    # ============================================================
+    #  ALPHA AMPLITUDE FIT 
+    # ============================================================
+    valid_obs = (~np.isnan(v_obs)) & (v_obs > 0)
+    mask = valid_obs & (v_kernel > 1e-6)
+
+    if np.count_nonzero(mask) >= 5:
+        eps = 1e-8
+        v_total_before = v_total.copy()
+
+        num = (v_obs[mask]**2 - v_baryons[mask]**2)
+        den = (v_kernel[mask]**2 + eps)
+        alpha2 = np.nanmean(np.clip(num / den, 0, None))
+        alpha = np.sqrt(alpha2) if alpha2 > 0 else 1.0
+        debug(f"[ALPHA] alpha_raw={alpha:.4g}")
+
+        # Apply alpha (auditable)
+        v_kernel = v_kernel * alpha
+        v_total  = np.sqrt(np.maximum(v_baryons**2 + v_kernel**2, 0.0))
+
+        # error metrics for diagnostics
+        err_before = np.nanmean((v_obs[mask] - v_total_before[mask])**2)
+        err_after  = np.nanmean((v_obs[mask] - v_total[mask])**2)
+        debug(f"[ALPHA] err_before={err_before:.4g}, err_after={err_after:.4g}")
+
+    else:
+        debug("[ALPHA] skipped — insufficient valid points for alpha-fit")
+
+    # ---------------------------------------------------------------
+    # POSTFIX DIAGNOSTICS / SANITY CHECKS
+    # ---------------------------------------------------------------
+    try:
+        debug("[KDBG] U.mean(before)=", U_mean)
+        debug("[KDBG] U.integral_before =", np.sum(U) * dx**3)
+        debug("[KDBG] desired_integral =", 1.0/float(L))
+        debug("[KDBG] U.scale_applied =", scale)
+        debug("[KDBG] U.mean(after)=", float(np.mean(U)))
+        debug("[KDBG] U.flat[0]=", float(U.flat[0]))
+        debug("[DBG] POLARITY_SIGN =", POLARITY_SIGN)
+        debug("[DIAG] U_mean_before =", U_mean)
+        debug("[DIAG] U_integral_before =", current_integral)
+        debug("[DIAG] U_integral_after =", float(np.sum(U) * dx**3))
+        debug("[DIAG] U_scale_applied =", float(scale))
+        debug("[DIAG] R_centers[:10] =", R_centers[:min(10, len(R_centers))])
+        debug("[DIAG] g_mean_total[:6] =", g_mean_total[:6])
+        debug("[DIAG] g_mean_bary[:6]  =", g_mean_bary[:6])
+        debug("[DIAG] g_mean_kern[:6]  =", g_mean_kern[:6])
+        debug("[DIAG] v_star[:5] =", v_star[:5] if 'v_star' in locals() else 'NA')
+        debug("[DIAG] v_gas[:5]  =", v_gas[:5]  if 'v_gas'  in locals() else 'NA')
+        debug("[DIAG] v_kernel[:5] =", v_kernel[:5])
+        debug("[DIAG] polarity: dot_prod, mag_bary, mag_kern =", dot_prod, mag_bary, mag_kern)
 
     except Exception:
         pass
 
-    # RETURN expected values (handled elsewhere in full pipeline)
-    # Not included here because you only gave the middle block.
-    # Your full file should already have the R_pred, V_pred logic below.
+    # composition consistency check
+    v_combined_post = np.sqrt(np.maximum(v_baryons**2 + v_kernel**2, 0.0))
+    maxdiff2 = np.nanmax(np.abs(v_total - v_combined_post))
+    if maxdiff2 > 1e-6:
+        print(f"[WARN] v_total vs sqrt(v_baryons^2+v_kernel^2) mismatch: max diff = {maxdiff2:.6g} km/s")
+    else:
+        print("[OK] v_total composition check passed (quadrature).")
 
-
-    # Combine vectors (vector sum) then convert to radial profile magnitudes
-    g_total_sq = (gx_b[:, :, iz] + gx_K[:, :, iz])**2 + (gy_b[:, :, iz] + gy_K[:, :, iz])**2
-    g_baryon_sq = gx_b[:, :, iz]**2 + gy_b[:, :, iz]**2
-    g_kernel_sq = gx_K[:, :, iz]**2 + gy_K[:, :, iz]**2
-
-    R_centers, g_mean_total = radial_profile_2d(np.sqrt(g_total_sq), dx, R_obs_max, nbins=RADIAL_BINS)
-    _, g_mean_baryons = radial_profile_2d(np.sqrt(g_baryon_sq), dx, R_obs_max, nbins=RADIAL_BINS)
-    _, g_mean_kernel = radial_profile_2d(np.sqrt(g_kernel_sq), dx, R_obs_max, nbins=RADIAL_BINS)
-
-    v_total = np.sqrt(np.maximum(R_centers * g_mean_total, 0.0))
-    v_baryons = np.sqrt(np.maximum(R_centers * g_mean_baryons, 0.0))
-    v_kernel = np.sqrt(np.maximum(R_centers * g_mean_kernel, 0.0))
-
-    # Safe cleanup (avoids UnboundLocalError)
+    # ---------------------------------------------------------------
+    # Safe cleanup
+    # ---------------------------------------------------------------
     for v in ("rho", "phi_b", "phi_K_raw", "phi_K",
               "gx_b", "gy_b", "gx_K", "gy_K", "g_total_sq"):
         if v in locals():
@@ -493,6 +798,7 @@ def predict_rc_for_params(gal, L, mu, kernel, beta=1.0):
 
     gc.collect()
     return R_centers, v_total, v_baryons, v_kernel
+
 
 def mafe(pred_at_R, obs_V):
     return float(np.median(np.abs(pred_at_R - obs_V) / np.clip(obs_V, 1e-6, None)))
@@ -506,7 +812,7 @@ def main():
     table_path = os.path.join("data", "galaxies.csv")
     gals = read_galaxy_table(table_path)
 
-    print(f"Initializing Ananta Surveyor for {len(gals)} galaxies...")
+    log(f"Initializing H1 Surveyor for {len(gals)} galaxies...")
     mode = f"SINGLE({TARGET_GALAXY})" if TARGET_GALAXY is not None else "FULL"
     print(f"Mode: {mode}")
 
