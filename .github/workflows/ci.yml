@@ -1,10 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch: # CI temporarily set to manual-only during final freeze and repo cleanup
+
 
 jobs:
   python-run:
