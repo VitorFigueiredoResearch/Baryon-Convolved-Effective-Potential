@@ -1,450 +1,1137 @@
-\begin{filecontents*}{references.bib}
-	@article{lelli2016sparc,
-		author  = {Lelli, Federico and McGaugh, Stacy S. and Schombert, James M.},
-		title   = {SPARC: Mass Models for 175 Disk Galaxies with Spitzer Photometry at 3.6 $\mu$m},
-		journal = {The Astronomical Journal},
-		year    = {2016},
-		volume  = {152},
-		number  = {6},
-		pages   = {157},
-		doi     = {10.3847/0004-6256/152/6/157}
-	}
-	@article{famaey_mcgaugh_2012_lrr,
-  author={Famaey, Benoit and McGaugh, Stacy S.},
-  title={Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions},
-  journal={Living Reviews in Relativity},
-  year={2012}, volume={15}, pages={10},
-  doi={10.12942/lrr-2012-10}
-}
-	@article{meidt2014mlr36,
-		author  = {Meidt, S. E. and Schinnerer, E. and van de Ven, G. and others},
-		title   = {Reconstructing the Stellar Mass Distributions of Galaxies from S$^4$G IRAC 3.6 $\mu$m Images: Implications for the Stellar Mass-to-Light Ratio},
-		journal = {The Astrophysical Journal},
-		year    = {2014},
-		volume  = {788},
-		number  = {2},
-		pages   = {144},
-		doi     = {10.1088/0004-637X/788/2/144}
-	}
-	@article{schombert2014cmlr,
-		author  = {Schombert, James M. and McGaugh, Stacy S.},
-		title   = {Color--Mass-to-Light Ratio Relations for Disk Galaxies},
-		journal = {The Astronomical Journal},
-		year    = {2014},
-		volume  = {148},
-		number  = {4},
-		pages   = {77},
-		doi     = {10.1088/0004-6256/148/4/77}
-	}
-	@article{dutton2014mcr,
-		author  = {Dutton, Aaron A. and Macci{\`o}, Andrea V.},
-		title   = {Cold Dark Matter Haloes in the Planck Era: Concentration--Mass Relation},
-		journal = {Monthly Notices of the Royal Astronomical Society},
-		year    = {2014},
-		volume  = {441},
-		number  = {4},
-		pages   = {3359--3374},
-		doi     = {10.1093/mnras/stu742}
-	}
-	@article{planck2018vi,
-		author  = {{Planck Collaboration} and Aghanim, N. and Akrami, Y. and others},
-		title   = {Planck 2018 Results. VI. Cosmological Parameters},
-		journal = {Astronomy \& Astrophysics},
-		year    = {2020},
-		volume  = {641},
-		pages   = {A6},
-		doi     = {10.1051/0004-6361/201833910}
-	}
-	@article{rahvar2014_nonlocal_rotation,
-		author  = {Rahvar, S. and Mashhoon, B.},
-		title   = {Observational Tests of Nonlocal Gravity: Galaxy Rotation Curves and Clusters of Galaxies},
-		journal = {Physical Review D},
-		year    = {2014},
-		volume  = {89},
-		pages   = {104011},
-		doi     = {10.1103/PhysRevD.89.104011}
-	}
-	@article{cisneros2014_lcm,
-		author  = {Cisneros, S. and Oblath, N. S. and Formaggio, J. A. and others},
-		title   = {The Luminous Convolution Model as an Alternative to Dark Matter in Spiral Galaxies},
-		journal = {arXiv e-prints},
-		year    = {2014},
-		eprint  = {1407.7583},
-		archivePrefix = {arXiv}
-	}
-@article{milgrom1983_mond,
-  author={Milgrom, Mordehai},
-  title={A modification of the Newtonian dynamics as a possible alternative to the hidden mass hypothesis},
-  journal={Astrophysical Journal},
-  year={1983}, volume={270}, pages={365--370},
-  doi={10.1086/161130}
-}
-	@article{bekenstein2004_teves,
-  author={Bekenstein, Jacob D.},
-  title={Relativistic gravitation theory for the MOND paradigm},
-  journal={Physical Review D},
-  year={2004}, volume={70}, pages={083509},
-  doi={10.1103/PhysRevD.70.083509}
-}
-	@article{famaey2012mondreview,
-		author = {Famaey, Benoit and McGaugh, Stacy S.},
-		title  = {Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions},
-		journal = {Living Reviews in Relativity},
-		year = {2012},
-		volume = {15},
-		pages  = {10},
-		doi    = {10.12942/lrr-2012-10}
-	}
-	@article{FamaeyMcGaugh2012,
-		author  = {Famaey, Benoit and McGaugh, Stacy S.},
-		title   = {Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions},
-		journal = {Living Reviews in Relativity},
-		year    = {2012},
-		volume  = {15},
-		pages   = {10},
-		doi     = {10.12942/lrr-2012-10}
-	}
-	@article{Bekenstein2004,
-		author  = {Bekenstein, Jacob D.},
-		title   = {Relativistic Gravitation Theory for the MOND Paradigm},
-		journal = {Phys. Rev. D},
-		year    = {2004},
-		volume  = {70},
-		pages   = {083509},
-		doi     = {10.1103/PhysRevD.70.083509}
-	}
-	@software{H1_repo_2025,
-  author    = {Figueiredo, Vítor M. F.},
-  title     = {Baryon-Convolved Effective Potential (H1)},
-  year      = {2025},
-  publisher = {Zenodo},
-  version   = {v0.1.0-rc},
-  doi       = {10.5281/zenodo.16967259},
-  url       = {https://doi.org/10.5281/zenodo.16967259}
-}
-
-\end{filecontents*}
-
 \documentclass[11pt,a4paper]{article}
 
-% ---------- Packages ----------
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage[a4paper,margin=1in]{geometry}
+% ===============================
+% Packages
+% ===============================
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage{bm}
+\usepackage{physics}
 \usepackage{graphicx}
-\usepackage{xcolor}
 \usepackage{booktabs}
-\usepackage{siunitx}
-\emergencystretch=2em
-\DeclareSIUnit\kpc{kpc}
-\usepackage[numbers,sort&compress]{natbib}
 \usepackage{hyperref}
-\usepackage[nameinlink,capitalise]{cleveref}
+\usepackage{geometry}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{siunitx}
+\usepackage{xcolor}
 
+\geometry{margin=2.5cm}
 
-% ---------- Hyperref ----------
-\hypersetup{
-	colorlinks=true,
-	linkcolor=blue!50!black,
-	citecolor=teal!60!black,
-	urlcolor=magenta!60!black,
-	pdftitle={An Evolving Effective Potential Model for the Mass Discrepancy in Galaxies},
-	pdfauthor={Vitor M. F. Figueiredo - vitor.figueiredo.research@protonmail.com}
+% ===============================
+% Custom commands
+% ===============================
+\newcommand{\Hone}{\textbf{H1}}
+\newcommand{\SPARC}{\textsc{SPARC}}
+\newcommand{\kms}{\si{\kilo\meter\per\second}}
+\newcommand{\kpc}{\si{\kilo\parsec}}
+
+% ===============================
+% Title
+% ===============================
+\title{
+	H1: A Baryon-Convolved Single-Field Potential \\
+	\large A Resolution-Stable, Nonlocal Alternative Framework for Galaxy Rotation Curves
 }
 
-% ---------- Simple units/macros ----------
-\newcommand{\Msol}{M_{\odot}}
-\newcommand{\dd}{\mathrm{d}}
-\newcommand{\vect}[1]{\bm{#1}}
-\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
-% typographic
-\newcommand{\TF}{Tully--Fisher} % will render as Tully–Fisher under modern engines
-
-% Model symbols
-\newcommand{\Lmem}{L}       % sample-global kernel range [kpc]
-\newcommand{\gain}{\mu}     % global gain (dimensionless)
-\newcommand{\rhob}{\rho_b}  % baryonic density
-\newcommand{\phieff}{\Phi_{\mathrm{eff}}}
-\newcommand{\geff}{\vect{g}_{\mathrm{eff}}}
-
-% Boxed callouts
-\newcommand{\keybox}[1]{%
-	\vspace{0.6em}\noindent
-	\colorbox{gray!10}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{#1}}%
-	\vspace{0.6em}
+\author{
+	Vítor Manuel Franco Figueiredo \\
+	\small Independent Researcher \\
+	\small ORCID: XXXX-XXXX-XXXX-XXXX \\
+	\small Portugal
 }
 
-% =========================================================
+\date{\today}
+
+% ===============================
+% Document
+% ===============================
 \begin{document}
+{\LARGE \textbf{H1: A Baryon-Convolved Single-Field Potential Explaining the Mass Discrepancy in Disk Galaxies}}\\[0.6em]
+{\large Vitor M. F. Figueiredo}\\
+{\small Portugal}\\
+{\small ORCID: 0009-0004-7358-4622}\\
+{\small \href{mailto:Vitor.figueiredo.research@protonmail.com}{Vitor.figueiredo.research@protonmail.com}}\\
+\today\footnote{Project initiated 22 August 2025; DOI registered 27 August 2025.}
+
+
 	
-	\begin{center}
-		{\LARGE \textbf{A Baryon-Convolved Effective Potential for the Mass Discrepancy in Disk Galaxies}}\\[0.6em]
-		{\large Vitor M. F. Figueiredo}\\
-		\texttt{ORCID: 0009-0004-7358-4622 \quad (Vitor.figueiredo.research@protonmail.com)}\\[0.5em]
-		\today
-	\end{center}
-		
-		\begin{abstract}
-			I introduce a \emph{sample-global two-parameter} baryon-built effective potential for disk galaxies. The total field is $\geff=-\nabla\phieff$, with
-			\[
-			\phieff(\vect{r})=\Phi_b(\vect{r})
-			+\gain\,G\!\int \rhob(\vect{r}')\,U\!\big(\lVert\vect{r}-\vect{r}'\rVert;\Lmem\big)\,\dd^3\vect{r}'.
-			\]
-			Here $\Lmem$ (\si{\kpc}) and $\gain$ (dimensionless) are \emph{global across the sample}. “Evolving” indicates that $\phieff$ inherits a system’s formation history through its current baryon map; no explicit time dependence is fitted in H1. I benchmark rotation curves against a parity-matched halo baseline, verify BTFR/RAR behavior, and predict galaxy--galaxy lensing without refitting, with hard preregistered fail thresholds.
-		\end{abstract}
-		
-		\section{Introduction}\label{sec:intro}
-		The disk-galaxy mass discrepancy is usually addressed with per-galaxy dark halos. Here I test a parsimonious alternative: a cored, finite kernel convolved with the observed baryons to build an \emph{effective potential} with just two \emph{sample-global} parameters $(\Lmem,\gain)$, then ask if the same field explains RCs, BTFR, RAR, and out–of–sample lensing.
-		\paragraph{Visual intuition (laser and smoke).}
-		Think of the galaxy’s baryons as a three dimensional “smoke” (stars, dust, gas, circumgalactic gas). The bright thin disk is like a horizontal laser sheet slicing the smoke: star formation lights up near the mid--plane, while mass outside the activation layer remains dim. The convolution that defines $\Phi_{\rm eff}$ integrates the \emph{entire} smoke to build one static, sample-global field used for both rotation and lensing.
-		\paragraph{Scope of “evolving” and core postulate.}
-		Here “evolving” means that $\Phi_{\rm eff}$ \emph{inherits} a system’s formation history through the present--day baryon map $\rho_b$; no explicit time dependence is fitted in H1. Our core empirical postulate is \emph{dual--role consistency}: the same scalar potential $\Phi_{\rm eff}$ governs stellar kinematics via $-\nabla\Phi_{\rm eff}$ and sources lensing via the Newtonian Poisson closure $\nabla^2\Phi_{\rm eff}=4\pi G(\rho_b+\rho_{\rm eff})$. This closure is not derived from a fundamental theory here; it is a testable modeling hypothesis adjudicated by the preregistered gates.
-		
-		\section{Model: one potential for kinematics and lensing}\label{sec:model}
-		\paragraph{Definition (scalar form).}
-		
-		\begin{align}
-			\phieff(\vect{r}) &= \Phi_b(\vect{r})
-			+\gain\,G\!\int \rhob(\vect{r}')\,U\!\big(\lVert\vect{r}-\vect{r}'\rVert;\Lmem\big)\,\dd^3\vect{r}', \label{eq:phi_eff}\\
-			\geff(\vect{r}) &= -\nabla\phieff(\vect{r}). \label{eq:geff}
-		\end{align}
-		The radial derivative $K(r;\Lmem)\equiv U'(r;\Lmem)$ is a \emph{cored} acceleration kernel. I test two finite, positive choices:
-		\begin{align}
-			K_{\text{Plummer}}(r;\Lmem) &= \frac{1}{4\pi\,(r^2+\Lmem^2)}, \label{eq:Kpl}\\
-			K_{\exp\text{-core}}(r;\Lmem) &= \frac{e^{-r/\Lmem}}{4\pi\,(r^2+\Lmem^2)}. \label{eq:KexpCore}
-		\end{align}
-		For \eqref{eq:Kpl}, $U(r)=(4\pi\Lmem)^{-1}\arctan(r/\Lmem)$ with $U(0)=0$. For $K_{\exp\text{-core}}$ I evaluate the scalar kernel via its 3D Fourier transform, i.e., I use $\widehat{U}(k)$ numerically; a closed–form $U(r)$ is not required for our FFT pipeline.
-		
-		\paragraph{Kinematics.}
-		For an axisymmetric disk, $v^2(R)=R\,\lVert\geff(R,0)\rVert$ in the mid--plane.
-		
-		\paragraph{Tails and scaling.}
-		I deliberately avoid $K\propto 1/r$ (which hard-wire exactly flat asymptotes) to keep BTFR scaling under control; quasi--flat outer segments are then an empirical outcome over finite radii and are adjudicated by our gates.
-		
-\keybox{\textbf{Single-field statement.}\; I compute one scalar potential $\Phi_{\rm eff}$ from baryons and use it for both kinematics and lensing. Stars trace $-\nabla\Phi_{\rm eff}$. For lensing I form the \emph{total} density $\rho_{\rm tot} \equiv \nabla^2\Phi_{\rm eff}/(4\pi G)$ and project it to $\Sigma$ and $\Delta\Sigma$ (App.~\ref{app:lensing}); the diagnostic decomposition $\rho_{\rm eff}\equiv \rho_{\rm tot}-\rho_b$ is reported but not used for the prediction.}
+\begin{abstract}
+	We present H1, a phenomenological framework for modeling galaxy rotation curves based on a nonlocal convolution of the observed baryonic mass distribution with a finite-range spatial kernel. The model introduces no dark matter particles, modifies no local gravitational laws, and does not propose new relativistic fields. Instead, it explores whether extended spatial correlations in the baryonic distribution can empirically account for observed galactic kinematics.
+	
+	H1 is defined by a minimal set of phenomenological parameters: a characteristic length scale governing the kernel extent and a global amplitude parameter controlling the strength of the nonlocal contribution. These parameters are fitted independently for each galaxy, and no per-galaxy tuning beyond this parameterization is permitted. The numerical pipeline is fully specified, frozen prior to fleet-level analysis, and validated for resolution stability and numerical consistency.
+	
+	We apply H1 to a sample of 175 disk galaxies drawn from the SPARC database, spanning a wide range of masses, surface brightnesses, and gas fractions. Across this heterogeneous sample, the model reproduces a broad diversity of rotation curve morphologies with a median absolute fractional error below the adopted acceptance threshold for a substantial fraction of systems. Failures are explicitly documented and analyzed.
+	
+	This work makes no claim that H1 constitutes a fundamental theory of gravity. Rather, it establishes a reproducible and falsifiable phenomenological framework for testing whether finite-range, nonlocal baryonic response models can capture key features of galaxy rotation curves. The fitted parameter distributions and identified failure regimes provide empirical constraints that any future physical interpretation or theoretical extension must satisfy.
+\end{abstract}
 
 
-		
-		\paragraph{Lensing postulate.}
-		I adopt as a modeling postulate that the same scalar $\Phi_{\rm eff}$ governing kinematics sources weak lensing via the Poisson mapping $\rho_{\rm eff}=\nabla^2\Phi_{\rm eff}/(4\pi G)$ and line–of–sight projection (App.~\ref{app:lensing}).
-		\paragraph{Interpretation.} $\rho_{\rm eff}$ is an \emph{effective} source obtained by inverting Poisson’s equation for the modeled $\Phi_{\rm eff}$; local sign changes (compensation) can occur and are not interpreted as literal negative mass. Lensing is computed from $\Phi_{\rm eff}$ itself (App.~\ref{app:lensing}).
-		
-		\section{Numerical Implementation (simulation-ready)}\label{sec:numerics}
-		\subsection{Grids and padding}\label{subsec:grids}
-		Each galaxy is embedded in $(x,y,z)\in[-R_{\max},R_{\max}]^2\times[-Z_{\max},Z_{\max}]$ with \emph{padding factor 2} per dimension to suppress FFT wrap-around. The kernel is truncated at $R_{\rm trunc}=6\,\Lmem$ (tail contribution $<3\%$ beyond). Grid sizing scales with $\Lmem$: I enforce $R_{\max}\ge 1.5\,R_{\rm trunc}$ so the truncated kernel fits within the padded box for all fitted $L$. The baryon density $\rhob$ stacks stellar disk+bulge (SPARC $3.6\,\mu$m) and gas; scale heights follow catalog values or a thin-disk default.
-		
-		\subsection{FFT recipe: potential then gradient}\label{subsec:fft}
-		Compute $\widehat{U}(\vect{k};\Lmem)$, then
-		\[
-		\widehat{\Phi}_K(\vect{k})=\gain\,G\,\widehat{\rhob}(\vect{k})\,\widehat{U}(\vect{k}),
-		\qquad
-		\widehat{\vect{g}}_K(\vect{k})=i\,\vect{k}\,\widehat{\Phi}_K(\vect{k}),
-		\]
-		and inverse FFT to obtain $\vect{g}_K$; add $\vect{g}_b=-\nabla\Phi_b$ and sample $v(R)$ in the mid--plane. Complexity $O(N\log N)$. I set the $k=0$ component of the potential to zero to remove any box--constant offset (this does not affect $\nabla\Phi$).
-		
-		\paragraph{Axisymmetric speed-up (consistency check).}
-		All reported metrics and figures use the 3D--FFT pipeline; the axisymmetric route is a consistency check only.
-		
-		\subsection{Robustness checks}
-		(i) Mock injection/recovery with SPARC-like noise; (ii) distance/inclination perturbations; (iii) bar/warp masks. Code is version-pinned and containerized.
-		
-		\section{Data and Fitting Protocol}\label{sec:methods}
-		\paragraph{Dataset and cuts.}
-		Preregistered SPARC subset: inclination $\ge 30^\circ$, quality flag $\le 2$, reliable distances/photometry. Stellar $M/L$ priors are SPS--motivated; see \citep{meidt2014mlr36,schombert2014cmlr}.
-		$\Upsilon_\star^{[3.6]}(\mathrm{disk})=0.5\pm 0.1$,
-		$\Upsilon_\star^{[3.6]}(\mathrm{bulge})=0.7\pm 0.1$
-		These $3.6\,\mu$m priors are standard because this band minimizes dust and traces old stellar populations with relatively small population variance; the adopted dispersions follow \citet{meidt2014mlr36,schombert2014cmlr}. I also report a sensitivity test with broadened priors; widening $\Upsilon_\star$ primarily trades against $\mu$, which our gas--dominated dwarf fold mitigates by construction.
-		
-		(Gaussian, truncated at $\pm 2\sigma$). Gas from H\,I with factor 1.33.
-		Stellar $M/L$ priors are SPS–motivated \citep{meidt2014mlr36,schombert2014cmlr}:
-		$\Upsilon_{[3.6],\mathrm{disk}}=0.5\pm0.1$ and
-		$\Upsilon_{[3.6],\mathrm{bulge}}=0.7\pm0.1$
-		(Gaussian, truncated at $\pm2\sigma$). Gas masses include a factor 1.33 for He.
-		These 3.6\,$\mu$m priors minimize dust sensitivity and track old populations with low variance;
-		widening them mainly trades against $\mu$, which our gas–dominated dwarf fold mitigates by design.
-		\paragraph{Baryonic mass modeling (3D).}
-		I deproject SPARC surface maps into a 3D $\rho_b$ as follows.
-		\emph{Stellar disk:} exponential in $R$ with catalog scale length $R_d$ and a vertical profile
-		${\rm sech}^2(z/h_\star)$ (default $h_\star=0.1\,R_d$ when unavailable), normalized to the
-		$3.6\,\mu$m luminosity and $\Upsilon_{[3.6],\mathrm{disk}}$.
-		\emph{Bulge:} spherical Sérsic with catalog $(n,R_e)$ or a de Vaucouleurs fallback, with
-		$\Upsilon_{[3.6],\mathrm{bulge}}$.
-		\emph{Gas:} H\,I surface density with a fixed He factor 1.33; vertical profile ${\rm sech}^2(z/h_{\rm gas})$
-		with $h_{\rm gas}=0.3$\,kpc by default and an optional linear flare $h_{\rm gas}(R)=h_{\rm gas}(0)(1+\alpha R/R_d)$
-		(\emph{sensitivity only}, not tuned).
-		I report a robustness sweep over $(h_\star,h_{\rm gas},\alpha)$ in the supplement; the preregistered fit and gates do not tune them.
-		
-		\paragraph{Global two-parameter fit.}
-		I fit $(\Lmem,\gain)$ by minimizing the velocity-space $\chi^2$ (equivalently RMSE under Gaussian errors) across folds. I report the \emph{median absolute fractional error} (MAFE) and RMSE but do not jointly optimize them; I define $\mathrm{MAFE}=\operatorname{median}_i\!\left(\left|v_{\rm pred}(R_i)-v_{\rm obs}(R_i)\right|/v_{\rm obs}(R_i)\right)$. I report Pearson $r=\mathrm{corr}(\Lmem,\gain)$ and show the \emph{joint posterior / CV scatter} to make any degeneracy explicit.
-		
-		\paragraph{Baseline for comparison.}
-		The comparison baseline uses a per--galaxy \textbf{Burkert} halo (two parameters) under the \emph{same} baryonic priors and CV protocol; an \textbf{NFW} baseline is reported as a sensitivity check.
-		
-		\paragraph{Degeneracy guardrails.}
-		(i) A dedicated CV fold contains gas-dominated dwarfs defined by $M_{\rm gas}/M_\star\ge 1$ (i.e., $f_{\rm gas} \ge 0.5$) and is always present in the 5-fold split; (ii) galaxy-level bootstrap ($B=1000$) for CIs (no point-level leakage).
-		
-		\paragraph{BTFR.}
-		The flat speed $V_f$ is the median of the last $N=4$ valid RC points with $\left|\mathrm{d}\ln v/\mathrm{d}\ln R\right|<0.05$; \emph{the same rule is applied to the halo baseline}. Fit $\log M_b=\alpha\log V_f+\beta$ with intrinsic scatter $\sigma_{\rm int}$.
-		
-		\paragraph{RAR (parity with literature).}
-		RAR is computed as observed total acceleration versus Newtonian baryonic acceleration, \emph{matching the standard literature definition}. I report total scatter and test residual trend vs.\ central surface brightness via a linear slope $t$-test (\textbf{two-sided, $\alpha=0.01$}).
-		
-		\paragraph{Lensing prediction (no retuning).}
-		With $(\Lmem,\gain)$ fixed by RCs, compute $\Delta\Sigma(R)$ and $\gamma_t(R)$ for stacks in \textbf{DES Y3}, \textbf{HSC PDR2}, and \textbf{KiDS-1000} redshift/mass bins (catalog/binning preregistered). The baseline for the variance-reduction gate is baryons--only potential ($\mu=0$) + per-galaxy NFW with a standard mass–concentration prior \citep{dutton2014mcr}, fit per galaxy under the same baryonic priors.
-		
-\paragraph{Cosmology for $\Sigma_{\rm crit}$.}
-Adopt a flat Planck–like cosmology \citep{planck2018vi} (e.g., $\Omega_m=0.315$, $\Omega_\Lambda=0.685$, $h=0.674$) when computing $\Sigma_{\rm crit}$ for all stacks.
+	
+	\tableofcontents
+	\newpage
+	
+\section{Introduction}
 
-		\section{Results}\label{sec:results}
-		\subsection{Rotation curves}
-		Show a 10-galaxy grid; report CV metrics and Pearson $r$ for $\mathrm{corr}(\Lmem,\gain)$ with the joint scatter plot.
-		
-		\subsection{BTFR and RAR}
-		Report $\alpha$, $\sigma_{\rm int}$ (BTFR) and RAR scatter; confirm no significant trend vs.\ surface brightness.
-		
-		\subsection{Lensing stacks}
-		Compare predicted vs.\ observed $\Delta\Sigma(R)$ or $\gamma_t(R)$; report the preregistered residual-variance reduction relative to the baseline and its significance. I will also stratify lensing stacks by posterior quartiles of $L$; the model predicts a monotonic increase of $\Delta\Sigma(R)$ at $R\sim 30$--$200$\,\si{\kpc} with $L$.
-		\paragraph{Planned discriminants (non-gating).}
-		I will compare the predicted vertical force law $K_z(R,z)$ against available stellar
-		$\sigma_z$ measurements, and test for external-field effects by contrasting otherwise similar
-		disks in low/high host-field environments. H1 predicts no intrinsic EFE beyond that encoded in $\rho_b$.
-		
-		\section{Falsification Gates (preregistered)}\label{sec:falsification}
-		\begin{center}
-			\begin{tabular}{@{}lcc@{}}
-				\toprule
-				\textbf{Gate} & \textbf{Pass} & \textbf{Fail}\\
-				\midrule
-				RC residuals & MAFE $\le 10\%$ and CV-RMSE $\le$ baseline\,$+5\%$ & otherwise\\
-				BTFR & $\alpha\in[3.8,4.2]$ and $\sigma_{\rm int}\le 0.12$ dex & otherwise\\
-				RAR & total scatter $\le 0.13$ dex and no trend ($\alpha\!=\!0.01$) & otherwise\\
-				Lensing (prediction)\footnotemark & $\ge 10\%$ residual-variance reduction at $2\sigma$ vs.\ baseline & otherwise\\
-				\bottomrule
-			\end{tabular}
-			\paragraph{Model comparison rationale.}
-			The CV-RMSE margin of $+5\%$ relative to the per-galaxy halo baseline is our parsimony buffer:
-			a two-parameter sample-global model that is within $5\%$ in predictive RMSE is preferred on
-			complexity grounds. As a sensitivity, I also report sample-aggregated $\Delta{\rm BIC}$
-			between H1 and the baseline; $\Delta{\rm BIC}\lesssim -10$ is treated as strong evidence for H1.
-			
-		\end{center}
-		\footnotetext{Relative to the baseline defined in \cref{sec:methods}: baryons--only ($\mu=0$) plus per--galaxy NFW with a standard mass–concentration prior.}
-		\section{Physical Motivation and Theoretical Context}\label{sec:motivation}
-		\paragraph{Why a convolution?}
-		Nonlocal response appears across physics when cumulative structure leaves long--range imprints (screening, memory, effective media). I model such imprinting phenomenologically as a \emph{cored, finite} convolution of the luminous mass, building one field for both stars and photons.
-		
-		\paragraph{Kernel choice and parsimony.}
-		I adopt two cored, positive kernels with finite effective mass: Plummer (\cref{eq:Kpl}) and an exponentially softened core (\cref{eq:KexpCore}). Cored profiles avoid hard--coding flat $1/r$ tails (protecting BTFR scaling) while allowing quasi--flat segments over finite radii. I preregister these two as the primary test and report a \emph{robustness check} across a one--parameter cored family in the supplement (not used for gating).
-		
-		\paragraph{Interpretation of $(L,\mu)$.}
-		$L$ [kpc] is a global correlation length that spreads baryonic influence beyond the bright thin disk; $\mu$ [--] is a dimensionless global gain. H1 does not claim these are fundamental constants; if the gates are passed, the measured $(L,\mu)$ become targets for deeper theory.
-		
-		\paragraph{Sign of $\rho_{\rm eff}$ and compensation.}
-		Because $\rho_{\rm eff}\!\propto\!\nabla^2\Phi_{\rm eff}$ of a smoothed potential, local sign changes (compensation) can occur even with positive $K$. I therefore (i) require physically sensible \emph{projected} lensing profiles and (ii) report a nonnegativity diagnostic (App.~\ref{app:lensing}). This keeps interpretability honest while letting the data decide.
-		
-		\paragraph{Context with prior ideas.}
-		Our approach is phenomenological and distinct from (i) nonlocal gravity kernels fit per galaxy \citep{rahvar2014_nonlocal_rotation} and (ii) luminous--convolution fits with per--galaxy freedom \citep{cisneros2014_lcm}. It also differs from MOND/AQUAL and TeVeS (Sec.~\ref{sec:related_mond}): H1 introduces a \emph{length} scale $L$ via a baryon--built convolution rather than a universal acceleration $a_0$ or a new dynamical field for inertia.
-		
-		\section{Related Work and Distinctions}\label{sec:related}
-		I differ from (i) nonlocal-gravity kernels with tunable functions \citep{rahvar2014_nonlocal_rotation} and (ii) luminous-convolution phenomenology fitted per galaxy \citep{cisneros2014_lcm}: I use a \emph{cored, finite} kernel, fit \emph{one} $(\Lmem,\gain)$ globally, and test RCs, BTFR \citep{lelli2016sparc}, RAR \citep{mcgaugh2016rar}, plus \emph{out-of-sample} lensing with preregistered gates.
-		While MOND posits a universal acceleration scale $a_0$, H1 posits a universal length scale $L$; one potential $\Phi_{\rm eff}$ then governs both stars (via $-\nabla\Phi_{\rm eff}$) and photons (via the Poisson/projected–Hessian route), enabling a direct out–of–sample lensing prediction.
-		
-		\paragraph{Inner--slope diversity (secondary).}
-		I compare the distribution of inner logarithmic slopes ${\rm d}\ln v/{\rm d}\ln R$ over $0.5$--$1.5$ disk scale lengths to SPARC values and report a Kolmogorov--Smirnov distance (non--gating).
-		
-\paragraph{Relation to MOND/TeVeS and other alternatives.}
-While both our framework and MOND reproduce the tight RAR, the control scales and constructions differ.
-MOND introduces a universal \emph{acceleration} $a_0$ and modifies the low-acceleration force law; relativistic completions (e.g., TeVeS) add fields to mediate lensing.
-By contrast, H1 postulates a universal \emph{length} $L$ and a dimensionless gain $\mu$ to build a \emph{baryon–convolved} $\Phi_{\rm eff}$ with Newtonian $1/r^2$ asymptotics.
-Once $\Phi_{\rm eff}$ is formed from the luminous map, galaxy–galaxy lensing follows via the standard Poisson/GR route without per–galaxy halos or extra fields.
-H1 does not predict a canonical external–field effect; any environment dependence enters only through $\rho_b$ and fixed sample cuts.
-I also differ from nonlocal-gravity kernels fit per galaxy and luminous-convolution phenomenology by fitting a single $(L,\mu)$ globally and preregistering RC/BTFR/RAR and out-of-sample lensing gates \citep{rahvar2014_nonlocal_rotation,cisneros2014_lcm,lelli2016sparc,mcgaugh2016rar}.
-For broader context see \citep{famaey2012mondreview} and \citet{bekenstein2004teves}.
+\subsection{The Galactic Mass Discrepancy}
 
-		
-		\section{Discussion and Limitations}\label{sec:discussion}
-		Bars/warps and distance systematics can bias RCs; dwarfs with extreme gas fractions test cored-kernel assumptions. Allowing per-galaxy freedom would improve fits but harm identifiability, intentionally avoided. Follow-up H1b will add a relaxation scale $\tau$ to test look-back lensing and merger activity.
-		\paragraph{Equivalence principles.}
-		Within H1, the same $\Phi_{\rm eff}$ acts on all tracers, so the Weak Equivalence Principle is respected in the phenomenology tested here. I do not address the Strong Equivalence Principle or cosmological backreaction; those require a relativistic completion and are beyond H1's scope.
-		
-		\paragraph{Scope: clusters and ellipticals.}
-		H1 targets rotationally supported disks. Pressure--supported ellipticals and galaxy clusters, where kinematics and lensing probe different regimes, are reserved for follow--up tests with the same $(L,\mu)$ to assess universality.
-		
-		\paragraph{Reading the best--fit $(L,\mu)$.}
-		If the gates are passed, the inferred global $L$ may encode a typical correlation length of baryon--gravity coupling in disks, and $\mu$ a dimensionless gain. I will test correlations between $L$ and outflow/vertical structure proxies (preplanned, non--tuning) to probe physical origin.
-		
-		
-		\section{Conclusion}\label{sec:conclusion}
-		A two-parameter, baryon-built effective potential provides a stringent, falsifiable account of disk-galaxy kinematics. A positive lensing prediction without retuning would argue that much of the discrepancy can be encoded in a sample-global, cored convolution with the luminous matter.
-		
-		\paragraph{Code and Data Availability.}
-		I will release a Dockerized reproducer (fixed CV folds, priors, FFT kernels, and pass-fail gates) upon submission.
-		
-		% =========================================================
-		% APPENDICES
-		% =========================================================
-		\appendix
-		
-		\section{Units and basic behavior}\label{app:units}
-		\subsection*{A.1 Units (single source of truth)}
-		By construction $\,[U]=L^{-1}$ and $[K]=L^{-2}$ so that $\mu\,G\,\rho_b*U$ has units of potential (km$^2$\,s$^{-2}$). 
+Rotation curves of disk galaxies have long provided evidence for a systematic discrepancy between the gravitational acceleration inferred from luminous matter and that predicted by Newtonian dynamics under standard assumptions. Across a wide range of galaxy masses and morphologies, observed circular velocities remain approximately flat or slowly declining at radii where the contribution from baryonic matter alone would predict a significant decrease. This phenomenon, commonly referred to as the \emph{galactic mass discrepancy}, has been confirmed by numerous independent observational programs and remains one of the central empirical challenges in extragalactic astrophysics.
 
-		\subsection*{A.2 Qualitative tails}
-		For compact mass, $K_{\text{Plummer}}\sim (4\pi r^2)^{-1}$ at large $r$, so the added field outside the light declines as $1/r^2$. Over observed finite ranges, the superposition with $\Phi_b$ can produce quasi-flat segments; whether it does so across a sample is addressed empirically by our gates. (Exactly flat asymptotes would follow from $K\!\propto\!1/r$, not adopted here.)
-		
-		\section{Activation window for vertical coupling (sensitivity only)}\label{app:thin}
-		To test sensitivity to thin--disk structure while preserving the isotropy of $U$, I keep the kernel unchanged and apply a fixed, normalized vertical window to the \emph{baryonic density} when forming $\Phi_{\rm eff}$:
-		\[
-		\rho_b^{\rm eff}(R,z) \;=\; \rho_b(R,z)\,W_z(z;h),
-		\qquad
-		W_z(z;h)=\frac{1}{\sqrt{2\pi}\,h}\,e^{-z^2/2h^2},
-		\]
-		with \emph{fixed} $h=\SI{0.3}{\kpc}$ (no new fit DOF). $W_z$ integrates to 1, so mid--plane units and the convolution definition of $\Phi_{\rm eff}$ are preserved. I recompute RC residuals with $\rho_b^{\rm eff}$ for sensitivity only; the preregistered two--parameter fit and gates are unchanged.
-		\paragraph{Interpretation of $\rho_{\rm eff}$.}
-		$\rho_{\rm eff}$ is an \emph{effective} source defined by inverting Poisson’s equation for the modeled $\Phi_{\rm eff}$; local sign changes can occur and should not be interpreted as literal negative mass. Lensing is computed from $\Phi_{\rm eff}$ itself, and $\rho_{\rm eff}$ is used only as a diagnostic decomposition.
-		
-		\section{Lensing from the same potential}\label{app:lensing}
-I map the same $\Phi_{\rm eff}$ to lensing via the Newtonian Poisson closure,
+The prevailing interpretation within the standard cosmological framework attributes this discrepancy to the presence of non-baryonic dark matter halos surrounding galaxies. While this approach has achieved considerable success at cosmological scales, its application at galactic scales introduces a number of persistent tensions, including apparent regularities between baryonic distributions and dynamical responses that are not trivially explained by collisionless halo models.
+
+\subsection{Challenges for Particle Dark Matter at Galactic Scales}
+
+At the scale of individual disk galaxies, several empirical relations have emerged that suggest a tight coupling between the distribution of baryonic matter and the observed gravitational field. Examples include the baryonic Tully--Fisher relation and the observed correlation between local baryonic surface density and dynamical acceleration. These regularities appear across galaxies with diverse formation histories and environments, raising questions about the degree of independence between baryonic structure and the inferred gravitational response.
+
+Within particle dark matter frameworks, reproducing these correlations typically requires complex feedback mechanisms, finely tuned halo properties, or galaxy-specific parameter adjustments. While such approaches remain viable, the persistence and universality of the observed relations motivate the exploration of alternative phenomenological descriptions in which the baryonic distribution plays a more direct role in shaping galactic dynamics.
+
+\subsection{Phenomenological Alternatives}
+
+A number of alternative frameworks have been proposed to address the galactic mass discrepancy without invoking particle dark matter, most notably theories that modify the effective gravitational response at low accelerations or introduce nonlocal interactions. These approaches vary widely in their physical interpretation and mathematical structure, but share a common objective: to reproduce observed galaxy rotation curves with reduced reliance on unseen components.
+
+Phenomenological models in this category have proven valuable as empirical probes, even when not presented as complete theories of gravity. By identifying the minimal structures required to match observations, such models can clarify which features of galactic dynamics are essential and which may be emergent consequences of deeper physical processes.
+
+\subsection{Scope and Motivation of H1}
+
+The present work introduces \textit{H1}, a phenomenological framework in which the gravitational potential of a galaxy is constructed by convolving the observed baryonic mass distribution with a finite-range, nonlocal kernel. The resulting effective potential is single-field in nature and depends solely on the measured baryonic content of the galaxy, without the introduction of particle dark matter or per-galaxy tuning parameters.
+
+H1 is not proposed as a complete or fundamental theory of gravity. Its purpose is more limited and specific: to test whether a resolution-stable, nonlocal baryon–potential coupling can reproduce key features of observed galactic rotation curves across a large and diverse galaxy sample. The emphasis is placed on numerical robustness, parameter parsimony, and transparent reporting of both successes and failures.
+
+By establishing a controlled empirical baseline, H1 aims to clarify the extent to which nonlocal baryonic effects alone can account for the galactic mass discrepancy, and to identify the regimes where such an approach succeeds or breaks down. These results are intended to inform, rather than replace, more comprehensive theoretical developments.
+
+	
+	% ===============================
+	\section{Conceptual Framework}
+	
+	This section defines the conceptual scope of the H1 framework. The aim is to clarify the type of object H1 represents, the assumptions under which it operates, and the limits of its intended interpretation. No claims are made here regarding fundamental modifications of gravity or the microscopic origin of the model ingredients.
+	
+	\subsection{Phenomenological Motivation}
+	
+	H1 is motivated by the persistent empirical mass discrepancy observed in rotationally supported disk galaxies, wherein observed rotation curves deviate systematically from predictions based solely on the Newtonian gravitational field of baryonic matter. While particle dark matter remains the dominant explanatory paradigm on cosmological scales, the tight empirical correlations observed at galactic scales---including relations between baryonic distributions and kinematic responses---suggest that alternative phenomenological descriptions may provide useful insight into this regime.
+	
+	In this context, H1 is constructed as a phenomenological framework designed to probe whether nonlocal responses sourced exclusively by observed baryonic structure can reproduce salient features of galaxy rotation curves without invoking additional matter components or per-galaxy tuning.
+	
+	\subsection{Single-Field, Nonlocal Response}
+	
+	The defining assumption of H1 is that the effective gravitational response at galactic scales may be described by a single scalar potential field whose spatial structure is determined by a nonlocal convolution of the baryonic mass distribution with a fixed kernel.
+	
+	Formally, the framework introduces an effective potential constructed from the observed baryonic density field through a spatial convolution with a kernel of finite extent. This kernel is not interpreted as a particle distribution, force carrier, or independent physical substance. Rather, it encodes a scale-dependent response of the system to its own baryonic configuration.
+	
+	The nonlocal character of the convolution distinguishes H1 from strictly local modifications of gravity while remaining compatible with standard Newtonian dynamics at the level of the Poisson equation applied to the effective potential.
+	
+	\subsection{Baryons as the Sole Source Term}
+	
+	Within H1, the baryonic mass distribution including stellar and gaseous components is treated as the sole source input. No additional dark components are introduced, and no hidden degrees of freedom are assigned on a per-galaxy basis.
+	
+	Importantly, this assumption is restricted in scope: H1 does not assert that baryons determine gravitational dynamics at all scales or in all environments. The framework is explicitly limited to galactic rotation curves and is evaluated only within this domain.
+	
+	\subsection{Global Parameters and Model Discipline}
+	
+	A central design principle of H1 is parameter discipline. The kernel structure and associated parameters are defined globally and held fixed across the galaxy sample.Per-galaxy freedom is limited to the two phenomenological kernel parameters
+	$(L,\mu)$. All other elements of the framework including kernel functional
+	form, normalization, numerical implementation, and fitting procedure are
+	fixed globally across the entire sample.
+	
+	
+	This choice prioritizes empirical stress-testing over optimal individual fits. Systematic mismatches are therefore treated as informative outcomes that delineate the boundaries of the framework’s applicability rather than as failures to be corrected through additional tuning.
+	
+	\subsection{What H1 Does and Does Not Claim}
+	
+	H1 is not presented as a fundamental theory of gravity, nor as a replacement for particle dark matter in cosmological contexts. It makes no claims regarding relativistic consistency, gravitational lensing, or structure formation beyond the specific phenomenology examined here.
+	
+	Instead, H1 should be understood as a constrained empirical model whose purpose is to assess whether a simple, resolution-stable, nonlocal baryon-convolved potential can reproduce characteristic features of disk galaxy rotation curves under globally fixed assumptions.
+	
+	Questions concerning physical interpretation, force normalization, or deeper theoretical embedding are intentionally deferred to subsequent work.
+	
+	
+	% ===============================
+\section{Mathematical Formulation}
+
+This section introduces the mathematical structure of the H1 framework. The formulation is intentionally minimal and phenomenological, specifying only the objects required to define the baryon-convolved potential and its contribution to galactic rotation curves. No claims are made here regarding the fundamental origin of the kernel or its behavior outside the regime explored.
+
+\subsection{Baryonic Source Distribution}
+
+Let $\rho_{\mathrm{b}}(\mathbf{x})$ denote the three-dimensional baryonic mass density of a disk galaxy, constructed from observed stellar and gaseous components. The baryonic distribution is treated as a fixed input, derived directly from photometric and kinematic observations and held constant throughout the analysis. No symmetry assumptions are imposed at the level of the formalism; geometric simplifications enter only at the numerical implementation stage.
+
+
+The total baryonic density is written as
+\begin{equation}
+	\rho_{\mathrm{b}}(\mathbf{x}) = \rho_{\star}(\mathbf{x}) + \rho_{\mathrm{gas}}(\mathbf{x}),
+\end{equation}
+where $\rho_{\star}$ and $\rho_{\mathrm{gas}}$ represent the stellar and gaseous contributions, respectively. No additional source terms are introduced.
+
+\subsection{Nonlocal Kernel Convolution}
+
+H1 postulates that the effective gravitational potential includes a nonlocal
+contribution sourced by the baryonic density through convolution with a spatial
+kernel. The kernel is defined as an isotropic scalar function $U(r; L)$, where
+$r = |\mathbf{x} - \mathbf{x}'|$ and $L$ is a characteristic length scale.
+
+The kernel-convolved potential is defined as
+\begin{equation}
+	\Phi_{\mathrm{K}}(\mathbf{x}) =
+	\mu \int \rho_{\mathrm{b}}(\mathbf{x}')\,
+	U(|\mathbf{x} - \mathbf{x}'|; L)\, d^3\mathbf{x}' .
+\end{equation}
+
+\noindent
+The kernel $U(r;L)$ is treated as a shape-defining function only. Its normalization
+is specified by convention and does not correspond to a physical mass density,
+force law, or conserved quantity. The kernel is assumed to be spherically symmetric,
+time-independent, finite, and integrable over three-dimensional space.
+
+\paragraph{Dimensional consistency.}
+The baryonic density $\rho_{\mathrm{b}}$ has units of mass per volume, while the
+kernel $U(r;L)$ is normalized such that its volume integral introduces no additional
+length scale beyond $L$ itself. Under this convention, the convolution integral
+has dimensions of mass per length, and the amplitude parameter $\mu$ carries the
+remaining dimensional weight required for $\Phi_{\mathrm{K}}$ to have units of
+squared velocity. With this choice, $\Phi_{\mathrm{K}}$ is dimensionally consistent
+with the Newtonian gravitational potential $\Phi_{\mathrm{N}}$.
+
+\noindent
+The gravitational constant $G$ enters the formulation exclusively through the
+Newtonian potential $\Phi_{\mathrm{N}}$, which satisfies the standard Poisson
+equation. No independent coupling constant is introduced for the kernel term.
+Accordingly, $\Phi_{\mathrm{K}}$ should be interpreted as an effective
+phenomenological contribution to the total potential, whose normalization is fixed
+by convention rather than derived from a fundamental field equation.
+
+\noindent
+For clarity, the kernel normalization specified above defines the \emph{continuous}
+object entering the formal convolution. Numerical enforcement of compact support
+and suppression of uniform background modes are implementation-level operations
+described in Section~4. In particular, removal of the zero-frequency (DC) mode is
+applied only after tapering and discrete normalization, and does not alter the
+shape-defining properties of the kernel or the analytical normalization convention.
+This operation suppresses spurious uniform potential offsets arising from finite
+computational domains and should be understood as a numerical safeguard rather than
+as a modification of the analytical definition of $\Phi_{\mathrm{K}}$.
+\noindent
+Under this normalization convention, the amplitude parameter $\mu$ is not
+dimensionless; it carries the dimensional factors required to map the
+convolved baryonic density into an effective potential with units of squared
+velocity. Accordingly, $\mu$ should be interpreted as a phenomenological
+normalization parameter rather than a pure numerical coefficient.
+
+
+\subsection{Total Effective Potential}
+
+The total effective potential is written as the sum of the Newtonian baryonic potential and the kernel-convolved contribution:
+\begin{equation}
+	\Phi_{\mathrm{tot}}(\mathbf{x}) =
+	\Phi_{\mathrm{N}}(\mathbf{x}) + \Phi_{\mathrm{K}}(\mathbf{x}),
+\end{equation}
+where $\Phi_{\mathrm{N}}$ satisfies the standard Poisson equation.
+No differential equation is assumed for $\Phi_{\mathrm{K}}$; it is defined
+entirely through the nonlocal convolution in Eq.~(4).
+ it is defined entirely through the nonlocal convolution in Eq.~(2)..
+
+\begin{equation}
+	\nabla^2 \Phi_{\mathrm{N}} = 4\pi G \rho_{\mathrm{b}}.
+\end{equation}
+
+No modification to the Poisson equation itself is introduced. All departures from Newtonian expectations arise solely from the presence of the nonlocal term $\Phi_{\mathrm{K}}$.
+
+\subsection{Circular Velocity Relation}
+
+For rotationally supported disk galaxies, the predicted circular velocity at
+cylindrical radius $R$ in the disk midplane is obtained from the radial derivative
+of the total effective potential,
+\begin{equation}
+	V_{\mathrm{tot}}^2(R) = R\, \left.\frac{\partial \Phi_{\mathrm{tot}}}{\partial R}\right|_{z=0}.
+\end{equation}
+
+Under the assumption of axisymmetry and circular motion, the total circular
+velocity is evaluated numerically using the quadrature sum of the baryonic and
+kernel-induced contributions,
+\begin{equation}
+	V_{\mathrm{tot}}^2(R) = V_{\mathrm{b}}^2(R) + V_{\mathrm{K}}^2(R),
+\end{equation}
+where $V_{\mathrm{b}}(R)$ is the Newtonian rotation curve sourced by the baryonic
+mass distribution and $V_{\mathrm{K}}(R)$ is the contribution derived from the
+kernel-induced potential $\Phi_{\mathrm{K}}$.
+
+\noindent
+This decomposition is an approximation adopted for numerical robustness and
+consistency across the galaxy sample. In general, the radial derivative of the
+total potential does not strictly decompose into independent squared velocity
+terms, and cross-terms may arise. These effects are neglected here, as the
+quadrature form provides a stable and transparent numerical procedure for
+extracting rotation curves within the phenomenological scope of the H1 framework.
+\noindent
+This quadrature decomposition is an approximation adopted for numerical
+robustness and clarity; it neglects possible cross-terms arising from the
+shared origin of both contributions in a single effective potential.
+
+\subsection{Parameter Scope and Non-Uniqueness}
+
+The H1 framework introduces two global parameters: a characteristic length scale $L$ governing the spatial extent of the kernel, and an amplitude parameter $\mu$ controlling the overall strength of the nonlocal contribution.
+
+No claim is made that this parameterization is unique. Alternative normalizations or force-based formulations may be equally valid or preferable in other contexts. In H1, the present formulation is adopted as a minimal and well-defined starting point for empirical testing under globally fixed assumptions.
+
+The interpretation of these parameters is deferred, and they are treated strictly as phenomenological descriptors within the scope of this work.
+
+	
+\section{Numerical Implementation}
+
+This section describes the numerical realization of the mathematical framework defined in Section~3. The purpose of this section is strictly operational: to document how the continuous equations are discretized and evaluated in a reproducible manner. No claims regarding model performance, empirical success, or parameter interpretation are made here.
+
+All numerical choices described below are fixed \emph{prior} to any parameter fitting or fleet-level analysis and are held constant throughout the study.
+
+\subsection{Spatial Grid and Discretization}
+
+All quantities are evaluated on a uniform three-dimensional Cartesian grid spanning a cubic domain of side length $2L_{\mathrm{box}}$. The grid spacing $\Delta x$ is fixed globally for a given run, and the total number of grid points is chosen to ensure an even grid along each axis.
+
+Continuous volume integrals are approximated by discrete sums according to
+\begin{equation}
+	\int f(\mathbf{x})\, d^3\mathbf{x} \;\rightarrow\;
+	\sum_{i,j,k} f_{ijk}\, (\Delta x)^3.
+\end{equation}
+
+No adaptive refinement, multigrid methods, or resolution-dependent tuning are employed. This choice prioritizes numerical transparency and reproducibility over computational optimization.
+
+Boundary effects are controlled through explicit domain padding; no periodic replication of the baryonic density is assumed beyond the computational volume.
+
+\subsection{Kernel Construction and Tapering}
+
+The kernel $U(r;L)$ is evaluated analytically on the grid as a shape-only function of the radial separation $r$. No amplitude normalization is applied at the analytic level.
+
+To suppress boundary artifacts and long-range aliasing effects associated with finite grids, the kernel is multiplied by a smooth, spherically symmetric radial taper that enforces compact effective support. The taper transitions continuously from unity to zero over a finite radial interval near a prescribed cutoff radius.
+The radial taper is implemented using a Hann-type window function that
+smoothly transitions from unity to zero over a finite radial interval.
+Explicitly, the taper is defined as
 \[
-\nabla^2\Phi_{\rm eff}=4\pi G\,\rho_{\rm tot},\qquad
-\rho_{\rm tot}\equiv\rho_b+\rho_{\rm eff}.
+T(r) = \cos^2\!\left[\frac{\pi(r - R_{\mathrm{inner}})}{2\Delta R}\right]
 \]
-The \emph{prediction} uses $\Sigma_{\rm tot}(R)=\int \rho_{\rm tot}\,{\rm d}l$ and 
-$\Delta\Sigma(R)=\bar{\Sigma}_{\rm tot}(<R)-\Sigma_{\rm tot}(R)$.
-I also report the \emph{diagnostic} component $\rho_{\rm eff}\equiv\rho_{\rm tot}-\rho_b$ to assess compensation; it is not used for gating.
+for $R_{\mathrm{inner}} < r < R_{\mathrm{inner}} + \Delta R$,
+with $R_{\mathrm{inner}} = 5L$ and $\Delta R = L$.
+Outside this interval, the kernel is identically zero.
 
-		
-		\textbf{(ii) Surface density and shear.} Project along the line of sight to get
-		\[
-		\Sigma_{\rm eff}(R)=\int \rho_{\rm eff}(R,l)\,\dd l,\quad
-		\Delta\Sigma(R)=\bar{\Sigma}(<R)-\Sigma_{\rm eff}(R),\quad
-		\gamma_t(R)=\frac{\Delta\Sigma(R)}{\Sigma_{\rm crit}}.
-		\]
-		Equivalently, one may form the 2D lensing potential from the line-of-sight integral of $\phieff$ and take its projected second derivatives; both routes are consistent and implemented numerically from the same $\phieff$ grid.
-\paragraph{Nonnegativity diagnostics (reported, non--gating).}
-I report (i) the fraction of projected radii with $\Sigma_{\rm eff}(R)<0$ and (ii) the 3D compensation ratio
-\[
-f_{\rm neg}^{\rm 3D} \equiv \frac{\int_{\mathcal V}\!\max\{0,-\rho_{\rm eff}\}\,{\rm d}^3\!r}
-{\int_{\mathcal V}\!\max\{0,\rho_{\rm eff}\}\,{\rm d}^3\!r},
-\]
-over $\mathcal V$ spanning the analysis box. Physically acceptable models should have $\Sigma_{\rm eff}(R)\ge 0$ within uncertainties and small $f_{\rm neg}^{\rm 3D}$ (I flag $f_{\rm neg}^{\rm 3D}>0.2$). These are diagnostics only and do not constitute preregistered gates.
-\noindent\textit{Modeling postulate.} In H1, the same scalar $\Phi_{\rm eff}$ that governs kinematics is assumed to source weak lensing via the Newtonian Poisson mapping; this is an empirical hypothesis adjudicated by the preregistered gates.
+The taper is applied \emph{before} any discrete normalization. This ordering ensures that the numerically normalized kernel corresponds exactly to the spatially supported object used in the convolution.
 
-		\section{Reproducibility checklist}\label{app:reprod}
-		\begin{itemize}
-			\item SPARC subset list; CV folds (seed=42); galaxy-level bootstraps ($B=1000$).
-			\item $M/L$ priors and distance/inclination uncertainty models.
-			\item FFT grid sizes; padding factor 2; kernel truncation $R_{\rm trunc}=6\,\Lmem$; $R_{\max}\ge 1.5\,R_{\rm trunc}$.
-			\item Mock injection/recovery scripts and evaluation metrics.
-			\item Pass/fail thresholds mirrored from \cref{sec:falsification}.
-		\end{itemize}
-		\paragraph{Code and Data Availability.}
-  All code and the LaTeX source are archived at Zenodo, DOI: \href{https://doi.org/10.5281/zenodo.16967259}{10.5281/zenodo.16967259}.
+\subsection{Kernel Normalization Convention}
 
-		% ----------------- Bibliography -----------------
-		\bibliographystyle{unsrtnat}
-		\bibliography{references}
-		
-	\end{document}
+After tapering, the kernel is normalized by enforcing a fixed discrete volume integral,
+\begin{equation}
+	\sum_{i,j,k} U_{ijk}\, (\Delta x)^3 = \frac{1}{L}.
+\end{equation}
+
+This condition defines a numerical normalization convention rather than a physical constraint. It is adopted to provide a stable, resolution-aware amplitude scale across different grid spacings and domain sizes. The normalization is applied uniformly across all galaxies and is not adjusted on a per-object basis.
+
+After discrete normalization, any residual constant offset arising from discretization is removed by enforcing zero mean on the kernel grid in real space. This step eliminates spurious uniform background contributions introduced by finite-grid effects while preserving the enforced normalization condition and the spatial structure of the kernel.
+
+
+\subsection{FFT-Based Convolution}
+For clarity, the numerical ordering applied to the kernel is as follows: the analytic kernel is first tapered to enforce compact support, then discretely normalized to satisfy the volume integral condition, after which any residual constant offset is removed in real space. Fourier-space DC suppression is applied only as a consistency check during convolution. At no stage does DC suppression alter the enforced normalization or the spatial form of the kernel.
+
+The kernel-convolved potential is computed via discrete convolution of the baryonic density with the normalized kernel. For computational efficiency, the convolution is evaluated using fast Fourier transforms (FFT), with all transforms performed under a consistent normalization convention.
+
+As a numerical safeguard, the zero-frequency (DC) mode of the kernel is explicitly suppressed in Fourier space prior to convolution. This operation removes uniform potential offsets without modifying spatial gradients and is consistent with the real-space zero-mean enforcement applied after normalization.
+No additional filtering or post-processing is applied.
+
+Diagnostic checks are used to verify linearity and numerical stability of the convolution procedure. These checks are used solely for validation and do not influence parameter fitting or model selection.
+No analogous DC suppression is applied to the baryonic density field, as its zero-frequency component represents the physical total mass of the system and must be retained.
+
+\subsection{Gradient Extraction and Circular Velocity}
+
+The kernel-induced contribution to the circular velocity is obtained from numerical gradients of the convolved potential evaluated in the disk midplane. Radial derivatives are computed using finite differences on the grid and projected onto cylindrical coordinates.
+
+The Newtonian baryonic rotation curve $V_{\mathrm{b}}(R)$ is computed independently using standard methods consistent with the adopted baryonic mass models.
+
+The total predicted rotation curve is evaluated as the quadrature sum
+\begin{equation}
+	V_{\mathrm{tot}}^2(R) = V_{\mathrm{b}}^2(R) + V_{\mathrm{K}}^2(R),
+\end{equation}
+a convention adopted for numerical robustness and consistency. This decomposition is a computational identity and does not imply physically independent components.
+
+\subsection{Pipeline Freeze and Reproducibility}
+
+Once the numerical pipeline is defined, all implementation choices are frozen, including:
+
+\begin{itemize}
+	\item kernel functional form,
+	\item taper profile and support,
+	\item normalization convention,
+	\item grid spacing $\Delta x$ and domain size,
+	\item convolution method,
+	\item gradient and velocity extraction procedures.
+\end{itemize}
+
+No modifications are introduced after fleet-level runs are initiated. All figures and summary statistics are generated automatically from the frozen pipeline. The implementation described in this section defines the sole computational realization of the H1 model used in this work.
+\paragraph{Reproducibility Contract.}
+All results presented in this work are generated using a single, frozen numerical pipeline. The kernel functional form, normalization convention, taper profile, convolution method, velocity extraction procedure, and spatial resolution ($\Delta x = 1.0\,\mathrm{kpc}$) are fixed prior to fleet-level analysis and are not adjusted on a per-galaxy basis. Stability tests exploring alternative resolutions or numerical settings are performed exclusively for validation purposes and are explicitly excluded from reported results. Any modification to these elements constitutes a distinct model realization and is outside the scope of the present work.
+
+	
+\section{Numerical Stability and Validation}
+
+This section documents a series of numerical tests designed to verify that the behavior reported in later sections does not arise from discretization artifacts, resolution-dependent effects, or implementation-specific instabilities. The purpose of these tests is not to assess empirical fit quality, but to establish that the numerical pipeline defined in Section~4 behaves consistently and predictably under controlled variations of numerical parameters.
+
+All tests described below are performed without modifying the kernel functional form, normalization convention, or fitting procedure.
+
+\subsection{Resolution Invariance Tests}
+
+To assess the dependence of the numerical results on spatial resolution, the full convolution pipeline is evaluated at multiple grid spacings $\Delta x$ while holding all physical parameters fixed. For each resolution, the computational domain is adjusted to maintain consistent physical coverage and boundary padding.
+
+The discrete kernel normalization is re-applied independently at each resolution following the procedure described in Section~4. No resolution-dependent tuning is introduced.
+
+Across the tested resolutions, the resulting kernel-convolved potentials and derived rotation curves are found to vary smoothly with $\Delta x$, with no evidence of discontinuities, sign reversals, or unphysical amplification. Differences between resolutions are confined to small-scale smoothing effects consistent with finite differencing and grid discretization.finite differencing and grid discretization, with no qualitative change in radial structure.
+
+These tests indicate that the numerical implementation does not rely on a specific grid resolution to produce stable outputs.
+
+\subsection{\texorpdfstring{$\Delta x$}{dx} Sensitivity Analysis}
+
+In addition to resolution invariance, explicit sensitivity tests are performed by varying the grid spacing $\Delta x$ over a representative range while monitoring diagnostic quantities such as the kernel normalization integral, potential gradients, and characteristic velocity scales.
+
+For each tested $\Delta x$, the discrete kernel integral is verified to satisfy the imposed normalization condition within numerical precision. The zero-mean constraint on the kernel is likewise preserved across resolutions.
+
+No systematic drift or divergence is observed in the derived kernel contribution as $\Delta x$ is varied. In particular, the relative magnitude of the kernel-induced velocity component remains bounded and does not exhibit resolution-driven growth or collapse.
+
+These results demonstrate that the numerical behavior of the kernel contribution is not an artifact of a particular discretization scale.
+
+\subsection{Kernel Survival and Taper Diagnostics}
+
+Because the kernel is subject to explicit tapering to enforce compact effective support, dedicated diagnostics are employed to verify that the taper does not trivially suppress the kernel or introduce spurious numerical behavior.
+
+For each grid configuration, the fraction of grid points with nonzero kernel support is monitored, along with the minimum and maximum kernel values after tapering and normalization. These diagnostics confirm that the kernel retains a finite, spatially extended structure across all tested resolutions.
+
+The ordering of operations—tapering prior to normalization and zero-mean enforcement—is verified to preserve the intended kernel shape while preventing long-range aliasing and boundary leakage. No cases are observed in which the taper eliminates the kernel entirely or reduces it to numerical noise.
+
+These checks ensure that the nonlocal contribution remains a genuine feature of the numerical model rather than a residual artifact.
+
+\subsection{Failure Modes and Safeguards}
+
+The numerical pipeline incorporates explicit safeguards to detect and prevent common failure modes, including singular kernel integrals, zero-amplitude normalization, and unstable convolution behavior.
+
+If a kernel realization fails to satisfy basic normalization or stability criteria, the corresponding configuration is rejected and not included in further analysis. Such failures are logged for diagnostic purposes but do not influence parameter selection or fitting outcomes.
+
+Importantly, no fallback tuning or corrective rescaling is applied to force convergence. When numerical failure occurs, it is treated as an explicit failure of the configuration rather than as a condition to be repaired.
+
+This design choice ensures that the results reported in subsequent sections arise from numerically well-defined configurations and are not stabilized by hidden corrective mechanisms.
+
+	
+\section{Data and Sample Selection}
+
+This section describes the observational data used in this study and the criteria by which galaxies are selected for analysis. No fitting results or performance metrics are discussed here. The purpose of this section is solely to define the empirical input to the H1 framework.
+
+\subsection{The SPARC Galaxy Database}
+
+All observational data used in this work are drawn from the Spitzer Photometry and Accurate Rotation Curves (SPARC) database \cite{lelli2016sparc}. SPARC provides high-quality rotation curves, near-infrared photometry, and homogeneous mass models for a large and diverse sample of disk galaxies.
+
+The database spans a wide range of galaxy properties, including:
+\begin{itemize}
+	\item stellar masses from dwarf systems to massive spirals,
+	\item surface brightness from low- to high-surface-brightness disks,
+	\item gas-dominated and stellar-dominated galaxies,
+	\item rising, flat, and declining rotation curve morphologies.
+\end{itemize}
+
+SPARC is widely used as a benchmark dataset for testing both dark matter and alternative gravity models, making it a suitable and well-understood empirical foundation for this study.
+
+\subsection{Sample Selection Criteria}
+
+The analysis is restricted to galaxies satisfying the following minimal criteria:
+\begin{itemize}
+	\item availability of resolved rotation curve measurements,
+	\item published stellar and gas mass models within SPARC,
+	\item sufficient radial coverage to probe the characteristic shape of the rotation curve.
+\end{itemize}
+
+No galaxies are excluded based on fit quality, morphology, or prior expectations of model performance. The intent is to sample the heterogeneity of observed disk galaxy dynamics rather than to optimize agreement with the model.
+
+The final sample consists of 175 galaxies drawn directly from SPARC without manual curation. This sample size enables statistical characterization of model behavior across galaxy types while remaining computationally tractable.
+
+\subsection{Stellar and Gas Mass Modeling}
+
+Stellar mass distributions are derived from the SPARC near-infrared photometry, converted to mass using the mass-to-light ratios provided in the database. Gas mass distributions are constructed from observed H\,\textsc{i} surface density profiles, including a standard correction for helium.
+
+The stellar and gaseous components are treated as fixed inputs throughout the analysis. No re-scaling, refitting, or modification of the baryonic mass models is performed within the H1 pipeline.
+
+The total baryonic mass density used in the convolution is given by the sum of these stellar and gas components, consistent with the formulation introduced in Section~3.
+
+\subsection{Adopted Observational Uncertainties}
+
+Observed rotation curve uncertainties are taken directly from the SPARC database and include reported measurement errors associated with velocity determinations. No additional error inflation or reweighting is applied.
+
+Systematic uncertainties related to distance estimates, inclination angles, and mass-to-light ratios are acknowledged but not explicitly propagated through the fitting procedure in this work. The impact of such systematics is discussed qualitatively in later sections.
+
+The analysis therefore reflects the model’s behavior under the same observational conditions commonly adopted in rotation curve studies using SPARC.
+The parameter grid spans fixed ranges
+\begin{equation}
+	L \in [L_{\min}, L_{\max}], \qquad \mu \in [\mu_{\min}, \mu_{\max}],
+\end{equation}
+sampled uniformly in parameter space with fixed resolution. 
+The same parameter grid is applied identically to all galaxies in the sample, with no adaptive refinement, rescaling, or per-object adjustment.
+
+	
+\section{Fitting Procedure}
+
+This section describes how model parameters are explored and selected for each galaxy. The procedure is designed to be transparent, reproducible, and explicitly limited in scope. No claims of predictive power are made here; parameter estimation is performed using observed rotation curve data and is therefore descriptive rather than forward-predictive.
+
+\subsection{Parameter Space and Scope}
+
+For each galaxy, the H1 framework involves two phenomenological parameters: a characteristic length scale $L$ governing the spatial extent of the kernel, and an amplitude parameter $\mu$ controlling the strength of the kernel contribution. These parameters are allowed to vary on a per-galaxy basis.
+
+All other elements of the model—including the kernel functional form, taper profile, normalization convention, grid spacing, and convolution pipeline—are fixed globally as described in Sections~3 and~4.
+
+No galaxy-specific tuning of numerical or structural components is permitted.
+
+\subsection{Exploration Strategy}
+
+Parameter exploration is performed by scanning a predefined grid in $(L, \mu)$ space. The ranges and sampling of this grid are chosen prior to fleet-level runs and held fixed across the full sample.
+
+For each parameter pair, the model rotation curve is computed using the frozen numerical pipeline. No iterative refinement, adaptive stepping, or gradient-based optimization is employed. This approach prioritizes transparency and reproducibility over computational efficiency.
+For the present analysis, the parameter grid spans fixed ranges
+$L \in [20, 200]$~kpc and $\mu \in [1, 500]$, sampled logarithmically with
+20 points in $L$ and 25 points in $\mu$, yielding a total of 500 parameter
+combinations evaluated per galaxy. These ranges and sampling are chosen
+prior to fleet-level analysis and are held fixed for all galaxies.
+
+The same exploration strategy is applied uniformly to all galaxies.
+
+\subsection{Error Metric}
+
+Model performance is quantified using the mean absolute fractional error (MAFE),
+\begin{equation}
+	\mathrm{MAFE} = \frac{1}{N} \sum_{i=1}^{N}
+	\left|
+	\frac{V_{\mathrm{model}}(R_i) - V_{\mathrm{obs}}(R_i)}{V_{\mathrm{obs}}(R_i)}
+	\right|,
+\end{equation}
+where $V_{\mathrm{obs}}(R_i)$ are the observed rotation velocities at radii $R_i$, and $V_{\mathrm{model}}(R_i)$ are the corresponding model predictions evaluated on the numerical grid.
+
+This metric provides a scale-free measure of fractional deviation and weights inner and outer radii comparably by construction. No additional weighting by observational uncertainties is applied.
+The mean absolute fractional error is adopted as a descriptive, scale-free metric to characterize fractional deviations across radii, without assuming a specific noise model or likelihood function.
+
+\subsection{Best-Fit Selection}
+
+For each galaxy, the best-fit parameter pair $(L, \mu)$ is defined as the grid point minimizing the MAFE over the explored parameter space.
+
+No post-selection filtering or rejection based on parameter values is performed. All galaxies yield a best-fit pair within the scanned range, regardless of the resulting error magnitude.
+
+The best-fit parameters are reported solely as phenomenological descriptors of each galaxy’s rotation curve under the H1 framework.
+\noindent
+It is important to emphasize that the parameter $\mu$ is not equivalent to a
+stellar mass-to-light ratio. Whereas a mass-to-light ratio rescales the local
+Newtonian contribution $\Phi_{\mathrm{N}}$, the parameter $\mu$ acts exclusively
+on the nonlocal kernel-induced potential $\Phi_{\mathrm{K}}$. Varying $\mu$
+therefore modifies only the spatially extended response to the baryonic
+distribution and cannot be absorbed into a rescaling of the baryonic mass
+normalization.
+
+\subsection{Amplitude Convention}
+
+The amplitude parameter $\mu$ enters multiplicatively in the kernel-convolved potential and is treated as an explicit degree of freedom. Its inclusion reflects the phenomenological nature of the model and is not interpreted as a correction to baryonic mass estimates or as evidence for additional matter components.
+
+No attempt is made to interpret $\mu$ physically within this work. Its role is limited to characterizing the strength of the nonlocal response required to match observed kinematics.
+
+\subsection{Predictive Limitations}
+
+Because $(L, \mu)$ are obtained by fitting to observed rotation curve data, the H1 framework in its present form is descriptive rather than predictive. Given a galaxy’s photometric information alone, the model cannot predict the corresponding rotation curve without reference to kinematic measurements.
+
+This limitation is acknowledged explicitly. The primary objective of the fitting procedure is to characterize how the required kernel parameters vary across galaxy properties, not to provide a forward model of galaxy dynamics.
+
+\subsection{Reproducibility and Constraints}
+
+The fitting procedure is deterministic given the frozen parameter grid, numerical pipeline, and observational inputs. No stochastic elements or adaptive adjustments are introduced.
+
+All reported fits and summary statistics are generated automatically from the same pipeline, ensuring that results can be reproduced exactly from the provided code and data.
+
+
+\section{Results}
+
+This section presents the empirical outcomes of applying the H1 framework
+to the full galaxy sample. All results reported here are obtained using the
+frozen numerical pipeline and fitting procedure described in Sections~4 and~7.
+No post-hoc adjustments or galaxy-specific modifications are introduced.
+
+\subsection{Fleet-wide Error Distribution}
+\label{sec:fleet_mafe}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{figures/fig_mafe_histogram.pdf}
+	\caption{
+		Distribution of median absolute fractional error (MAFE) across the full
+		SPARC sample of 175 galaxies. The histogram summarizes the fleet-wide
+		performance of the H1 model under a frozen numerical pipeline.
+		While a subset of systems achieves low fractional error, the distribution
+		exhibits a broad tail, indicating heterogeneous performance across galaxy
+		morphologies and mass regimes.
+	}
+	\label{fig:mafe_histogram}
+\end{figure}
+
+Figure~\ref{fig:mafe_histogram} shows the distribution of median absolute
+fractional error (MAFE) values across the full sample of 175 galaxies.
+Each MAFE value summarizes the fractional deviation between the observed
+and modeled rotation curves across the sampled radial range for a given
+system.
+
+The resulting distribution is broad and asymmetric, indicating substantial
+heterogeneity in model performance across galaxy morphologies and mass
+regimes. The median MAFE across the sample is $0.215$, with a central
+16--84 percentile range of approximately $[0.115,\,0.675]$.
+
+A non-negligible subset of galaxies is described with comparatively low
+fractional error. Approximately $12\%$ of the sample achieves
+$\mathrm{MAFE} < 0.10$, while $29\%$ of systems fall below a reference
+threshold of $\mathrm{MAFE} < 0.15$. At the same time, a pronounced tail
+toward larger errors is present, reflecting cases in which the kernel-based
+description fails to capture key features of the observed rotation curves.
+
+These statistics are reported descriptively and are not interpreted as
+acceptance or rejection criteria. Galaxies with both low and high residual
+errors are retained in all subsequent analyses. The purpose of this
+distribution is to characterize the aggregate empirical behavior of the
+H1 framework when applied uniformly across a large and diverse galaxy
+sample.
+
+
+\subsection{Representative Rotation Curve Examples}
+
+The H1 framework is applied to a sample of 175 disk galaxies drawn from the SPARC database\cite{lelli2016sparc}, spanning a wide range of baryonic masses, surface brightnesses, gas fractions, and morphological types, including both high- and low-surface-brightness systems.
+
+For each galaxy, the best-fit parameter pair $(L,\mu)$ is obtained by minimizing the mean absolute fractional error (MAFE) over a predefined parameter grid, using the frozen numerical pipeline described in Sections~4 and~7. All galaxies yield a best-fit solution within the explored parameter space.
+
+To illustrate the diversity of model behavior across the full sample, we present rotation curve decompositions for a representative subset of galaxies selected to span low-error, intermediate, and high-error regimes, as well as a range of morphological classes. These examples are not chosen to demonstrate optimal performance, but rather to provide qualitative insight into how the kernel contribution behaves across different systems under identical modeling assumptions.
+\begin{figure}[H]
+	\centering
+	
+	\begin{subfigure}[t]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{figures/rc_F574-1_best.png}
+		\caption{F574--1 (low residual error)}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{figures/rc_NGC3949_best.png}
+		\caption{NGC~3949 (intermediate residual error)}
+	\end{subfigure}
+	
+	\vspace{0.35cm}
+	
+	\begin{subfigure}[t]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{figures/rc_UGC07608_best.png}
+		\caption{UGC~07608 (low surface brightness)}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{figures/rc_NGC4559_best.png}
+		\caption{NGC~4559 (intermediate-mass spiral)}
+	\end{subfigure}
+	
+	\vspace{0.35cm}
+	
+	\begin{subfigure}[t]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{figures/rc_NGC3198_best.png}
+		\caption{NGC~3198 (extended disk)}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{figures/rc_DDO154_best.png}
+		\caption{DDO~154 (high residual error)}
+	\end{subfigure}
+	
+	\caption{Representative rotation curve decompositions for a subset of galaxies drawn from the full SPARC sample. Shown are the observed circular velocities (open circles), the Newtonian baryonic contribution (dotted line), the kernel-induced contribution (dashed line), and the total predicted velocity under the H1 framework (solid line). The selected galaxies span a range of baryonic masses, surface brightnesses, and fit qualities, including systems with low, intermediate, and high residual errors as quantified by the mean absolute fractional error (MAFE). These examples illustrate the diversity of model behavior under a frozen numerical pipeline rather than highlighting optimal fits. All curves are generated using identical numerical settings and fitting procedures, with no galaxy-specific adjustments beyond the fitted parameters $(L,\mu)$.}
+	
+	\label{fig:rc_examples}
+\end{figure}
+
+
+\subsection{Kernel Contribution Characteristics}
+
+Across the full sample, the kernel-induced velocity component
+$V_{\mathrm{K}}(R)$ contributes primarily at intermediate and outer
+galactocentric radii, although its relative magnitude and radial extent
+vary substantially between galaxies.
+
+No universal radial profile or scaling behavior is observed.
+In some systems, the kernel contribution remains subdominant relative to
+the Newtonian baryonic term at all radii, acting as a modest correction to
+the total rotation curve. In other systems, $V_{\mathrm{K}}(R)$ becomes
+comparable to, or exceeds, the baryonic contribution at large radii,
+providing a significant fraction of the total predicted rotational
+velocity.
+
+The radius at which the kernel contribution becomes dynamically relevant,
+as well as its overall amplitude, differs markedly across the sample.
+This diversity persists even among galaxies with similar baryonic masses,
+surface brightnesses, or disk scale lengths, indicating that the kernel
+response is not governed by a single characteristic scale or threshold.
+
+These behaviors reinforce the phenomenological character of the H1
+framework. Within the present model, the kernel term does not encode a
+universal modification to baryonic rotation curves. Instead, it acts as
+a galaxy-specific nonlocal response whose spatial extent and strength are
+summarized by the fitted parameters $(L,\mu)$. The observed diversity in
+kernel behavior motivates an empirical examination of how these parameters
+vary across the galaxy population.
+\subsection{Distribution of Fitted Parameters}
+\label{sec:parameter_distributions}
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/fig_parameter_distributions.pdf}
+	\caption{
+		Distributions of the fitted kernel parameters $L$ and $\mu$ across the full sample
+		of 175 galaxies. Both parameters span wide dynamic ranges, with no evidence for
+		narrow clustering around universal values. The broad and asymmetric distributions
+		indicate substantial galaxy-to-galaxy variation, consistent with the phenomenological
+		nature of the H1 framework.
+	}
+	\label{fig:parameter_distributions}
+\end{figure}
+
+Figure~\ref{fig:parameter_distributions} presents the empirical distributions of the fitted kernel parameters across the full sample. While substantial scatter is present in all cases, the distributions are not consistent with purely random parameter assignment. Instead, broad trends are observed, indicating that the fitted kernel parameters vary systematically with galaxy properties, albeit with large intrinsic dispersion.
+The discrete banding visible in some projections reflects the finite parameter grid used in the frozen fitting procedure, rather than quantization of physical galaxy properties.
+No single scaling relation is tight or universal. Galaxies with similar baryonic masses or disk sizes can exhibit markedly different values of $(L,\mu)$, and conversely, similar parameter values may arise in systems with distinct morphologies. This behavior indicates that the kernel response is sensitive to more than a single global galaxy property.
+
+Importantly, the presence of scatter does not negate the existence of structure. Rather, it suggests that the phenomenological parameters $(L,\mu)$ encode a multidimensional response to baryonic configuration, reflecting the diversity of galactic assembly histories, mass distributions, and dynamical states.
+
+These relations are reported empirically and without interpretation. No functional forms are imposed, and no attempt is made to reduce the observed behavior to a single governing law. The purpose of this analysis is not to establish universality, but to delineate the empirical parameter space that any physical interpretation of the kernel must be able to reproduce.
+
+The observed trends and scatter together define constraints on future extensions of the framework. Any successful theoretical model underlying the H1 phenomenology must accommodate both the absence of universal parameter values and the presence of broad, population-level correlations.
+
+\subsection{Scaling Relations}
+\label{sec:scaling_relations}
+To explore whether the fitted kernel parameters encode systematic behavior across the galaxy population, we examine their dependence on basic global galaxy properties. In particular, we consider correlations between the fitted parameters $(L,\mu)$ and baryonic mass, characteristic disk scale length, and surface brightness indicators derived from the SPARC database.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/fig_scaling_relations.pdf}
+	\caption{
+		Empirical scaling relations between the fitted kernel parameters $(L,\mu)$
+		and basic galaxy properties, including total baryonic mass and characteristic
+		disk scale length. Each point represents a single galaxy from the SPARC sample.
+		No tight correlations or universal scaling relations are observed.
+	}
+	\label{fig:scaling_relations}
+\end{figure}
+
+Figure~\ref{fig:scaling_relations} examines the empirical relationships between
+the fitted kernel parameters $(L,\mu)$ and basic galaxy properties, including
+total baryonic mass and characteristic disk scale length.
+
+Substantial scatter is observed in all parameter–property projections.
+While weak trends are present in certain combinations, no tight scaling
+relations emerge across the full sample. The fitted parameters therefore do
+not collapse onto a single predictive relation with baryonic mass or size.
+
+All trends shown are reported descriptively and without physical interpretation.
+The presence of large intrinsic scatter indicates that, within the present
+framework, the parameters $(L,\mu)$ function as phenomenological descriptors
+rather than as quantities determined uniquely by global galaxy properties.
+
+These scaling relations are presented to document empirical behavior across
+the sample and to provide constraints for future theoretical development,
+rather than to establish physical laws.
+
+\subsection{Failure Modes}
+
+A non-negligible subset of galaxies exhibits large residual errors under the H1 framework. These systems are retained in the analysis without reclassification or exclusion, and their presence is treated as a meaningful empirical outcome rather than an anomaly.
+
+Failures are not uniformly distributed across the sample. Instead, elevated residuals tend to occur preferentially in specific regimes, including galaxies with complex kinematic structure, strong asymmetries, or indications of non-equilibrium dynamics. In several cases, the observed rotation curves display features such as abrupt slope changes or irregular velocity structure that are not well captured by a smooth, axisymmetric convolution model.
+
+Importantly, no post-hoc adjustments or galaxy-specific modifications are introduced to mitigate these failures. All galaxies are analyzed using identical numerical settings, kernel form, normalization convention, and fitting procedure.
+
+The fraction of galaxies exceeding selected reference error thresholds is quantified explicitly and reported as part of the fleet-level statistics. These thresholds are descriptive rather than prescriptive and are not interpreted as acceptance criteria.
+
+The systematic nature of the observed failures suggests that they encode information about the limitations of the present phenomenological framework. Identifying the physical or dynamical origins of these failure modes is deferred to future work and provides a clear target for model refinement beyond H1.
+
+\subsection{Summary of Empirical Findings}
+
+Application of the H1 framework to a sample of 175 disk galaxies yields the following empirical outcomes:
+
+\begin{itemize}
+	\item The overall shapes of observed rotation curves are reproduced with heterogeneous accuracy across the sample.
+	\item The fitted phenomenological parameters $(L,\mu)$ exhibit substantial galaxy-to-galaxy variation.
+	\item No evidence is found for universal or narrowly clustered parameter values within the explored framework.
+	\item Both systematic successes and systematic failures are present and quantitatively identifiable.
+\end{itemize}
+
+Taken together, these results characterize the descriptive capabilities and limitations of the H1 model under a frozen numerical and fitting pipeline. The observed distribution of fit quality, parameter values, and failure modes defines a set of empirical constraints that any future theoretical interpretation or extension of the framework must address.
+
+	
+\section{Interpretation}
+
+This section discusses the empirical patterns reported in Section~8 and explores their possible interpretation within the limited phenomenological scope of the H1 framework. The discussion is restricted to inferences drawn directly from fitted parameters and rotation curve decompositions. No claim is made regarding the fundamental origin of the kernel or its relation to a complete theory of gravity.
+
+\subsection{What the Kernel Captures Empirically}
+
+Across the galaxy sample, the kernel-induced contribution $V_{\mathrm{K}}(R)$ exhibits behavior that is neither purely Newtonian nor reducible to a simple rescaling of the baryonic mass distribution. Instead, it acts as a nonlocal response that depends on the spatial arrangement of baryons over finite radial ranges.
+
+In many systems, the kernel contribution becomes significant only beyond the inner baryon-dominated region, modifying the outer rotation curve slope without strongly affecting the central rise. In other systems, the kernel remains subdominant at all radii. This diversity indicates that the kernel does not encode a universal correction but rather a system-dependent response to baryonic structure.
+
+\subsection{Inner Overshoot and Outer Decay Regimes}
+
+A recurring pattern observed in the rotation curve decompositions is the presence of distinct radial regimes. In the inner regions, where baryonic acceleration is high, the Newtonian contribution alone often reproduces the observed velocity. In these regions, the kernel contribution is either small or rapidly varying.
+
+At intermediate and outer radii, the kernel-induced velocity typically varies more slowly with radius, contributing to flatter or gently declining rotation curves. The transition between these regimes does not occur at a fixed acceleration or radius across the sample, suggesting that the kernel response is sensitive to the detailed mass distribution rather than a single universal threshold.
+
+\subsection{Parameter Variability and Lack of Universality}
+
+The fitted parameters $(L, \mu)$ span wide ranges across the galaxy sample, with no evidence for clustering around universal values. This variability implies that, in its current form, H1 should not be interpreted as a model with universal constants analogous to those appearing in modified gravity proposals.
+
+Instead, $(L, \mu)$ function as phenomenological descriptors that summarize how strongly and over what spatial extent the kernel response manifests in a given system. Their variation reflects genuine diversity among galaxies rather than numerical instability or fitting noise alone.
+This variability further implies that any attempt to reinterpret $(L,\mu)$ as universal constants would be inconsistent with the present empirical findings.
+
+\subsection{Relation to MOND-like Phenomenology}
+
+Although H1 does not introduce an acceleration scale or modify the equations of motion directly, some qualitative similarities with MOND-like phenomenology arise. In particular, the kernel contribution often becomes relevant in regions where baryonic gravity alone underpredicts observed velocities.
+
+However, the absence of a fixed acceleration threshold, combined with the system-dependent nature of $(L, \mu)$, distinguishes H1 from MOND and related formulations. Any resemblance is therefore phenomenological rather than structural, and should not be interpreted as evidence for equivalence or shared underlying dynamics.
+
+
+\subsection{Comparison with Halo-Based Descriptions}
+
+From an empirical standpoint, the behavior captured by the kernel bears resemblance to that produced by cored dark matter halo profiles when fitted on a per-galaxy basis. Both approaches can reproduce a wide variety of rotation curve shapes with a small number of free parameters.
+
+The distinction lies not in immediate fit quality, but in representation: H1 encodes non-Newtonian behavior as a nonlocal response to baryonic structure rather than as an independent mass component. Whether this distinction carries deeper physical significance remains an open question beyond the scope of this work.
+A quantitative comparison with standard halo fits is deferred to future work.
+
+\subsection{Descriptive Versus Predictive Status}
+
+It is important to emphasize that H1, as presented here, is a descriptive framework. The parameters $(L, \mu)$ are obtained by fitting to observed kinematic data and are not predicted from photometry alone.
+
+Consequently, H1 does not currently provide out-of-sample predictions for unseen galaxies. Its value lies instead in establishing a compact and reproducible phenomenological mapping between baryonic distributions and observed rotation curve shapes.
+
+\subsection{Implications for Future Extensions}
+
+The empirical patterns identified in this work define concrete targets for future theoretical development. Any proposed physical interpretation of the kernel must account for:
+
+\begin{itemize}
+	\item the absence of universal parameter values,
+	\item the system-dependent radial onset of kernel effects,
+	\item the coexistence of successes and failures within a single framework.
+\end{itemize}
+
+Future extensions may explore alternative normalization schemes, force-based formulations, or dynamical interpretations. In particular, confronting the kernel-induced potential with gravitational lensing observations will provide a decisive test of whether the phenomenology identified here reflects a genuine gravitational effect or a descriptive parameterization.
+
+\subsection{Summary}
+
+In summary, the H1 framework demonstrates that finite-range, baryon-convolved potentials can reproduce a wide variety of galaxy rotation curve morphologies using a small set of phenomenological parameters. The results neither establish a new theory of gravity nor invalidate existing paradigms, but instead provide a structured empirical landscape against which future models can be tested.
+
+	
+\section{Limitations and Model Status}
+
+This section summarizes the limitations of the H1 framework and clarifies its current scientific status. These limitations are not presented as deficiencies to be concealed, but as defining boundaries that determine the appropriate interpretation of the results reported in this work.
+
+\subsection{Phenomenological Scope}
+
+H1 is a phenomenological framework designed to test whether finite-range, nonlocal convolutions of baryonic mass distributions can reproduce observed galaxy rotation curve morphologies. It does not constitute a fundamental theory of gravity, nor does it propose new field equations, additional dynamical degrees of freedom, or modifications to local gravitational laws.
+
+Accordingly, the framework is intended to characterize empirical behavior within a clearly defined observational domain, rather than to explain the physical origin of that behavior.
+
+\subsection{Descriptive Rather Than Predictive Nature}
+
+In its present form, H1 is descriptive. The parameters $(L, \mu)$ are obtained by fitting to observed kinematic data and are not predicted from photometric information alone. As a result, the framework does not provide out-of-sample predictions for rotation curves of previously unseen galaxies.
+
+This places H1 in the category of empirical modeling rather than predictive theory. Its primary value lies in identifying systematic patterns, constraints, and failure modes that any successful predictive or theoretical extension must ultimately reproduce.
+
+\subsection{Normalization Non-Uniqueness}
+
+The normalization of the kernel employed in this work is a computational convention chosen to ensure numerical stability and resolution invariance across the explored parameter space. It is not derived from first principles and does not correspond to a physical mass density, force law, or conserved quantity.
+
+Alternative normalization schemes, including force-based or gradient-based conventions, may be equally valid or more physically motivated. The exploration of such alternatives is beyond the scope of the present work and is deferred to future studies.
+
+\subsection{Absence of Gravitational Lensing Tests}
+
+The present study focuses exclusively on galactic rotation curves. Gravitational lensing predictions, while conceptually straightforward within the single-potential assumption adopted here, are not evaluated.
+
+Because lensing provides an independent probe of the gravitational potential, its inclusion represents a critical next step in determining whether the kernel-induced contribution reflects a genuine gravitational effect or merely parameterizes kinematic behavior. Until such tests are performed, no claims regarding lensing consistency are made.
+
+\subsection{Limited Parameter Universality}
+
+Despite the use of a common kernel functional form across the full galaxy sample, the fitted parameters $(L, \mu)$ exhibit substantial variation between systems. No evidence for universal parameter values is supported by the present results.
+
+This variability indicates that, if a deeper physical mechanism underlies the observed phenomenology, it must naturally accommodate significant system-dependent behavior rather than enforcing a single universal scale.
+
+\subsection{Degeneracy with Halo-Based Models}
+
+The ability of H1 to reproduce a wide range of rotation curve shapes does not, by itself, distinguish it from halo-based dark matter models with comparable per-galaxy freedom. Both approaches can achieve similar levels of agreement with observed kinematics when allowed similar flexibility.
+
+A quantitative comparison with standard halo models, using consistent statistical metrics and identical data inputs, is therefore required to assess relative parsimony and explanatory power. Such comparisons are deferred to future work.
+
+\subsection{Current Scientific Status}
+
+Taken together, these considerations establish H1 as a controlled phenomenological framework rather than a complete physical theory. Its contribution lies in mapping the empirical behavior of nonlocal baryon-convolved potentials across a large and diverse galaxy sample, and in defining observational constraints that any deeper theoretical interpretation must satisfy.
+
+The framework is intentionally conservative in scope, and its limitations are explicitly documented to prevent overinterpretation of the results.
+
+\section{Comparison with Other Approaches}
+
+This section situates the H1 framework within the broader landscape of models developed to address the galaxy rotation curve problem. The comparison is qualitative and conceptual rather than exhaustive, with the goal of clarifying similarities, differences, and points of contact with existing approaches.
+
+\subsection{Cold Dark Matter Halo Models}
+
+Within the standard $\Lambda$CDM framework, galaxy rotation curves are explained by invoking extended dark matter halos, typically parameterized by profiles such as Navarro--Frenk--White (NFW)\cite{navarro1996nfw, navarro1997nfw}
+ or cored alternatives including Burkert profiles\cite{burkert1995profile}. These models introduce additional mass components whose spatial distributions are not directly constrained by luminous matter.
+
+H1 differs fundamentally in that it introduces no additional matter component. All source terms are derived exclusively from the observed baryonic mass distribution, and departures from Newtonian expectations arise from a nonlocal response rather than from an unseen mass density.
+
+At a phenomenological level, both approaches possess sufficient flexibility to reproduce a wide range of rotation curve shapes when parameters are fit on a per-galaxy basis. A quantitative comparison of statistical performance and parameter economy is therefore required to assess relative parsimony; such a comparison is deferred to future work.
+
+\subsection{MOND and Modified Inertia Frameworks}
+
+Modified Newtonian Dynamics (MOND) and related modified inertia theories \cite{milgrom1983mond, milgrom1983mond2,milgrom1983mond3}alter the effective force law or inertia at low accelerations, typically introducing a characteristic acceleration scale $a_0$. These frameworks emphasize empirical regularities such as the radial acceleration relation and the baryonic Tully--Fisher relation\cite{mcgaugh2016rar, mcgaugh2000btfr}
+.
+
+H1 does not modify the local force law or inertia. Instead, it introduces a nonlocal contribution to the gravitational potential sourced by baryonic matter. The characteristic scale in H1 is spatial rather than accelerational, and no a priori constraints are imposed linking inner and outer dynamics.
+
+As a result, any MOND-like phenomenology that emerges within H1 arises as an empirical outcome rather than as an imposed principle. Whether such relations are preserved, violated, or modified by the framework is an open question addressed elsewhere.
+
+\subsection{Relativistic Modified Gravity Theories}
+
+Relativistic extensions of MOND, such as TeVeS and related multi-field theories, introduce additional scalar, vector, or tensor degrees of freedom to reconcile galactic dynamics with gravitational lensing and cosmological constraints.\cite{milgrom1983mond, milgrom1983mond2, milgrom1983mond3}
+
+
+H1 does not attempt a relativistic completion and introduces no new dynamical fields. It operates entirely within a Newtonian potential framework augmented by a phenomenological nonlocal term. As such, H1 should not be viewed as a competitor to relativistic gravity theories, but rather as a low-energy empirical testbed whose behavior may inform or constrain more complete formulations.
+
+\subsection{Nonlocal and Convolution-Based Gravity Models}
+
+Several authors have explored nonlocal modifications of gravity or convolution-based formulations in which the gravitational response depends on spatially extended kernels. Examples include nonlocal gravity \cite{mashhoon2008nonlocal, rahvar2014nonlocal} models motivated by integro-differential field equations and luminous convolution approaches applied to galactic dynamics.
+
+H1 shares the general concept of spatial convolution but differs in scope and execution. The kernel employed here is explicitly finite-range, numerically compact, and treated as a phenomenological object rather than as the solution to a specific nonlocal field equation. Emphasis is placed on numerical stability, reproducibility, and empirical behavior across a large and heterogeneous galaxy sample.
+
+\subsection{Position of H1 in the Model Landscape}
+
+Taken together, these comparisons place H1 in a distinct and well-defined category:
+
+\begin{itemize}
+	\item H1 does not introduce dark matter particles or halos.
+	\item H1 does not modify local gravitational laws or inertia.
+	\item H1 does not propose new relativistic fields.
+	\item H1 provides a reproducible phenomenological framework based on nonlocal baryon convolution.
+\end{itemize}
+
+Within this context, H1 offers a complementary perspective by framing galaxy rotation curves as the manifestation of a spatially extended response to baryonic structure, rather than as evidence for additional matter components or modified local force laws.
+
+Its primary contribution lies in establishing whether such a framework can capture observed rotation curve morphologies across a diverse galaxy population, and in defining empirical constraints that future theoretical models must satisfy.
+
+	
+\section{Predictions and Falsifiability}
+
+A defining goal of the H1 framework is to remain empirically falsifiable within its stated phenomenological scope. This section summarizes the concrete predictions of the model and delineates the conditions under which it can be tested, constrained, or ruled out. No claim is made that H1 constitutes a complete theory of gravity; it is evaluated strictly as a descriptive framework for galactic rotation curves derived from baryonic structure.
+
+\subsection{Rotation Curve Morphology}
+
+The primary prediction of H1 concerns the morphology of galaxy rotation curves. Given an observed baryonic mass distribution and a specified kernel form, the framework predicts a radial velocity profile determined by the fitted parameters $(L,\mu)$.
+
+H1 is considered successful for a given system if the predicted rotation curve reproduces the observed rise, turnover, and outer behavior within the adopted error metric. Persistent or systematic deviations in specific radial regimes constitute a falsification of the framework for that class of objects.
+
+\subsection{Galaxy-Class Dependent Behavior}
+
+Applied across a heterogeneous galaxy sample, H1 yields testable predictions regarding how its phenomenological parameters vary with galaxy properties. In particular, the fitted parameters $(L,\mu)$ may exhibit correlations with baryonic mass, surface brightness, disk scale length, or gas fraction.
+
+The absence of reproducible trends across the sample would indicate that the kernel-based description lacks explanatory power beyond curve fitting. Conversely, the emergence of systematic scaling behavior would provide empirical constraints on any future theoretical interpretation.
+
+\subsection{Low-Surface-Brightness and Gas-Dominated Systems}
+
+Low-surface-brightness and gas-dominated galaxies constitute a stringent test of the H1 framework, as their dynamics are poorly captured by purely baryonic Newtonian models. If a finite-range nonlocal response plays a meaningful role, H1 predicts that its effects should be most pronounced in such systems.
+
+Failure to reproduce rotation curve morphology in these regimes, or the requirement of extreme or internally inconsistent parameter values, would constitute a clear falsification of the framework for those galaxy classes.
+
+\subsection{Consistency with Empirical Scaling Relations}
+
+Although H1 is not explicitly constructed to enforce empirical scaling relations such as the baryonic Tully--Fisher relation (BTFR) or the radial acceleration relation (RAR), it nonetheless yields predictions for rotational velocities derived from baryonic mass distributions.
+
+Comparisons between H1-derived quantities and established empirical relations therefore provide an important consistency check. Significant and systematic departures from these relations would indicate internal tension within the framework and motivate revision or rejection of the model.
+
+\subsection{Deferred Tests and Out-of-Scope Predictions}
+
+Certain critical tests lie beyond the scope of the present work. In particular, H1 does not yet provide validated predictions for gravitational lensing or cosmological observables. These tests require extending the phenomenological framework into regimes not addressed here and are therefore deferred to future investigation.
+
+These deferred tests represent genuine falsification points rather than guarantees of success. Should future lensing or large-scale tests fail, the kernel-based description explored here would be ruled out as a viable gravitational response model, even if it remains effective as a descriptive parameterization of rotation curve shapes.
+
+\subsection{Summary of Falsifiability}
+
+In summary, H1 is falsifiable at multiple levels:
+\begin{itemize}
+	\item failure to reproduce rotation curve morphology across galaxy classes,
+	\item absence of systematic behavior in fitted parameters,
+	\item inconsistency with established empirical scaling relations,
+	\item instability under numerical or resolution tests.
+\end{itemize}
+
+The framework is intentionally constructed to expose such failures transparently. Whether H1 ultimately succeeds or fails, its value lies in providing a well-defined empirical test of finite-range, nonlocal baryonic response models at galactic scales.
+
+\section{Conclusion}
+
+\subsection{Summary of Findings}
+
+In this work, we introduced H1, a phenomenological framework for modeling galaxy rotation curves based on a finite-range, nonlocal convolution of the observed baryonic mass distribution. The framework was constructed to be minimal, reproducible, and explicitly falsifiable within a clearly defined scope.
+
+Applied to a sample of 175 disk galaxies drawn from the SPARC database, H1 reproduces a broad range of observed rotation curve morphologies across diverse galaxy types, including low-surface-brightness and gas-dominated systems. The numerical pipeline was validated for resolution stability and robustness, and all implementation choices were frozen prior to fleet-level analysis. Systems for which the model fails to reproduce observed kinematics were retained and documented explicitly rather than excluded.
+
+Taken together, the results demonstrate that a finite-range, nonlocal response to baryonic structure can serve as an effective phenomenological description of galactic rotation curves for a substantial subset of galaxies, while simultaneously delineating clear regimes in which this description breaks down.
+\noindent
+The absence of tight correlations between the fitted parameters $(L,\mu)$ and
+global galaxy properties is itself a meaningful empirical outcome. This result
+rules out simple scale-invariant or single-parameter modifications within the
+class of finite-range nonlocal baryonic response models and defines concrete
+constraints that any deeper theoretical interpretation must satisfy.
+
+\subsection{Scientific Status of H1}
+
+H1 is not proposed as a fundamental theory of gravity, nor does it claim to replace dark matter or modified gravity frameworks. Instead, it should be understood as a descriptive and empirical model designed to test whether extended spatial correlations in baryonic mass distributions are relevant to galactic dynamics.
+
+The fitted parameters $(L,\mu)$ are treated strictly as phenomenological descriptors that vary from galaxy to galaxy. Accordingly, H1 in its current form is descriptive rather than predictive: it requires kinematic data to determine parameter values and does not generate rotation curve predictions from photometry alone.
+
+Within this limited scope, H1 is demonstrably falsifiable. The framework can fail by:
+\begin{itemize}
+	\item failing to reproduce rotation curve morphology across galaxy classes,
+	\item exhibiting no systematic behavior in fitted parameters,
+	\item showing instability under numerical or resolution tests,
+	\item or proving inconsistent with established empirical scaling relations.
+\end{itemize}
+
+The value of H1 lies not in asserting a final explanation, but in providing a transparent and reproducible empirical framework against which finite-range, nonlocal response models can be tested, constrained, or rejected.
+
+\subsection{Outlook Toward H2 and Beyond}
+
+The present work establishes a validated numerical and empirical foundation for further investigation. Several natural extensions follow from this framework, including testing consistency with gravitational lensing observations, exploring relations to empirical scalings such as the baryonic Tully--Fisher and radial acceleration relations, and examining whether the phenomenological parameters identified here admit a deeper physical interpretation.
+
+These extensions, collectively referred to as H2 and beyond, will determine whether the nonlocal response explored in H1 reflects a genuine gravitational effect or remains a useful descriptive parameterization. Crucially, the infrastructure developed in this work ensures that such future tests can be conducted without altering the core assumptions or numerical implementation presented here.
+
+All numerical code, analysis scripts, and data products used in this study are publicly available at:
+\begin{center}
+	\texttt{https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential}
+\end{center}
+to facilitate independent verification, reuse, and extension.
+
+Regardless of future outcomes, H1 provides a well-defined empirical benchmark for assessing the role of finite-range, nonlocal baryonic response in galactic dynamics.
+
+
+	% ===============================
+	\appendix
+	% ===============================
+	\section{Numerical Diagnostics}
+	
+	This appendix documents numerical diagnostics performed to validate the stability,
+	consistency, and correctness of the computational pipeline used in this work.
+	These checks are diagnostic in nature and do not influence the fitting procedure
+	or empirical results reported in the main text.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.85\textwidth]{figures/fig_dx_stability_ngc4559.pdf}
+		\caption{
+			Resolution invariance test for the galaxy NGC~4559.
+			The total predicted rotation curve is shown for three spatial resolutions
+			($\Delta x = 0.5$, $0.75$, and $1.0$~kpc), using identical fitting procedures
+			and kernel parameters.
+			The production resolution ($\Delta x = 1.0$~kpc) closely matches the higher-resolution
+			results, demonstrating numerical stability of the convolution pipeline.
+			Deviations at the smallest radii reflect discretization effects and do not
+			affect the global rotation curve morphology.
+		}
+		\label{fig:dx_stability_ngc4559}
+	\end{figure}
+	The resolution-invariance test is shown for NGC~4559 at its best-fit
+	kernel parameters $L = 200$~kpc and $\mu = 10$.
+	
+	\subsection{Kernel Integral Checks}
+	
+	The kernel normalization employed in H1 is defined as a numerical convention
+	rather than a physical constraint. To verify that this convention behaves
+	consistently under discretization, the discrete volume integral of the kernel
+	was evaluated for all resolutions used in the analysis.
+	
+	After application of the radial taper and discrete normalization, the kernel
+	satisfies the imposed integral constraint to within numerical precision across
+	all tested grid spacings. Residual deviations are consistent with finite-grid
+	rounding error and decrease monotonically with increasing resolution.
+	
+	These checks confirm that the normalization procedure is stable, resolution-aware,
+	and does not introduce uncontrolled amplitude drift into the convolution.
+	\noindent
+	At small separations ($r \rightarrow 0$), the kernel is evaluated on the finite
+	three-dimensional grid used for the convolution. This discretization
+	effectively regularizes the kernel at the origin at the scale of a single
+	voxel, preventing singular behavior in the numerical integral without
+	introducing additional physical assumptions.
+	
+	\subsection{FFT Normalization Tests}
+	
+	The convolution between the baryonic density field and the kernel is evaluated
+	using fast Fourier transform (FFT) methods. Several diagnostic tests were
+	performed to ensure correctness and linearity of the FFT implementation.
+	
+	First, convolution linearity was verified by applying the kernel to test density
+	fields with known behavior (uniform fields and localized delta-like distributions),
+	confirming that the resulting potential behaves as expected.
+	
+	Second, the zero-frequency (DC) mode of the kernel was explicitly monitored.
+	The removal of this mode suppresses uniform background offsets in the potential
+	arising from finite-domain discretization. This operation is applied after
+	tapering and normalization and does not affect the shape-defining properties
+	of the kernel.
+	
+	Finally, FFT normalization conventions were held fixed across all runs, and
+	numerical stability was verified under changes in grid resolution and domain
+	size. No resolution-dependent artifacts were observed that affect the qualitative
+	or quantitative results reported in Section~8.
+	\noindent
+	All FFT-based convolutions employ a smooth tapering window to suppress edge
+	discontinuities arising from the finite computational domain. A Hann-type
+	window is applied prior to convolution and zero-mode suppression. Tests using
+	alternative window functions produced no qualitative change in fleet-level
+	error statistics or parameter distributions, indicating that the reported
+	behavior is not an artifact of boundary handling.
+	
+\section{Fleet Summary Tables}
+
+Summary statistics for the full galaxy sample are provided in machine-readable
+form to facilitate independent verification and reuse.
+
+For each galaxy, the following quantities are reported:
+\begin{itemize}
+	\item galaxy identifier,
+	\item best-fit mean absolute fractional error (MAFE),
+	\item fitted kernel parameters $(L,\mu)$,
+	\item characteristic velocity scales of the baryonic, kernel-induced,
+	and total rotation curves,
+	\item diagnostic flags indicating kernel activity and qualitative
+	rotation curve features.
+\end{itemize}
+
+The complete fleet summary is provided as accompanying CSV and JSON files
+in the public repository associated with this work. These tables constitute
+the authoritative record of all fitted results and are not filtered or curated
+beyond the selection criteria described in Section~6.
+No subset selection, filtering, or manual curation was applied to the fleet summary tables beyond the sample criteria defined in Section 6
+\section{Reproducibility and Code Availability}
+
+All numerical results presented in this work were generated using a frozen and
+fully deterministic analysis pipeline.
+
+The following elements were fixed prior to fleet-level execution and were not
+modified thereafter:
+\begin{itemize}
+	\item kernel functional form and taper profile,
+	\item kernel normalization convention,
+	\item spatial grid construction and resolution,
+	\item FFT convolution method and normalization,
+	\item fitting metric and parameter search strategy.
+\end{itemize}
+
+All figures and summary statistics were generated automatically from this frozen
+pipeline without manual intervention or post-processing.
+
+The complete source code, analysis scripts, and processed data products are
+publicly available at:
+\begin{center}
+	\texttt{https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential}
+\end{center}
+
+The repository includes version-controlled scripts for reproducing all figures
+and tables in this paper, along with documentation describing the execution
+environment and data provenance. Independent reproduction of the results
+requires no proprietary software or unpublished data.
+
+
+	% ===============================
+	% Bibliography
+	% ===============================
+	\bibliographystyle{unsrt}
+	\bibliography{references}
+	
+\end{document}
