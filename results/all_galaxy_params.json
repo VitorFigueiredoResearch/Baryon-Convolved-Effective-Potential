@@ -1,0 +1,1052 @@
+{
+  "CamB": {
+    "L": 50.0,
+    "mu": 10.0,
+    "mafe": 1.582637913843352,
+    "kernel": "ananta-hybrid"
+  },
+  "D512-2": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.11486647241779535,
+    "kernel": "ananta-hybrid"
+  },
+  "D564-8": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.269627026812121,
+    "kernel": "ananta-hybrid"
+  },
+  "D631-7": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.7127935810120591,
+    "kernel": "ananta-hybrid"
+  },
+  "DDO064": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1449176740182716,
+    "kernel": "ananta-hybrid"
+  },
+  "DDO154": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.153584128830309,
+    "kernel": "ananta-hybrid"
+  },
+  "DDO161": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.47770227656120906,
+    "kernel": "ananta-hybrid"
+  },
+  "DDO168": {
+    "L": 50.0,
+    "mu": 10.0,
+    "mafe": 0.0976606677503265,
+    "kernel": "ananta-hybrid"
+  },
+  "DDO170": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1987084155249582,
+    "kernel": "ananta-hybrid"
+  },
+  "ESO079-G014": {
+    "L": 50.0,
+    "mu": 300.0,
+    "mafe": 0.2440138034632494,
+    "kernel": "ananta-hybrid"
+  },
+  "ESO116-G012": {
+    "L": 50.0,
+    "mu": 300.0,
+    "mafe": 0.2802706153206062,
+    "kernel": "ananta-hybrid"
+  },
+  "ESO444-G084": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.1914877621929916,
+    "kernel": "ananta-hybrid"
+  },
+  "ESO563-G021": {
+    "L": 80.0,
+    "mu": 500.0,
+    "mafe": 0.3247604429330792,
+    "kernel": "ananta-hybrid"
+  },
+  "F561-1": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 0.15074251582453205,
+    "kernel": "ananta-hybrid"
+  },
+  "F563-1": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.20682178189263822,
+    "kernel": "ananta-hybrid"
+  },
+  "F563-V1": {
+    "L": 80.0,
+    "mu": 200.0,
+    "mafe": 0.08383497655096826,
+    "kernel": "ananta-hybrid"
+  },
+  "F563-V2": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.1886542767180105,
+    "kernel": "ananta-hybrid"
+  },
+  "F565-V2": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1943936495147832,
+    "kernel": "ananta-hybrid"
+  },
+  "F567-2": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1236734303474749,
+    "kernel": "ananta-hybrid"
+  },
+  "F568-1": {
+    "L": 80.0,
+    "mu": 500.0,
+    "mafe": 0.06472301944164843,
+    "kernel": "ananta-hybrid"
+  },
+  "F568-3": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.16855771618744253,
+    "kernel": "ananta-hybrid"
+  },
+  "F568-V1": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.24801771731214894,
+    "kernel": "ananta-hybrid"
+  },
+  "F571-8": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.3378828780836943,
+    "kernel": "ananta-hybrid"
+  },
+  "F571-V1": {
+    "L": 30.0,
+    "mu": 500.0,
+    "mafe": 0.24035143160220823,
+    "kernel": "ananta-hybrid"
+  },
+  "F574-1": {
+    "L": 30.0,
+    "mu": 200.0,
+    "mafe": 0.0485795438285031,
+    "kernel": "ananta-hybrid"
+  },
+  "F574-2": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 0.4130366460871391,
+    "kernel": "ananta-hybrid"
+  },
+  "F579-V1": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.14230729896303917,
+    "kernel": "ananta-hybrid"
+  },
+  "F583-1": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.4883106880090148,
+    "kernel": "ananta-hybrid"
+  },
+  "F583-4": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.15423788099598135,
+    "kernel": "ananta-hybrid"
+  },
+  "IC2574": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2238179274155035,
+    "kernel": "ananta-hybrid"
+  },
+  "IC4202": {
+    "L": 120.0,
+    "mu": 10.0,
+    "mafe": 0.1749704512654725,
+    "kernel": "ananta-hybrid"
+  },
+  "KK98-251": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2169480889769635,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0024": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.5689781191626262,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0055": {
+    "L": 10.0,
+    "mu": 300.0,
+    "mafe": 0.08065483553641313,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0100": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.13239820000380229,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0247": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.20991598190931116,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0289": {
+    "L": 10.0,
+    "mu": 200.0,
+    "mafe": 0.30496178680374103,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0300": {
+    "L": 50.0,
+    "mu": 200.0,
+    "mafe": 0.2585018408504099,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0801": {
+    "L": 80.0,
+    "mu": 10.0,
+    "mafe": 0.13925027071373133,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC0891": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.12005407808299906,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC1003": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2771892635760669,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC1090": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.19226862901365344,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC1705": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 2.4552781858854558,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2366": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 0.4201181826280629,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2403": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.673293955267162,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2683": {
+    "L": 30.0,
+    "mu": 500.0,
+    "mafe": 0.13039859402911155,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2841": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 1.3710072971608,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2903": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.22702572883113886,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2915": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 3.08784406551125,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2955": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.17486687747934065,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2976": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.33023159753600395,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC2998": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.14079538423131607,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3109": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.20938263858621747,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3198": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.3797034618996704,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3521": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.42938900547923603,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3726": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.5095256157004284,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3741": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 11.103593062139542,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3769": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.7589274772066368,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3877": {
+    "L": 120.0,
+    "mu": 200.0,
+    "mafe": 0.11811660006664419,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3893": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1881034189814494,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3917": {
+    "L": 200.0,
+    "mu": 300.0,
+    "mafe": 0.2537987600893271,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3949": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.01797788163923487,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3953": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.08839984361231207,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3972": {
+    "L": 50.0,
+    "mu": 200.0,
+    "mafe": 0.2244306213037509,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC3992": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.25782511617345005,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4010": {
+    "L": 30.0,
+    "mu": 200.0,
+    "mafe": 0.13642474416049757,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4013": {
+    "L": 50.0,
+    "mu": 200.0,
+    "mafe": 0.26367353118764236,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4051": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.039435653909785276,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4068": {
+    "L": 50.0,
+    "mu": 10.0,
+    "mafe": 0.780763392628745,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4085": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.06987084903605852,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4088": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.17131102791048924,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4100": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.12728984995603834,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4138": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.2894858071893478,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4157": {
+    "L": 80.0,
+    "mu": 200.0,
+    "mafe": 0.19564957659334958,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4183": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.18718360562613182,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4214": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.4691210019022944,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4217": {
+    "L": 10.0,
+    "mu": 200.0,
+    "mafe": 0.15075605485652888,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4389": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1404982157748129,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC4559": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.17087056083286106,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC5005": {
+    "L": 120.0,
+    "mu": 10.0,
+    "mafe": 0.1348532286007484,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC5033": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.30412231524547123,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC5055": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.3874230471350579,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC5371": {
+    "L": 200.0,
+    "mu": 200.0,
+    "mafe": 0.1599289422122157,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC5585": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.4086936283378191,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC5907": {
+    "L": 50.0,
+    "mu": 50.0,
+    "mafe": 0.274881074739382,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC5985": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.17969654394215656,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC6015": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2786089442843312,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC6195": {
+    "L": 200.0,
+    "mu": 50.0,
+    "mafe": 0.08249340928672333,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC6503": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.22564833976506155,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC6674": {
+    "L": 50.0,
+    "mu": 200.0,
+    "mafe": 0.3100468969326129,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC6789": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.14154759234405992,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC6946": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.13911486551001664,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC7331": {
+    "L": 120.0,
+    "mu": 10.0,
+    "mafe": 0.30837882448142395,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC7793": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.3800702743372052,
+    "kernel": "ananta-hybrid"
+  },
+  "NGC7814": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.24223804133985566,
+    "kernel": "ananta-hybrid"
+  },
+  "PGC51017": {
+    "L": 30.0,
+    "mu": 10.0,
+    "mafe": 1.486131706210505,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC00128": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.3466001157367692,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC00191": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.48850251449090326,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC00634": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.22848466582178362,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC00731": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.09991341277347046,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC00891": {
+    "L": 10.0,
+    "mu": 200.0,
+    "mafe": 0.2213578116393108,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC01230": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.3145404002054642,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC01281": {
+    "L": 80.0,
+    "mu": 10.0,
+    "mafe": 0.22231561687143764,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC02023": {
+    "L": 30.0,
+    "mu": 500.0,
+    "mafe": 0.18864255880575997,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC02259": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.22610985908744607,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC02455": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 1.7244718703348858,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC02487": {
+    "L": 200.0,
+    "mu": 300.0,
+    "mafe": 0.21538885733283267,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC02885": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.23635451245230082,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC02916": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.11304620354797096,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC02953": {
+    "L": 120.0,
+    "mu": 10.0,
+    "mafe": 2.070730262617949,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC03205": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.0928166590034887,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC03546": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.41441648801389375,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC03580": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.3984818001387809,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC04278": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2785394435728637,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC04305": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 0.6356275657166615,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC04325": {
+    "L": 30.0,
+    "mu": 500.0,
+    "mafe": 0.10569554746523302,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC04483": {
+    "L": 50.0,
+    "mu": 10.0,
+    "mafe": 1.3925525497502602,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC04499": {
+    "L": 10.0,
+    "mu": 200.0,
+    "mafe": 0.1200678182025687,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05005": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.9509357212946227,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05253": {
+    "L": 120.0,
+    "mu": 10.0,
+    "mafe": 0.16580506748789797,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05414": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.0954578981427057,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05716": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2458248587001094,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05721": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 3.478806388646797,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05750": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.7317907478594484,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05764": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.11685624637000659,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05829": {
+    "L": 10.0,
+    "mu": 200.0,
+    "mafe": 0.17251317132416086,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05918": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.07832129814525012,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05986": {
+    "L": 80.0,
+    "mu": 300.0,
+    "mafe": 0.09123133443898045,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC05999": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.21084271221703316,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06399": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.204918598992217,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06446": {
+    "L": 30.0,
+    "mu": 200.0,
+    "mafe": 0.15860571539907636,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06614": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.6445638668699771,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06628": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.17809432537517228,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06667": {
+    "L": 10.0,
+    "mu": 300.0,
+    "mafe": 0.07848978273806424,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06786": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.307786889659944,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06787": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.6672277201002081,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06818": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.278785025077826,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06917": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.10700114135924373,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06923": {
+    "L": 50.0,
+    "mu": 500.0,
+    "mafe": 0.09179209390885962,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06930": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1148365107141412,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06973": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 0.5520734745191659,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC06983": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1238852053245925,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07089": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.14302186524592023,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07125": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 0.17993373299427917,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07151": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.06657838838113846,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07232": {
+    "L": 50.0,
+    "mu": 10.0,
+    "mafe": 0.731806622742158,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07261": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.08898858493783238,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07323": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.19465188376451015,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07399": {
+    "L": 10.0,
+    "mu": 200.0,
+    "mafe": 0.10496042196480901,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07524": {
+    "L": 10.0,
+    "mu": 200.0,
+    "mafe": 0.1056016636066481,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07559": {
+    "L": 10.0,
+    "mu": 10.0,
+    "mafe": 0.5716147623072003,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07577": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.12465325161637429,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07603": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2118122434733529,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07608": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.18974094164282634,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07690": {
+    "L": 50.0,
+    "mu": 10.0,
+    "mafe": 0.4365182454776616,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC07866": {
+    "L": 30.0,
+    "mu": 10.0,
+    "mafe": 0.3537646921217202,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC08286": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.2148255320914489,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC08490": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 1.4950980880248723,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC08550": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.8982580769214714,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC08699": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.6210304539857974,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC08837": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.2106522991910219,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC09037": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.12413095787138469,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC09133": {
+    "L": 10.0,
+    "mu": 50.0,
+    "mafe": 0.4693503831234388,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC09992": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.17422026553521336,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC10310": {
+    "L": 30.0,
+    "mu": 500.0,
+    "mafe": 0.07274833996242556,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC11455": {
+    "L": 120.0,
+    "mu": 10.0,
+    "mafe": 0.5714581500836684,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC11557": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.1580931518034715,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC11820": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.3934988179687313,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC11914": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.10336698675561516,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC12506": {
+    "L": 50.0,
+    "mu": 50.0,
+    "mafe": 0.1626491840213432,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC12632": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.07678038135608883,
+    "kernel": "ananta-hybrid"
+  },
+  "UGC12732": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.23316019605150456,
+    "kernel": "ananta-hybrid"
+  },
+  "UGCA281": {
+    "L": 120.0,
+    "mu": 10.0,
+    "mafe": 0.06027708248146721,
+    "kernel": "ananta-hybrid"
+  },
+  "UGCA442": {
+    "L": 10.0,
+    "mu": 500.0,
+    "mafe": 0.1922800290352666,
+    "kernel": "ananta-hybrid"
+  },
+  "UGCA444": {
+    "L": 200.0,
+    "mu": 10.0,
+    "mafe": 0.12144378697259406,
+    "kernel": "ananta-hybrid"
+  }
+}
