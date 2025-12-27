@@ -1,8 +1,10 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16967259.svg)](https://doi.org/10.5281/zenodo.16967259)
+# H1 — Baryon-Convolved Single-Field Potential
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18065273.svg)](https://doi.org/10.5281/zenodo.18065273)
+
 
 [![CI](https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential/actions/workflows/ci.yml/badge.svg)](https://github.com/VitorFigueiredoResearch/Baryon-Convolved-Effective-Potential/actions/workflows/ci.yml)
 
-# H1 — Baryon-Convolved Single-Field Potential
 
 **Status:** Frozen phenomenological model  
 **Domain:** Galaxy rotation curves (SPARC)  
