@@ -21,8 +21,8 @@ constructed from a **nonlocal convolution of the observed baryonic mass
 distribution**.
 
 H1 is intentionally **descriptive rather than predictive**.
-Its purpose is to test—using real data and a controlled, resolution-stable
-numerical pipeline—whether **finite-range, nonlocal baryonic response models**
+Its purpose is to test using real data and a controlled, resolution stable
+numerical pipeline, whether **finite-range, nonlocal baryonic response models**
 can reproduce observed rotation-curve morphologies **without invoking
 particle dark matter** or modifying local gravitational laws.
 
@@ -43,7 +43,7 @@ H1 is **not**:
 H1 **is**:
 - a frozen phenomenological baseline  
 - a reproducible numerical experiment  
-- a falsifiable testbed for nonlocal baryon–potential coupling  
+- a falsifiable testbed for nonlocal baryon potential coupling  
 
 The model uses **global parameters** shared across the entire galaxy sample.
 No per-galaxy tuning is permitted.
@@ -147,7 +147,7 @@ These tests are described in **Appendix A** of the manuscript.
 * No hidden priors or adaptive refits
 * Identical pipeline applied to all galaxies
 
-Any modification to the code must be stated explicitly in derivative work.
+Any modification to the code must be stated explicitly in the derivative work.
 
 ---
 
@@ -186,5 +186,5 @@ You may not:
 H1 is designed as a **baseline**.
 
 Whether it ultimately succeeds or fails, its purpose is to establish—clearly,
-honestly, and reproducibly—how much of galactic rotation-curve structure can be
+Honestly, and reproducibly, how much of the galactic rotation-curve structure can be
 captured by **nonlocal baryonic response alone**.
