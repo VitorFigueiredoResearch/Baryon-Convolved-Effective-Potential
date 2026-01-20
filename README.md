@@ -10,7 +10,7 @@
 **Domain:** Galaxy rotation curves (SPARC)  
 **Author:** Vítor M. F. Figueiredo  
 **ORCID:** https://orcid.org/0009-0004-7358-4622  
-**Zenodo DOI:** https://doi.org/10.5281/zenodo.16967259
+**Zenodo DOI:** https://zenodo.org/records/18065273
 
 ---
 
