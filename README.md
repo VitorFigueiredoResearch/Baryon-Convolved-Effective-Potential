@@ -1,5 +1,6 @@
 # H1 — Baryon-Convolved Single-Field Potential
 Submitted for peer review at Monthly Notices of the Royal Astronomical Society (MN-26-0172-P).
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18065273.svg)](https://doi.org/10.5281/zenodo.18065273)
 
 
